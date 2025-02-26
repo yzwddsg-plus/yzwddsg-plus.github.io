@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>YZWDDSG</title>
+  <title>netconsole | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="YZWDDSG">
+  <meta name="description" content="netconsole | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="description" content="模板：3-hexo 本模板原作者：yelog">
 <meta property="og:type" content="website">
@@ -333,22 +333,34 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="page-" class="article article-type-page" itemscope itemprop="blogPost">
+        <article id="post-netconsole" class="article article-type-post" itemscope itemprop="blogPost">
+    
+        <h1 class="article-title">netconsole</h1>
     
     <div class="article-meta">
         
         
         
+        <span class="book">
+            <i class="iconfont icon-category"></i>
+            
+            
+            <a  data-rel="硬件">硬件</a> > 
+            
+            <a  data-rel="硬件&lt;---&gt;串口">串口</a>
+            
+        </span>
+        
         
     </div>
     <div class="article-meta">
         
-            Created At : <time class="date" title='Updated At: 2025-02-23 23:32:18'>2025-02-23 23:32</time>
+            Created At : <time class="date" title='Updated At: 2025-02-26 23:08:30'>2025-02-26 23:01</time>
         
     </div>
     <div class="article-meta">
         
-        <span>Count:11</span>
+        <span>Count:676</span>
         
         
         
@@ -367,7 +379,7 @@
     
     <div class="toc-ref">
     
-        
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0"><span class="toc-text">学习</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#netconsole%E5%8E%9F%E7%90%86"><span class="toc-text">netconsole原理</span></a></li></ol></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -383,8 +395,67 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>模板：<a target="_blank" rel="noopener" href="https://github.com/yelog/hexo-theme-3-hexo">3-hexo</a></p>
-<p>本模板原作者：yelog</p>
+        <p>当然这个不太适合放在硬件大目录下，但是谁让他也是种console呢？先放在这里吧</p>
+<h3 id="学习"><a href="#学习" class="headerlink" title="学习"></a><center>学习</center></h3><h4 id="netconsole原理"><a href="#netconsole原理" class="headerlink" title="netconsole原理"></a>netconsole原理</h4><p>netconsole模块可以让printk信息（输出到控制台的信息）通过网络<font color="red">（UDP）</font>发送到远程主机。</p>
+<p>与串口控制台不同，netconsole不需要串口线和串口。另外，它可以轻易地将多台服务器的内核信息收集到一台服务器上。</p>
+<p>首先，netconsole当前并不是默认加载的，有两个config选项控制CONFIG_NETCONSOLE、CONFIG_NETCONSOLE_DYNAMIC</p>
+<p>然后看一下doc相关，有一些内容需要明确：</p>
+<ol>
+<li>如果把这个模块搞成built-in的，需要在网卡驱动加载后再加载这个<font color="red">(因为可以看到netconsole需要使用netpoll，而netpoll需要等网卡准备好才可以)</font></li>
+<li>加载模块时可以加一些参数，比如insmod netconsole netconsole&#x3D;@&#x2F;,@10.0.0.2&#x2F;</li>
+</ol>
+<pre><code>.. Warning::
+
+   the default target ethernet setting uses the broadcast
+   ethernet address to send packets, which can cause increased load on
+   other systems on the same ethernet segment.
+
+.. Tip::
+
+   some LAN switches may be configured to suppress ethernet broadcasts
+   so it is advised to explicitly specify the remote agents&#39; MAC addresses
+   from the config parameters passed to netconsole.
+
+.. Tip::
+
+   to find out the MAC address of, say, 10.0.0.2, you may try using::
+
+	ping -c 1 10.0.0.2 ; /sbin/arp -n | grep 10.0.0.2
+
+.. Tip::
+
+   in case the remote logging agent is on a separate LAN subnet than
+   the sender, it is suggested to try specifying the MAC address of the
+   default gateway (you may use /sbin/route -n to find it out) as the
+   remote MAC address instead.
+
+.. note::
+
+   the network device (eth1 in the above case) can run any kind
+   of other network traffic, netconsole is not intrusive. Netconsole
+   might cause slight delays in other traffic if the volume of kernel
+   messages is high, but should have no other impact.
+
+.. note::
+
+   if you find that the remote logging agent is not receiving or
+   printing all messages from the sender, it is likely that you have set
+   the &quot;console_loglevel&quot; parameter (on the sender) to only send high
+   priority messages to the console. You can change this at runtime using::
+
+	dmesg -n 8
+
+   or by specifying &quot;debug&quot; on the kernel command line at boot, to send
+   all kernel messages to the console. A specific value for this parameter
+   can also be set using the &quot;loglevel&quot; kernel boot option. See the
+   dmesg(8) man page and Documentation/admin-guide/kernel-parameters.rst
+   for details.
+</code></pre>
+<p>文件在drivers&#x2F;net&#x2F;netconsole.c中</p>
+<p>比如：netconsole&#x3D;@169.254.62.129&#x2F;XXX,<a href="mailto:&#43;&#x35;&#x31;&#x34;&#64;&#49;&#54;&#57;&#46;&#50;&#x35;&#52;&#46;&#x36;&#50;&#x2e;&#49;">+514@169.254.62.1</a>&#x2F;，，意思就是从ip为169.254.62.129网卡名字为XXX向169.254.62.1地址的514端口发送</p>
+<p>目的地址可以使用mac地址，但是源地址不可以</p>
+<p><font color="red">netconsole简单来说其实就是注册一个console设备，这样printk遍历console发送log的时候就会调用到netconsole的write方法向netconsole中写入了，而日志是怎么转发的呢？其实netconsole模块还调用netpoll_setup注册了netpoll，netconsole的write函数其实就是利用netpoll的netpoll_send_udp转发这些日志</font></p>
+<p>netpoll原理见：<a target="_blank" rel="noopener" href="https://yzwddsg-plus.github.io/2025/02/24/netpoll%E5%8E%9F%E7%90%86/">https://yzwddsg-plus.github.io/2025/02/24/netpoll%E5%8E%9F%E7%90%86/</a></p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
