@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>netconsole | YZWDDSG</title>
+  <title>hung task原理 | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="netconsole | YZWDDSG">
+  <meta name="description" content="hung task原理 | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta property="og:type" content="website">
@@ -341,9 +341,9 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="post-netconsole" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-hung-task原理" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">netconsole</h1>
+        <h1 class="article-title">hung task原理</h1>
     
     <div class="article-meta">
         
@@ -353,9 +353,7 @@
             <i class="iconfont icon-category"></i>
             
             
-            <a  data-rel="硬件">硬件</a> > 
-            
-            <a  data-rel="硬件&lt;---&gt;串口">串口</a>
+            <a  data-rel="故障排查">故障排查</a>
             
         </span>
         
@@ -363,12 +361,12 @@
     </div>
     <div class="article-meta">
         
-            发布时间 : <time class="date" title='最后更新: 2025-02-26 23:08:30'>2025-02-26 23:01</time>
+            发布时间 : <time class="date" title='最后更新: 2025-02-27 23:07:02'>2025-02-27 22:54</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:676</span>
+        <span>字数:1.8k</span>
         
         
         
@@ -387,7 +385,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0"><span class="toc-text">学习</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#netconsole%E5%8E%9F%E7%90%86"><span class="toc-text">netconsole原理</span></a></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0"><span class="toc-text">学习</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A6%82%E5%BF%B5%EF%BC%9A"><span class="toc-text">概念：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%8Elockup%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9A"><span class="toc-text">与lockup的区别：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E5%8F%82%E6%95%B0%EF%BC%9A"><span class="toc-text">相关参数：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E7%90%86%EF%BC%9A"><span class="toc-text">原理：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#hung-task%E5%8E%9F%E5%9B%A0%EF%BC%9A"><span class="toc-text">hung task原因：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A8%A1%E6%8B%9Fhungtask%EF%BC%9A"><span class="toc-text">模拟hungtask：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E8%AE%B0"><span class="toc-text">后记</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -403,67 +401,178 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>当然这个不太适合放在硬件大目录下，但是谁让他也是种console呢？先放在这里吧</p>
-<h3 id="学习"><a href="#学习" class="headerlink" title="学习"></a><center>学习</center></h3><h4 id="netconsole原理"><a href="#netconsole原理" class="headerlink" title="netconsole原理"></a>netconsole原理</h4><p>netconsole模块可以让printk信息（输出到控制台的信息）通过网络<font color="red">（UDP）</font>发送到远程主机。</p>
-<p>与串口控制台不同，netconsole不需要串口线和串口。另外，它可以轻易地将多台服务器的内核信息收集到一台服务器上。</p>
-<p>首先，netconsole当前并不是默认加载的，有两个config选项控制CONFIG_NETCONSOLE、CONFIG_NETCONSOLE_DYNAMIC</p>
-<p>然后看一下doc相关，有一些内容需要明确：</p>
-<ol>
-<li>如果把这个模块搞成built-in的，需要在网卡驱动加载后再加载这个<font color="red">(因为可以看到netconsole需要使用netpoll，而netpoll需要等网卡准备好才可以)</font></li>
-<li>加载模块时可以加一些参数，比如insmod netconsole netconsole&#x3D;@&#x2F;,@10.0.0.2&#x2F;</li>
-</ol>
-<pre><code>.. Warning::
-
-   the default target ethernet setting uses the broadcast
-   ethernet address to send packets, which can cause increased load on
-   other systems on the same ethernet segment.
-
-.. Tip::
-
-   some LAN switches may be configured to suppress ethernet broadcasts
-   so it is advised to explicitly specify the remote agents&#39; MAC addresses
-   from the config parameters passed to netconsole.
-
-.. Tip::
-
-   to find out the MAC address of, say, 10.0.0.2, you may try using::
-
-	ping -c 1 10.0.0.2 ; /sbin/arp -n | grep 10.0.0.2
-
-.. Tip::
-
-   in case the remote logging agent is on a separate LAN subnet than
-   the sender, it is suggested to try specifying the MAC address of the
-   default gateway (you may use /sbin/route -n to find it out) as the
-   remote MAC address instead.
-
-.. note::
-
-   the network device (eth1 in the above case) can run any kind
-   of other network traffic, netconsole is not intrusive. Netconsole
-   might cause slight delays in other traffic if the volume of kernel
-   messages is high, but should have no other impact.
-
-.. note::
-
-   if you find that the remote logging agent is not receiving or
-   printing all messages from the sender, it is likely that you have set
-   the &quot;console_loglevel&quot; parameter (on the sender) to only send high
-   priority messages to the console. You can change this at runtime using::
-
-	dmesg -n 8
-
-   or by specifying &quot;debug&quot; on the kernel command line at boot, to send
-   all kernel messages to the console. A specific value for this parameter
-   can also be set using the &quot;loglevel&quot; kernel boot option. See the
-   dmesg(8) man page and Documentation/admin-guide/kernel-parameters.rst
-   for details.
+        <p>之前学习了lockup，除了这个之外，还有一种异常也经常遇到，就是hung task</p>
+<h3 id="学习"><a href="#学习" class="headerlink" title="学习"></a><center>学习</center></h3><h4 id="概念："><a href="#概念：" class="headerlink" title="概念："></a>概念：</h4><p>首先需要明白，hung task是什么？它指的是一个线程长时间处于<font color="red">D(TASK_UNINTERRUPTIBLE)</font>状态不能被<font color="red">调度</font></p>
+<h4 id="与lockup的区别："><a href="#与lockup的区别：" class="headerlink" title="与lockup的区别："></a>与lockup的区别：</h4><p>hung task容易和lockup搞混淆，这俩其实本质上是不一样的：lockup是会定期检测<font color="red">系统</font>还是否有<font color="red">调度</font>的能力，而hung task检测的是<font color="red">线程</font>，定期检测线程是否<font color="red">被调度</font>执行。</p>
+<p>但是这俩并不是完全独立的，经常一块出现。比如内核lockup了，一直不能调度，而此时正好有线程在io处于D状态，那它就一直不能被调度从而hung死；又或者一个线程hung了，而它正好持有某个锁，而内核此时正好要获取这个锁，一直获取不到，也不调度，就lockup了。</p>
+<h4 id="相关参数："><a href="#相关参数：" class="headerlink" title="相关参数："></a>相关参数：</h4><p>config：</p>
+<pre><code class="language-shell">CONFIG_BLK_IO_HUNG_TASK_CHECK						//是否检测块设备的io hung，这种情况下，io慢（但并没有hang）可能也会被检测到
+CONFIG_DETECT_HUNG_TASK							//是否检测hang
+CONFIG_DEFAULT_HUNG_TASK_TIMEOUT					//超时时间，进程超过这个这个时间没有被调度就认为hang
+CONFIG_BOOTPARAM_HUNG_TASK_PANIC					//检测到hang时是否触发panic
 </code></pre>
-<p>文件在drivers&#x2F;net&#x2F;netconsole.c中</p>
-<p>比如：netconsole&#x3D;@169.254.62.129&#x2F;XXX,<a href="mailto:&#x2b;&#x35;&#x31;&#x34;&#x40;&#x31;&#x36;&#x39;&#x2e;&#50;&#53;&#52;&#x2e;&#x36;&#x32;&#46;&#49;">+514@169.254.62.1</a>&#x2F;，，意思就是从ip为169.254.62.129网卡名字为XXX向169.254.62.1地址的514端口发送</p>
-<p>目的地址可以使用mac地址，但是源地址不可以</p>
-<p><font color="red">netconsole简单来说其实就是注册一个console设备，这样printk遍历console发送log的时候就会调用到netconsole的write方法向netconsole中写入了，而日志是怎么转发的呢？其实netconsole模块还调用netpoll_setup注册了netpoll，netconsole的write函数其实就是利用netpoll的netpoll_send_udp转发这些日志</font></p>
-<p>netpoll原理见：<a target="_blank" rel="noopener" href="https://yzwddsg-plus.github.io/2025/02/24/netpoll%E5%8E%9F%E7%90%86/">https://yzwddsg-plus.github.io/2025/02/24/netpoll%E5%8E%9F%E7%90%86/</a></p>
+<p>内核参数：</p>
+<pre><code class="language-shell">/proc/sys/kernel/hung_task_all_cpu_backtrace			//发生hang时是否对cpu栈进行回溯
+/proc/sys/kernel/hung_task_panic				//是否触发panic
+/proc/sys/kernel/hung_task_check_count				//检查的最大进程数
+/proc/sys/kernel/hung_task_timeout_secs				//超过多少时间没有调度认为hang。可以覆盖CONFIG_DEFAULT_HUNG_TASK_TIMEOUT
+/proc/sys/kernel/hung_task_check_interval_secs			//检测间隔
+/proc/sys/kernel/hung_task_warnings				//控制内核报告hung task的次数
+</code></pre>
+<h4 id="原理："><a href="#原理：" class="headerlink" title="原理："></a>原理：</h4><p>设置CONFIG_DETECT_HUNG_TASK为y后，会启用hung task检测</p>
+<pre><code>subsys_initcall(hung_task_init);
+
+static int __init hung_task_init(void)
+&#123;
+  //注册一个通知链，，这个之前还真没见过，后续研究一下
+	atomic_notifier_chain_register(&amp;panic_notifier_list, &amp;panic_block);
+
+	/* Disable hung task detector on suspend */
+  //系统suspend的时候也禁用hung task检测，也是用通知链搞的，后面研究一下
+	pm_notifier(hungtask_pm_notify, 0);
+
+  //起一个khungtaskd内核线程
+	watchdog_task = kthread_run(watchdog, NULL, &quot;khungtaskd&quot;);
+	hung_task_sysctl_init();
+
+	return 0;
+&#125;
+
+//这就是起的khungtaskd内核线程要执行的函数
+static int watchdog(void *dummy)
+&#123;
+	unsigned long hung_last_checked = jiffies;
+  //set khungtaskd的nice值为高优先级
+	set_user_nice(current, 0);
+  //死循环，一直检测
+	for ( ; ; ) &#123;
+    //这个timeout和interval就是上面那俩sysctl参数控制的
+		unsigned long timeout = sysctl_hung_task_timeout_secs;
+		unsigned long interval = sysctl_hung_task_check_interval_secs;
+		long t;
+
+    //如果没设置interval，就是timeout的时间，也就是每隔timeout时间检测一下
+    //如果设置了，就使用最小值
+		if (interval == 0)
+			interval = timeout;
+		interval = min_t(unsigned long, interval, timeout);
+
+    //这里就是计算一下，last是上次检查时间，jiffies是当前时间
+    //如果interval是0的话就表示不开启hung task检测
+    //如果不是的话，那就计算last - jiffies + interval(没转换单位，知道意思就好)
+    //也就是计算下一次检测的时候（其实感觉这里叫timeout不太好，应该是检测时间，而不是timeout吧？）
+		t = hung_timeout_jiffies(hung_last_checked, interval);
+
+    //处理小于0的情况,真正的检测hang也是在这的
+    //因为总会走到t&lt;=0的情况的
+    //比如下一次唤醒的时候，hung_timeout_jiffies中的last没更新，interval没更新，但是jiffies一直在增长
+    //理想的一种情况是，last更新完，interval就是timeout，那么sched出去下一次唤醒的时候t应该是正好小于等于0
+    if (t &lt;= 0) &#123;
+      //要保证没有reset_hung_task且hungtask没有挂起
+			if (!atomic_xchg(&amp;reset_hung_task, 0) &amp;&amp;
+			    !hung_detector_suspended)
+        //真正的检测hang的函数
+				check_hung_uninterruptible_tasks(timeout);
+			hung_last_checked = jiffies;
+			continue;
+		&#125;
+    //sched出去，等到t时刻唤醒
+		schedule_timeout_interruptible(t);
+	&#125;
+	return 0;
+&#125;
+
+//看主要流程
+static void check_hung_uninterruptible_tasks(unsigned long timeout)
+&#123;
+
+	hung_task_show_lock = false;
+	rcu_read_lock();
+  //遍历所有线程
+	for_each_process_thread(g, t) &#123;
+		unsigned int state;
+    //这块就是hung_task_check_count控制的
+		if (!max_count--)
+			goto unlock;
+
+    //这块是定时释放一下锁？怕锁持有时间太长导致系统出现问题？
+		if (time_after(jiffies, last_break + HUNG_TASK_LOCK_BREAK)) &#123;
+			if (!rcu_lock_break(g, t))
+				goto unlock;
+			last_break = jiffies;
+		&#125;
+		/*
+		 * skip the TASK_KILLABLE tasks -- these can be killed
+		 * skip the TASK_IDLE tasks -- those are genuinely idle
+		 */
+     //对D进程执行check_hung_task，也就是检测是否hang
+		state = READ_ONCE(t-&gt;__state);
+		if ((state &amp; TASK_UNINTERRUPTIBLE) &amp;&amp;
+		    !(state &amp; TASK_WAKEKILL) &amp;&amp;
+		    !(state &amp; TASK_NOLOAD))
+			check_hung_task(t, timeout);
+	&#125;
+。。。。
+&#125;
+
+//真正对D进程检查是否hang
+static void check_hung_task(struct task_struct *t, unsigned long timeout)
+&#123;
+  //自愿和非自愿上下文切换的次数
+	unsigned long switch_count = t-&gt;nvcsw + t-&gt;nivcsw;
+
+  //如果上次switch_count不等于当前switch_count，跳出
+  //因为这就意味着进行过上下文切换了，最起码就是已经调度过了
+	if (switch_count != t-&gt;last_switch_count) &#123;
+		t-&gt;last_switch_count = switch_count;
+		t-&gt;last_switch_time = jiffies;
+		return;
+	&#125;
+  //如果当前的jiffies是在last_switch_time加timeout之前的
+  //这就说明还没到hang的时间限制，也返回
+	if (time_is_after_jiffies(t-&gt;last_switch_time + timeout * HZ))
+		return;
+
+	trace_sched_process_hang(t);
+
+	if (sysctl_hung_task_panic) &#123;
+		console_verbose();
+		hung_task_show_lock = true;
+		hung_task_call_panic = true;
+	&#125;
+  //上面那些都不满足的话，也就是hang了
+  //下面其实就是hang的处理了
+。。。。。。
+
+	touch_nmi_watchdog();
+&#125;
+</code></pre>
+<p>所以，其实是怎么检测的呢？主要就是检测<font color="red">D进程</font>的<font color="red">swicth次数</font>在timeout时间没没有改变（也就是这段时间没有上下文切换），<font color="red">last_switch_time</font>在timeout时间也没有改变（也就是这段时间没有被调度执行），就认为hang死了</p>
+<p>那怎么关闭hung task的检测呢？很简单，在不改变config重新编译内核的情况下，可以把hung_task_timeout_secs设置为0，或者更直接点，直接kill khuntaskd进程也可以</p>
+<h4 id="hung-task原因："><a href="#hung-task原因：" class="headerlink" title="hung task原因："></a>hung task原因：</h4><p>一般而言，产生hung的原因有以下几点（个人最常遇到的是前两种）：</p>
+<ol>
+<li>申请io，等待读写完成时间太长（或者设备有问题）</li>
+<li>调用mutex等待访问某个共享资源</li>
+<li>调用wait_event io_wait_event wait_for_completion等待某个事件的发生</li>
+<li>内核中其他任务设置为task_uninterruptible的场景</li>
+</ol>
+<h4 id="模拟hungtask："><a href="#模拟hungtask：" class="headerlink" title="模拟hungtask："></a>模拟hungtask：</h4><p>首先写用户态写死循环脚本是行不通的，因为用户态的死循环没什么用啊。他不会真的一直占着cpu，时间片一完，tick一到应该也会强行调度出去了</p>
+<ul>
+<li><strong>结文件系统然后向里面写入文件</strong></li>
+</ul>
+<pre><code>fsfreeze -f /XXXX     //冻结对文件系统的访问,比如ext4 jfs xfs等文件系统
+fsfreeze -u /XXXX     //解冻
+</code></pre>
+<p>冻结后向该文件系统下的一个文件写入内容，就会出现hung task。就是利用了冻结后不能io的原理吧</p>
+<p><font color="red">（另外，经过实验，这时候读写虽然会hung住，但是-u解冻之后，之前hung住的进程会继续执行完成）</font></p>
+<p><font color="red">（另外，不能用tmpfs这些文件系统，所以可以创建一个文件系统然后挂载上再冻结解冻之类）</font></p>
+<ul>
+<li><strong>应该可以使用大量的fio压力，导致系统处理不过来，导致hung task。不过没成功过，可能压力不够大？</strong></li>
+</ul>
+<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a><center>后记</center></h3><ul>
+<li>所以看hung task的时候，直接ps aux |grep D找不到D进程也是正常的。因为之前都看到了，在check_hung_uninterruptible_tasks函数中使用的是for_each_process_thread函数遍历的是每一个<font color="red">线程</font>，所以要遍历每个线程看有没有D住的</li>
+<li>还有个参数呢CONFIG_BLK_IO_HUNG_TASK_CHECK。这个简单看了下，其实也就是如果开了这个的话在blk_io_schedule中就用io_schedule_timeout代替io_schedule。另外，即使不在config中指定CONFIG_BLK_IO_HUNG_TASK_CHECK打开io hung task，也可以使用类似echo Y &gt; &#x2F;sys&#x2F;module&#x2F;blk_core&#x2F;parameters&#x2F;io_hung_task_check的方式打开io hung task。</li>
+</ul>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
