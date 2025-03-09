@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>YZWDDSG</title>
+  <title>/proc/cpuinfo显示频率原理 | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="YZWDDSG">
+  <meta name="description" content="/proc/cpuinfo显示频率原理 | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta property="og:type" content="website">
@@ -413,22 +413,32 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="page-" class="article article-type-page" itemscope itemprop="blogPost">
+        <article id="post-proc-cpuinfo显示频率原理" class="article article-type-post" itemscope itemprop="blogPost">
+    
+        <h1 class="article-title">/proc/cpuinfo显示频率原理</h1>
     
     <div class="article-meta">
         
         
         
+        <span class="book">
+            <i class="iconfont icon-category"></i>
+            
+            
+            <a  data-rel="power">power</a>
+            
+        </span>
+        
         
     </div>
     <div class="article-meta">
         
-            发布时间 : <time class="date" title='最后更新: 2025-02-23 23:32:18'>2025-02-23 23:32</time>
+            发布时间 : <time class="date" title='最后更新: 2025-03-09 22:05:12'>2025-03-09 22:00</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:11</span>
+        <span>字数:1.7k</span>
         
         
         
@@ -447,7 +457,7 @@
     
     <div class="toc-ref">
     
-        
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0"><span class="toc-text">学习</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%E9%A2%91%E7%8E%87%E5%8E%9F%E7%90%86"><span class="toc-text">计算频率原理</span></a></li></ol></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -463,8 +473,120 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>模板：<a target="_blank" rel="noopener" href="https://github.com/yelog/hexo-theme-3-hexo">3-hexo</a></p>
-<p>本模板原作者：yelog</p>
+        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h3><p>众所周知，现在&#x2F;proc&#x2F;cpuinfo可以显示cpu的运行频率，而虚机中&#x2F;proc&#x2F;cpuinfo显示的cpu频率一直是一个固定的值</p>
+<h3 id="学习"><a href="#学习" class="headerlink" title="学习"></a><center>学习</center></h3><h4 id="计算频率原理"><a href="#计算频率原理" class="headerlink" title="计算频率原理"></a>计算频率原理</h4><p>先不管虚拟化那一套，就先看看内核是怎么计算cpu频率的呢？</p>
+<p>先了解一下相关背景：</p>
+<blockquote>
+<p>APERF：是一个MSR寄存器，它总是以当前的CPU的实际工作频率按比例增加数值，每个cpu上都有一个。比如一个CPU主频2.6GHz，然后睿频到了3.4GHz，那APERF就按照3.4GHz的比例去增加数值。</p>
+<p>MPERF：也是一个MSR寄存器，也是每个CPU都有一个。这个是按照最大CPU频率按比例增加，一般也就是CPU的主频，也就是标称频率，也就是p0状态下的频率。比如一颗cpu的主频是2.6GHz，那它就是去按照2.6GHz的比例去增加。</p>
+</blockquote>
+<blockquote>
+<p>到这差不多就能猜到了，就是通过这俩msr去计算cpu运行频率的。当然，其实频率这块还涉及到别的msr，以及怎么设置调节频率这块，还和驱动有关系，有些麻烦，到时候再细看一下再单开一篇，现在只看这俩msr足够。</p>
+</blockquote>
+<p>再看一下是怎么计算cpu频率的，以&#x2F;proc&#x2F;cpuinfo为例，现在的&#x2F;proc&#x2F;cpuinfo已经支持显示实时cpu频率了（有时候不会，后面会说到）</p>
+<pre><code>##cat /proc/cpuinfo时，会调到show_cpuinfo，直接来看显示cpu频率的部分
+##其实就在这，如果开了tsc的话，就对freq格式化输出，那freq其实就是频率咯
+##freq是arch_freq_get_on_cpu返回的，看一下这个函数
+if (cpu_has(c, X86_FEATURE_TSC)) &#123;
+    unsigned int freq = arch_freq_get_on_cpu(cpu);
+    seq_printf(m, &quot;cpu MHz\t\t: %u.%03u\n&quot;, freq / 1000, (freq % 1000));
+&#125;
+
+##看一下怎么返回cpu频率的
+unsigned int arch_freq_get_on_cpu(int cpu)
+&#123;
+    ##这个cpu_samples就是一个percpu的aperfmperf结构体
+    ##里面主要有acnt mcnt aperf mperf
+	struct aperfmperf *s = per_cpu_ptr(&amp;cpu_samples, cpu);
+	unsigned int seq, freq;
+	unsigned long last;
+	u64 acnt, mcnt;
+
+    ##如果没有aperfmperf这个feature就跳到fallback了，这个后面还会提到
+	if (!cpu_feature_enabled(X86_FEATURE_APERFMPERF))
+		goto fallback;
+
+    ##这里就是一些赋值acnt mcnt last_update，这些作用后面说
+	do &#123;
+		seq = raw_read_seqcount_begin(&amp;s-&gt;seq);
+		last = s-&gt;last_update;
+		acnt = s-&gt;acnt;
+		mcnt = s-&gt;mcnt;
+	&#125; while (read_seqcount_retry(&amp;s-&gt;seq, seq));
+
+	/*
+	 * Bail on invalid count and when the last update was too long ago,
+	 * which covers idle and NOHZ full CPUs.
+	 */
+    ##如果mcnt为0或jiffies-last大于MAX_SAMPLE_AGE也去fallback
+    ##到这就知道了，last_update也就是last其实就是上次更新时的jiffies
+    ##而MAX_SAMPLE_AGE时HZ/50，一般内核默认时250HZ，也就是MAX_SAMPLE_AGE时20ms
+    ##也就是如果这次采样和上次采样间隔超过20ms，就不继续计算了，去fallback了
+	if (!mcnt || (jiffies - last) &gt; MAX_SAMPLE_AGE)
+		goto fallback;
+
+    ##最后走到这是真正的计算频率，其实就是cpu_khz*acnt/mcnt
+    ##cpu_khz其实一般就是cpu主频了，也是tsc的频率
+    ##acnt mcnt是什么呢？先说答案，其实就是两次采样间隔中aperf mperf的差值，后面还会看到
+    ##所以频率计算公式是什么？主频*(Δaperf)/(Δmperf),联系之前说的aperf mperf的作用就很好理解了
+    ##也许有人会有疑问，为什么直接不是返回mperf就好了，还得乘主频再除aperf呢？aperf不就是按主频增长的嘛？
+    ##原因在于aperf和mperf并不是按照频率增长，而是和频率成一个倍数关系的增长
+    ##所以aperf mperf只能反应一个倍数关系，而不能反应真实的频率，所以最后还要乘tsc，因为tsc一直是按照主频增长的
+	return div64_u64((cpu_khz * acnt), mcnt);
+
+fallback:
+    ##这里就是没有成功计算频率，但是最要返回一个值
+    ##先尝试去cpufreq_quick_get获取，貌似要走驱动那块来着，有些忘了，写下一篇时再看
+	freq = cpufreq_quick_get(cpu);
+    ##如果quick也没获取到，那就只能返回cpu_khz了，一般也就是主频值了
+	return freq ? freq : cpu_khz;
+&#125;
+
+
+##到这基本就完全知道是怎么计算频率的了，但是还有个问题没有解释清楚
+##acmt mcnt是谁更新的？什么时候更新的？其实就在下面这个函数
+void arch_scale_freq_tick(void)
+&#123;
+	struct aperfmperf *s = this_cpu_ptr(&amp;cpu_samples);
+	u64 acnt, mcnt, aperf, mperf;
+    ##还是必须要支持X86_FEATURE_APERFMPERF才行
+	if (!cpu_feature_enabled(X86_FEATURE_APERFMPERF))
+		return;
+
+    ##读MSR_IA32_APERF的值到aperf中
+	rdmsrl(MSR_IA32_APERF, aperf);
+    ##读MSR_IA32_MPERF到mperf中
+	rdmsrl(MSR_IA32_MPERF, mperf);
+    ##这就出来啦，下面四条连起来看
+    ##acnt和mcnt就是当前采样的aperf和mperf的值和上次采样的值的差
+    ##然后把cpu_samples中的aperf mperf重新赋值成当前采样的值
+	acnt = aperf - s-&gt;aperf;
+	mcnt = mperf - s-&gt;mperf;
+
+	s-&gt;aperf = aperf;
+	s-&gt;mperf = mperf;
+    ##然后更新last_update为当前jiffies，更新acnt和mcnt
+	raw_write_seqcount_begin(&amp;s-&gt;seq);
+	s-&gt;last_update = jiffies;
+	s-&gt;acnt = acnt;
+	s-&gt;mcnt = mcnt;
+	raw_write_seqcount_end(&amp;s-&gt;seq);
+
+	scale_freq_tick(acnt, mcnt);
+&#125;
+
+##那这个arch_scale_freq_tick函数什么时候会调用到呢？搜一下就看到了
+scheduler_tick
+</code></pre>
+<p><font color="red">所以这块应该就可以恍然大明白了，假如一个默认启动的内核时250HZ的，那每隔4ms就会发起一次tick，就会调到scheduler_tick，然后scheduler_tick里就会调到arch_scale_freq_tick去采样，然后更新acnt mcnt，当用户执行cat &#x2F;proc&#x2F;cpuinfo的时候就自然直接利用acnt和mcnt计算出当前频率了</font></p>
+<p>但是，其实还有两个问题存在：1.有些cpu上并不显示实时频率，为什么？2.虚拟化情况下为什么只返回主频？</p>
+<p><strong>1.有些cpu上并不显示实时频率，为什么？</strong></p>
+<p>实测发现，有些cpu上cat &#x2F;prco&#x2F;cpuinfo的话并不会显示实时的cpu频率，而是一个固定的值</p>
+<p>其实arch_freq_get_on_cpu函数中也说明了，如果设置了nohz或者nohz_full或者cpu一直在idle的话就可能因为采样间隔太大跳到fallback去了</p>
+<p>其实还是没有负载搞得，只要你把cpu的负载稍微打上去一点，就能显示了</p>
+<p><strong>2.虚拟化情况下为什么只返回主频？</strong></p>
+<p>其实这个就更好理解了，可以看一下lscpu是不是没有aperfmperf这个feature，因为没有这个feature，也就是不支持X86_FEATURE_APERFMPERF，那也就不能去读aperf mperf去计算cpu频率了，所以只能返回固定的值了，也就是cpu主频</p>
+<p>这其实又能引申出一个问题，虚拟化情况下不能访问apermperf的话，怎么估算cpu频率呢？其实应该可以使用perf之类的工具，比如使用perf state sleep 1会得到cycles和task-clock，cycles就是这一秒cpu运行了多少个周期，task-clock就是实际运行了多少时间。比如我得到了cycles是800000，task-clock是1ms。那么就可以计算800000&#x2F;1*1000&#x2F;10^9&#x3D;0.8GHz，后面两个是换算单位，*1000是换算成秒，&#x2F;10^9是换算成GHz</p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
