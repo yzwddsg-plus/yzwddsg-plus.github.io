@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>rsyslog配置 | YZWDDSG</title>
+  <title>修改公版内核 | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="rsyslog配置 | YZWDDSG">
+  <meta name="description" content="修改公版内核 | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta property="og:type" content="website">
@@ -412,9 +412,9 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="post-rsyslog配置" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-修改公版内核" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">rsyslog配置</h1>
+        <h1 class="article-title">修改公版内核</h1>
     
     <div class="article-meta">
         
@@ -432,12 +432,12 @@
     </div>
     <div class="article-meta">
         
-            发布时间 : <time class="date" title='最后更新: 2025-03-07 22:42:46'>2025-03-07 22:36</time>
+            发布时间 : <time class="date" title='最后更新: 2025-03-10 22:56:49'>2025-03-10 22:13</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:1.5k</span>
+        <span>字数:314</span>
         
         
         
@@ -456,7 +456,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0"><span class="toc-text">学习</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B0%8F%E5%AE%9E%E9%AA%8C"><span class="toc-text">小实验</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-text">参考</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#centos"><span class="toc-text">centos</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ubuntu"><span class="toc-text">ubuntu</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -472,165 +472,49 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="学习"><a href="#学习" class="headerlink" title="学习"></a><center>学习</center></h3><ul>
-<li><strong>rsyslog作用</strong></li>
+        <h3 id="centos"><a href="#centos" class="headerlink" title="centos"></a><center>centos</center></h3><ul>
+<li>下载对应的src.rpm包<a target="_blank" rel="noopener" href="http://ftp.iij.ad.jp/pub/linux/centos-vault/centos/8/BaseOS/Source/SPackages/">http://ftp.iij.ad.jp/pub/linux/centos-vault/centos/8/BaseOS/Source/SPackages/</a></li>
+<li>安装必要的包 得把repo源的powertool打开</li>
 </ul>
-<p>其实作用就是收集、转发、保存系统日志，比如&#x2F;var&#x2F;log&#x2F;messages</p>
-<ul>
-<li><strong>查看版本</strong></li>
-</ul>
-<p>rsyslogd -v</p>
-<ul>
-<li><strong>配置</strong></li>
-</ul>
-<p>rsyslog的配置文件一般在&#x2F;etc&#x2F;rsyslog.conf下</p>
-<p>首先按官方文档所言，rsyslog支持三种不同的配置格式：basic（以前叫sysklogd，比较基本的格式）；advanced；obsolete legacy（基本不用）</p>
-<ul>
-<li><ul>
-<li>basic格式</li>
-</ul>
-</li>
-</ul>
-<pre><code>#一般由两个字段组成，selector和action
-#selector由两部分组成：facility和priority，facility就是生成消息的子系统，比如第一行的mail，优先级就是log级别，比如第一行的info
-#action就是日志转储的位置，比如/var/log/maillog绝对路径（尽量避免相对路径），此外，还可以往管道、console、远程和用户输出
-#把mail的info或更低级别日志写入/var/log/maillog，-的意思是异步写入，也就是先缓存到内存中，合适的时机再写入
-mail.info   -/var/log/maillog
-#把所有信息低于等于info的都写入，除了mail、authpriv和cron
-*.info;mail.none;authpriv.none;cron.none                /var/log/messages
-#把kern.crit转发到远程主机
-kern.crit     @finlandia
-#转发到console
-kern.crit     /dev/console
-#把err以上，info及以下的内容转发到/var/adm/kernel-info
-kern.info;kern.!err   /var/adm/kernel-info
+<pre><code>sudo yum install -y asciidoc audit-libs-devel binutils-devel bison clang elfutils-devel flex git java-devel kabi-dw libcap-devel libcap-ng-devel libmnl-devel llvm ncurses-devel newt-devel nss-tools numactl-devel openssl-devel pciutils-devel perl-ExtUtils-Embed perl-devel perl-generators pesign python3-docutils xmlto xz-devel dwarves libbpf-devel libbabeltrace-devel -y
 </code></pre>
 <ul>
-<li><ul>
-<li>规则集</li>
+<li>yum源打开powertool repo</li>
+<li>rpm -ivh kernel-4.18.0-348.7.1.el8_5.src.rpm安装</li>
 </ul>
+<p>​	内核源码包就在&#x2F;root&#x2F;rpmbuild&#x2F;SOURCES中</p>
+<p>​	cp linux-4.18.0-348.7.1.el8_5.tar.xz &#x2F;tmp 把源码cp一下</p>
+<p>​	解压修改，并替换</p>
+<ul>
+<li>cd到&#x2F;root&#x2F;rpmbuild下 执行rpmbuild -bb –target&#x3D;$(uname -m) SPECS&#x2F;kernel.spec</li>
+</ul>
+<h3 id="ubuntu"><a href="#ubuntu" class="headerlink" title="ubuntu"></a><center>ubuntu</center></h3><ul>
+<li><p>下载对应内核的源码包</p>
+</li>
+<li><p>解压并修改源码，把当前内核的config复制过来</p>
 </li>
 </ul>
-<p>包含一个filter和一组action。下面input是把从端口10514接收的消息绑定到规则集rulesetname。这样从这个端口过来的消息就通过这个规则集来处理了。</p>
-<p><font color="red">看上去这个规则集在区分本地log和远程转发的log的话很好用，比如每个不同的端口过来的log都分别定义一个规则集</font></p>
-<pre><code>ruleset(name=&quot;rulesetname&quot;) &#123;
-    action(type=&quot;omfile&quot; file=&quot;/path/to/file&quot;)
-    action(type=&quot;...&quot; ...)
-    /* and so on... */
-&#125;
-
-input(type=&quot;imptcp&quot; port=&quot;10514&quot; ruleset=&quot;rulesetname&quot;)
+<p>​	sudo cp &#x2F;boot&#x2F;config-$(uname -r).config</p>
+<ul>
+<li>安装必要的包</li>
+</ul>
+<pre><code>sudo apt-get install libncurses5-dev openssl libssl-dev sudo apt-get install build-essential openssl sudo apt-get install pkg-config sudo apt-get install libc6-dev sudo apt-get install bison sudo apt-get install flex sudo apt-get install libelf-dev sudo apt-get install zlibc minizip sudo apt-get install libidn11-dev libidn11 apt install dwarves
 </code></pre>
 <ul>
-<li><ul>
-<li>模板</li>
+<li>编译内核</li>
 </ul>
-</li>
-</ul>
-<p>允许指定用户可能需要的任何格式，还用于<font color="red">动态文件名</font>生成</p>
+<pre><code>sudo make -j4
+sudo make modules -j4
+sudo make modules_install -j4
+</code></pre>
 <ul>
-<li><ul>
-<li>常用内容</li>
+<li>安装内核</li>
 </ul>
-</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th><strong>类型</strong></th>
-<th><strong>名称</strong></th>
-<th><strong>作用</strong></th>
-<th><strong>示例</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>变量</td>
-<td><code>%HOSTNAME%</code></td>
-<td>日志来源的主机名</td>
-<td><code>/var/log/%HOSTNAME%/app.log</code></td>
-</tr>
-<tr>
-<td>变量</td>
-<td><code>$fromhost-ip</code></td>
-<td>日志来源的 IP 地址</td>
-<td><code>if ($fromhost-ip == &quot;192.168.1.100&quot;)</code></td>
-</tr>
-<tr>
-<td>变量</td>
-<td><code>$programname</code></td>
-<td>生成日志的程序名称</td>
-<td><code>if ($programname == &quot;sshd&quot;)</code></td>
-</tr>
-<tr>
-<td>变量</td>
-<td><code>$syslogseverity</code></td>
-<td>日志的优先级</td>
-<td><code>if ($syslogseverity &lt;= 4)</code></td>
-</tr>
-<tr>
-<td>变量</td>
-<td><code>$msg</code></td>
-<td>日志消息的内容</td>
-<td><code>if ($msg contains &quot;error&quot;)</code></td>
-</tr>
-<tr>
-<td>模块</td>
-<td><code>omfile</code></td>
-<td>将日志写入本地文件</td>
-<td><code>action(type=&quot;omfile&quot; file=&quot;/path/to/file&quot;)</code></td>
-</tr>
-<tr>
-<td>模块</td>
-<td><code>omfwd</code></td>
-<td>将日志转发到远程服务器</td>
-<td><code>action(type=&quot;omfwd&quot; target=&quot;192.168.1.100&quot;)</code></td>
-</tr>
-<tr>
-<td>模块</td>
-<td><code>ommysql</code></td>
-<td>将日志写入 MySQL 数据库</td>
-<td><code>action(type=&quot;ommysql&quot; server=&quot;localhost&quot;)</code></td>
-</tr>
-<tr>
-<td>模块</td>
-<td><code>omelasticsearch</code></td>
-<td>将日志写入 Elasticsearch</td>
-<td><code>action(type=&quot;omelasticsearch&quot; server=&quot;localhost&quot;)</code></td>
-</tr>
-<tr>
-<td>模块</td>
-<td><code>omstdout</code></td>
-<td>将日志输出到标准输出</td>
-<td><code>action(type=&quot;omstdout&quot;)</code></td>
-</tr>
-</tbody></table>
-<h3 id="小实验"><a href="#小实验" class="headerlink" title="小实验"></a><center>小实验</center></h3><ul>
-<li><strong>omfile和omfwd能不能同时进行？</strong></li>
-</ul>
-<p>假设以下情况，我已经在一个机器a上配置了log转发，转发到机器b上，那么机器b上能不能同时设置omfile和omfwd？也就是把收到的转发的log一边保存在本地，一边继续转发出去？</p>
-<p>这里我用两台机器实现这样的情景：在机器A上配置netconsole，让它把kernel日志转发到机器B上，然后机器B上配置&#x2F;etc&#x2F;rsyslog.conf，让它往本地存储一份的同时，往机器A的514端口发log</p>
-<p>验证过程为：在机器A上执行for i in <code>seq 1000</code>;do echo 111 &gt; &#x2F;dev&#x2F;kmsg;done，然后在机器A上tcpdump -i eth1 port 514抓包。正常情况下的传导链条应该是，A:netconsole-&gt;B:rsyslog-&gt;A:本地 B:rsyslog</p>
-<p>结果：</p>
-<p>在机器A的tcpdump上抓到了转发过来的包</p>
-<p><img src="/img/4.png" alt="这是一张图片"></p>
-<p>在机器B本地配置的文件上也看到了转发的log</p>
-<p><img src="/img/5.png" alt="这是一张图片"></p>
-<p>这就可以说明，<font color="red">保存本地的action和远程转发的规则是可以同时生效的</font></p>
-<ul>
-<li><strong>转发回环的话会发生什么？</strong></li>
-</ul>
-<p>再进一步，如果我继续在机器A上配置往机器B的log转发，形成一个回环会怎么样呢？如下：A:netconsole-&gt;B:rsyslog-&gt;A:rsyslog，最后会不会形成一条消息从A的rsyslog到B的rsyslog一直循环转发？</p>
-<p>试一下</p>
-<p>我A机器上配置如下</p>
-<p><img src="/img/6.png" alt="这是一张图片"></p>
-<p>机器B上配置类似</p>
-<p>这时候理论上来说当在A机器上echo test &gt; &#x2F;dev&#x2F;kmsg时，因为配置了netconsole，转发到了机器B的rsyslog中；机器B的rsyslog接收到之后因为rsyslog.conf中配置向机器A的rsyslog转发，所以它把接收到的log转发到机器A；机器A的rsyslog接收到之后因为rsyslog.conf中配置向机器B的rsyslog转发，所以它把接收到的log转发到机器B；机器B的rsyslog接收到之后因为rsyslog.conf中配置向机器A的rsyslog转发，所以它把接收到的log转发到机器A；机器A的rsyslog接收到之后因为rsyslog.conf中配置向机器B的rsyslog转发，所以它把接收到的log转发到机器B；机器B的rsyslog接收到之后因为rsyslog.conf中配置向机器A的rsyslog转发，所以它把接收到的log转发到机器A；机器A的rsyslog接收到之后因为rsyslog.conf中配置向机器B的rsyslog转发，所以它把接收到的log转发到机器B；机器B的rsyslog接收到之后因为rsyslog.conf中配置向机器A的rsyslog转发，所以它把接收到的log转发到机器A；机器A的rsyslog接收到之后因为rsyslog.conf中配置向机器B的rsyslog转发，所以它把接收到的log转发到机器B；…………….一直无限循环</p>
-<p>可以看到，两个机器上的tcpdump框框抓包，一直循环</p>
-<p><img src="/img/7.png" alt="这是一张图片"></p>
-<p>由此得出结论：<font color="red">两个机器上的rsyslog都配置往对方机器转发日志的话，会造成无限循环刷log！！！哈哈哈</font></p>
-<p>ps：这破坏境真麻烦，搞了好久</p>
-<p>pps：知道结论了就好了，尽量别这么完，一小会本地log存了200多M，这要网速再快点等一会磁盘都得打爆了</p>
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a><center>参考</center></h3><p>​	<a target="_blank" rel="noopener" href="https://www.rsyslog.com/doc/configuration/index.html">https://www.rsyslog.com/doc/configuration/index.html</a></p>
+<pre><code>sudo make install
+sudo mkinitramfs -o /boot/initrd.img-XXXX
+sudo update-initramfs -c -k XXXX
+sudo update-grub2
+</code></pre>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
