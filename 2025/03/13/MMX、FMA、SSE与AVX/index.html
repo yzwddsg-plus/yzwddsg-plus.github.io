@@ -489,7 +489,7 @@
     </div>
     <div class="article-meta">
         
-            发布时间 : <time class="date" title='最后更新: 2025-03-13 21:48:57'>2025-03-13 21:37</time>
+            发布时间 : <time class="date" title='最后更新: 2025-03-13 22:02:30'>2025-03-13 21:37</time>
         
     </div>
     <div class="article-meta">
@@ -537,19 +537,19 @@
 <pre><code>for (int i = 0; i &lt; 32; ++i)
     a[i] += 1;
 </code></pre>
-<p>整数又是什么意思？字面意思，就是只能处理整数，以前要是向处理浮点数的话，需要另外的单独的处理器以及单独的指令集（x87）。这个历史过程是这样的：</p>
+<p>整数又是什么意思？字面意思，就是只能处理整数，以前要是想处理浮点数的话，需要另外的单独的处理器以及单独的指令集（x87）。这个历史过程是这样的：</p>
 <p>最开始就是主板上需要安装两个处理器，一个专门处理整型，一个专门处理浮点型，叫协处理器</p>
 <p>后来，intel 80486发布了，是第一款把那这俩东西集成到一起的芯片，处理浮点数的器件叫FPU，封装在一个芯片里就提高了运算速度嘛，通讯更快</p>
 <p>再后来，intel推出了具有MMX技术的奔腾cpu</p>
 <h5 id="SIMD与MMX"><a href="#SIMD与MMX" class="headerlink" title="SIMD与MMX"></a>SIMD与MMX</h5><p>MMX的出现改变了什么呢？能支持向量运算了，也就是支持<font color="red">SIMD（单指令，多数据）</font>了。怎么支持的呢？上面提到的FPU中的寄存器是64位的，所以可以同时存放和计算2个32位&#x2F;4个16位&#x2F;8个8位，然后系统就可以在一条指令中同时处理这些内容了。（但是这时候功能还是有限的，<font color="red">第一，支持向量还是只适用于整数计算，第二，因为是使用了FPU中的寄存器进行计算的，所以使用MMX指令的时候不能同时进行浮点运算</font>）</p>
 <blockquote>
-<p>这块其实有个疑问来的，那当时的32为系统下，通用的32位寄存器理论上不也能实现SIMD嘛？32位寄存器理论上是可以同时支持2个16位&#x2F;4个8位运行的吧？确实，我们手动操作可以实现这样的效果，但是比较麻烦，比如要在一个32位通用寄存器上进行2个16位加法，就需要通过移位之类的操作先把两个数放进一个寄存器中，然后运算完之后，还需要把两个数字提取分离出来。</p>
+<p>这块其实有个疑问来的，那当时的32位系统下，通用的32位寄存器理论上不也能实现SIMD嘛？32位寄存器理论上是可以同时支持2个16位&#x2F;4个8位运行的吧？确实，我们手动操作可以实现这样的效果，但是比较麻烦，比如要在一个32位通用寄存器上进行2个16位加法，就需要通过移位之类的操作先把两个数放进一个寄存器中，然后运算完之后，还需要把两个数字提取分离出来。</p>
 <p>那其实SIMD依赖的是什么呢？是人家的<font color="red">硬件支持</font>加<font color="red">扩展的指令集</font>。使用相关的指令可以直接进行SIMD的操作。</p>
 </blockquote>
 <h5 id="SSE"><a href="#SSE" class="headerlink" title="SSE"></a>SSE</h5><p>再后来啊，就又出现了SSE。SSE又有哪些改变呢？这一次它不再依赖FPU中的64位寄存器来实现向量运算了，而是单独扩展处理8个128位寄存器，还扩展了一些能处理浮点数的指令。</p>
 <p>但这时候还有一些限制：SSE这时候还只支持32位的浮点数，4个32位浮点数，不支持整数运算；而且呢，这时候的SSE支持的128位寄存器虽然与FPU的寄存器分开了，但是SSE指令和FPU指令其实还是不能同时运行的，因为可能涉及到某些硬件资源的共享吧。</p>
 <h5 id="SSE2"><a href="#SSE2" class="headerlink" title="SSE2"></a>SSE2</h5><p>后来又升级了SSE2，这时候支持的数据类型就更多了。four 32-bit or two 64-bit floats, as well as sixteen 8-bit, eight 16-bit, four 32-bit, or two 64-bit integers.</p>
-<p>MMX寄存器还保留在cpu中，但是所有的MMX和SSE操作都可以使用单独的128为SSE寄存器进行存储。什么意思呢？就是其实128位的SSE寄存器也可以用来进行MMX的操作？</p>
+<p>MMX寄存器还保留在cpu中，但是所有的MMX和SSE操作都可以使用单独的128位SSE寄存器进行存储。什么意思呢？就是其实128位的SSE寄存器也可以用来进行MMX的操作？</p>
 <h5 id="SSE3"><a href="#SSE3" class="headerlink" title="SSE3"></a>SSE3</h5><p>The MMX registers remained in the processor, but all MMX and SSE operations could be made to place using the separate 128-bit SSE registers.</p>
 <h5 id="SSE4"><a href="#SSE4" class="headerlink" title="SSE4"></a>SSE4</h5><p>这个版本中，寄存器没有修改，但是增加了更多指令能处理更多可能的数学运算之类的，也就是扩展了指令集</p>
 <h5 id="AVX（advanced-vector-extensions）"><a href="#AVX（advanced-vector-extensions）" class="headerlink" title="AVX（advanced vector extensions）"></a>AVX（advanced vector extensions）</h5><p>重大更新，把向量寄存器的数量扩展了一倍，大小扩展了一倍。之前<font color="red">SSE时代是8个128位寄存器，现在AVX时代已经扩展成了16个256个寄存器。</font></p>
@@ -665,7 +665,7 @@ int main() &#123;
 <p>使用以下命令</p>
 <pre><code>perf stat -e core_power.lvl2_turbo_license,core_power.lvl1_turbo_license,core_power.lvl0_turbo_license
 </code></pre>
-<p>当我不运行上面的程序是结果如下</p>
+<p>当我不运行上面的程序时结果如下</p>
 <pre><code>Performance counter stats for &#39;system wide&#39;:
 
                  0      core_power.lvl2_turbo_license
