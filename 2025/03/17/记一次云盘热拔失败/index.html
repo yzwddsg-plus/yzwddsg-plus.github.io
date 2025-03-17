@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>修改bios配置 | YZWDDSG</title>
+  <title>记一次云盘热拔失败 | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="修改bios配置 | YZWDDSG">
+  <meta name="description" content="记一次云盘热拔失败 | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta property="og:type" content="website">
@@ -478,9 +478,9 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="post-修改bios配置" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-记一次云盘热拔失败" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">修改bios配置</h1>
+        <h1 class="article-title">记一次云盘热拔失败</h1>
     
     <div class="article-meta">
         
@@ -490,7 +490,7 @@
             <i class="iconfont icon-category"></i>
             
             
-            <a  data-rel="其他">其他</a>
+            <a  data-rel="故障排查">故障排查</a>
             
         </span>
         
@@ -498,12 +498,12 @@
     </div>
     <div class="article-meta">
         
-            发布时间 : <time class="date" title='最后更新: 2025-03-11 23:04:36'>2025-03-11 21:49</time>
+            发布时间 : <time class="date" title='最后更新: 2025-03-17 22:31:54'>2025-03-17 22:02</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:342</span>
+        <span>字数:1.4k</span>
         
         
         
@@ -522,7 +522,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9BIOS"><span class="toc-text">修改BIOS</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BB%E6%B5%81BIOS%E5%8E%82%E5%95%86"><span class="toc-text">主流BIOS厂商</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E8%AE%B0"><span class="toc-text">后记</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-text">参考</span></a></li></ol>
+        
     
 <style>
     .left-col .switch-btn,
@@ -538,61 +538,254 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h3><p>​	虽然我们在自己使用的电脑上可以在重启时通过狂按F2&#x2F;F10或其他组合按键进入BIOS中修改配置选项，但是在服务器上这么搞还是有些麻烦的。如果能在系统内修改BIOS选项，下次重启时自动生效就好了。</p>
-<h3 id="修改BIOS"><a href="#修改BIOS" class="headerlink" title="修改BIOS"></a>修改BIOS</h3><h4 id="主流BIOS厂商"><a href="#主流BIOS厂商" class="headerlink" title="主流BIOS厂商"></a>主流BIOS厂商</h4><table>
-<thead>
-<tr>
-<th>厂商</th>
-<th>备注</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Phoenix Technologies</td>
-<td>美国凤凰科技。</td>
-</tr>
-<tr>
-<td>American Megatrends</td>
-<td>美国安迈科技，目前为全球最大的 BIOS 供应商。之前曾被凤凰科技超过。</td>
-</tr>
-<tr>
-<td>Insyde Software</td>
-<td>台湾系微公司。</td>
-</tr>
-<tr>
-<td>Byosoft</td>
-<td>新兴厂商，中国大陆的百敖软件公司。</td>
-</tr>
-</tbody></table>
-<p>表格参考：<a target="_blank" rel="noopener" href="https://travonf.github.io/blog/hw/conf-bios.html">https://travonf.github.io/blog/hw/conf-bios.html</a></p>
-<pre><code>##看bios厂商
-dmidecode -t bios
-##看服务器厂商
-dmidecode -t system
+        <p>虚机中有个盘拔失败了</p>
+<p>这里主要记录一下怎么找到vring相关信息的</p>
+<pre><code>crash&gt; set ffff95b2b9078000
+    PID: 1697
+COMMAND: &quot;kworker/u416:1&quot;
+   TASK: ffff95b2b9078000  [THREAD_INFO: ffff95b2b9078000]
+    CPU: 181
+  STATE: TASK_UNINTERRUPTIBLE
+crash&gt; bt
+PID: 1697   TASK: ffff95b2b9078000  CPU: 181  COMMAND: &quot;kworker/u416:1&quot;
+ #0 [ffffa2835c82bb10] __schedule at ffffffff863092d2
+ #1 [ffffa2835c82bba0] schedule at ffffffff86309906
+ #2 [ffffa2835c82bbb8] blk_mq_freeze_queue_wait at ffffffff85e322d6
+ #3 [ffffa2835c82bc00] blk_cleanup_queue at ffffffff85e27508
+ #4 [ffffa2835c82bc18] virtblk_remove at ffffffffc02e3307 [virtio_blk]
+ #5 [ffffa2835c82bc30] virtio_dev_remove at ffffffffc0297499 [virtio]
+ #6 [ffffa2835c82bc50] __device_release_driver at ffffffff8605da7b
+ #7 [ffffa2835c82bc78] device_release_driver at ffffffff8605db74
+ #8 [ffffa2835c82bc90] bus_remove_device at ffffffff8605cf4b
+ #9 [ffffa2835c82bcb0] device_del at ffffffff86057c0b
+#10 [ffffa2835c82bcf8] device_unregister at ffffffff86057ec6
+#11 [ffffa2835c82bd08] unregister_virtio_device at ffffffffc02972b1 [virtio]
+#12 [ffffa2835c82bd18] virtio_pci_remove at ffffffffc02d84cd [virtio_pci]
+#13 [ffffa2835c82bd38] pci_device_remove at ffffffff85f2cc48
+#14 [ffffa2835c82bd58] __device_release_driver at ffffffff8605da7b
+#15 [ffffa2835c82bd80] device_release_driver at ffffffff8605db74
+#16 [ffffa2835c82bd98] pci_stop_bus_device at ffffffff85f225cc
+#17 [ffffa2835c82bdb8] pci_stop_and_remove_bus_device at ffffffff85f227ee
+#18 [ffffa2835c82bdc8] disable_slot at ffffffff85f49509
+#19 [ffffa2835c82bde8] acpiphp_disable_and_eject_slot at ffffffff85f49775
+#20 [ffffa2835c82be00] acpiphp_hotplug_notify at ffffffff85f4a702
+#21 [ffffa2835c82be38] acpi_device_hotplug at ffffffff85f74afc
+#22 [ffffa2835c82be80] acpi_hotplug_work_fn at ffffffff85f6a09d
+#23 [ffffa2835c82be90] process_one_work at ffffffff85aaf7c3
+#24 [ffffa2835c82bed0] worker_thread at ffffffff85aaf9b3
+#25 [ffffa2835c82bf10] kthread at ffffffff85ab5b48
+#26 [ffffa2835c82bf50] ret_from_fork at ffffffff85a0451f
+
+##可以看到virtblk_remove的参数是virtio_device结构体指针，所以先找他
+crash&gt; bt
+PID: 1697   TASK: ffff95b2b9078000  CPU: 181  COMMAND: &quot;kworker/u416:1&quot;
+ #0 [ffffa2835c82bb10] __schedule at ffffffff863092d2
+ #1 [ffffa2835c82bba0] schedule at ffffffff86309906
+ #2 [ffffa2835c82bbb8] blk_mq_freeze_queue_wait at ffffffff85e322d6
+ #3 [ffffa2835c82bc00] blk_cleanup_queue at ffffffff85e27508
+ #4 [ffffa2835c82bc18] virtblk_remove at ffffffffc02e3307 [virtio_blk]
+ #5 [ffffa2835c82bc30] virtio_dev_remove at ffffffffc0297499 [virtio]
+ #6 [ffffa2835c82bc50] __device_release_driver at ffffffff8605da7b
+ #7 [ffffa2835c82bc78] device_release_driver at ffffffff8605db74
+ #8 [ffffa2835c82bc90] bus_remove_device at ffffffff8605cf4b
+
+ static void virtblk_remove(struct virtio_device *vdev)
+&#123;
+
+##看一下virtio_dev_remove的汇编，rbp rdi都是virtio_device的地址
+crash&gt; dis -lr ffffffffc0297499
+0xffffffffc0297470 &lt;virtio_dev_remove&gt;: nopl   0x0(%rax,%rax,1) [FTRACE NOP]
+0xffffffffc0297475 &lt;virtio_dev_remove+5&gt;:       push   %r12
+0xffffffffc0297477 &lt;virtio_dev_remove+7&gt;:       push   %rbp
+0xffffffffc0297478 &lt;virtio_dev_remove+8&gt;:       lea    -0x10(%rdi),%rbp
+0xffffffffc029747c &lt;virtio_dev_remove+12&gt;:      push   %rbx
+0xffffffffc029747d &lt;virtio_dev_remove+13&gt;:      mov    0x68(%rdi),%r12
+0xffffffffc0297481 &lt;virtio_dev_remove+17&gt;:      mov    %rdi,%rbx
+0xffffffffc0297484 &lt;virtio_dev_remove+20&gt;:      mov    %rbp,%rdi
+0xffffffffc0297487 &lt;virtio_dev_remove+23&gt;:      callq  0xffffffffc02973e0 &lt;virtio_config_disable&gt;
+0xffffffffc029748c &lt;virtio_dev_remove+28&gt;:      mov    0xd0(%r12),%rax
+0xffffffffc0297494 &lt;virtio_dev_remove+36&gt;:      mov    %rbp,%rdi
+0xffffffffc0297497 &lt;virtio_dev_remove+39&gt;:      callq  *%rax
+0xffffffffc0297499 &lt;virtio_dev_remove+41&gt;:      nopl   (%rax)
+
+##看一下virtblk_remove的汇编，第二个push把rbp给push了，所以该栈的第二个压栈参数就是virtio_device的地址
+crash&gt; dis -lr ffffffffc02e3307
+0xffffffffc02e32d0 &lt;virtblk_remove&gt;:    nopl   0x0(%rax,%rax,1) [FTRACE NOP]
+0xffffffffc02e32d5 &lt;virtblk_remove+5&gt;:  push   %r12
+0xffffffffc02e32d7 &lt;virtblk_remove+7&gt;:  mov    %rdi,%r12
+0xffffffffc02e32da &lt;virtblk_remove+10&gt;: push   %rbp
+0xffffffffc02e32db &lt;virtblk_remove+11&gt;: mov    0x330(%rdi),%rbp
+0xffffffffc02e32e2 &lt;virtblk_remove+18&gt;: lea    0x158(%rbp),%rdi
+0xffffffffc02e32e9 &lt;virtblk_remove+25&gt;: callq  0xffffffff85aaef70 &lt;flush_work&gt;
+0xffffffffc02e32ee &lt;virtblk_remove+30&gt;: mov    0x28(%rbp),%rdi
+0xffffffffc02e32f2 &lt;virtblk_remove+34&gt;: callq  0xffffffff85e3f8f0 &lt;del_gendisk&gt;
+0xffffffffc02e32f7 &lt;virtblk_remove+39&gt;: mov    0x28(%rbp),%rax
+0xffffffffc02e32fb &lt;virtblk_remove+43&gt;: mov    0x3b0(%rax),%rdi
+0xffffffffc02e3302 &lt;virtblk_remove+50&gt;: callq  0xffffffff85e274d0 &lt;blk_cleanup_queue&gt;
+0xffffffffc02e3307 &lt;virtblk_remove+55&gt;: lea    0x30(%rbp),%rdi
+
+##也就是ffff96b1d16c2400是virtio_device的地址
+crash&gt; bt -f
+PID: 1697   TASK: ffff95b2b9078000  CPU: 181  COMMAND: &quot;kworker/u416:1&quot;
+ #0 [ffffa2835c82bb10] __schedule at ffffffff863092d2
+    ffffa2835c82bb18: ffff95b2b9078000 ffff97a8d3773c80
+    ffffa2835c82bb28: ffff96b1cc775b80 ffffffff86b77b80
+    ffffa2835c82bb38: ffffa2835c82bb98 ffffffff863092d2
+    ffffa2835c82bb48: ffff95b2b90789d8 00000000b8c1c520
+    ffffa2835c82bb58: ffffa2835c82bba0 0000000000000004
+    ffffa2835c82bb68: f4bb75f19a2e0000 ffff95b2b9078000
+    ffffa2835c82bb78: ffff96b1d16c2400 ffffffffc02e6060
+    ffffa2835c82bb88: ffff95b29072a9c0 0000000000000000
+    ffffa2835c82bb98: ffff95b2b9078000 ffffffff86309906
+ #1 [ffffa2835c82bba0] schedule at ffffffff86309906
+    ffffa2835c82bba8: ffff95b2b8c1bf50 ffff95b2b8c1c518
+    ffffa2835c82bbb8: ffffffff85e322d6
+ #2 [ffffa2835c82bbb8] blk_mq_freeze_queue_wait at ffffffff85e322d6
+    ffffa2835c82bbc0: ffff95b200000000 ffff95b2b9078000
+    ffffa2835c82bbd0: ffffffff85ae3f70 ffff95b2b8c1c520
+    ffffa2835c82bbe0: ffff95b2b8c1c520 f4bb75f19a2e0000
+    ffffa2835c82bbf0: ffff95b2b8c1bf40 ffff95b3004a2e00
+    ffffa2835c82bc00: ffffffff85e27508
+ #3 [ffffa2835c82bc00] blk_cleanup_queue at ffffffff85e27508
+    ffffa2835c82bc08: ffff96b1d16c2410 ffff95b3004a2e00
+    ffffa2835c82bc18: ffffffffc02e3307
+ #4 [ffffa2835c82bc18] virtblk_remove at ffffffffc02e3307 [virtio_blk]
+    ffffa2835c82bc20: ffff96b1d16c2400 ffffffffc02e6060
+    ffffa2835c82bc30: ffffffffc0297499
+ #5 [ffffa2835c82bc30] virtio_dev_remove at ffffffffc0297499 [virtio]
+
+##priv就是virtio_blk的地址
+##不知道是因为符号没导出还是什么原因查不到，mod -s加载模块也不行，那就只能手动去算了
+ crash&gt; virtio_device ffff96b1d16c2400 |grep priv
+  priv = 0xffff95b3004a2e00
+
+crash&gt; virtio_blk 0xffff95b3004a2e00
+crash: command not found: virtio_blk
+
+##当前的virtio_blk结构体定义如下
+##我们需要根据这些偏移来计算处vqs的地址
+##首先需要明确的是refcount_t/unsigned int/int这些类型是占4个字节，指针占8个字节
+struct virtio_blk &#123;
+	struct mutex vdev_mutex;
+	struct virtio_device *vdev;
+	struct gendisk *disk;
+	struct blk_mq_tag_set tag_set;
+	struct work_struct config_work;
+	refcount_t refs;
+	unsigned int sg_elems;
+	int index;
+	int num_vqs;
+	struct virtio_blk_vq *vqs;
+&#125;;
+##首先计算出两个结构体占的字节数
+##然后就可以计算整体偏移了，结果是392个字节
+crash&gt; mutex |grep -i size
+SIZE: 32
+crash&gt; blk_mq_tag_set |grep -i size
+    unsigned int cmd_size;
+SIZE: 296
+crash&gt; work_struct |grep -i size
+SIZE: 32
+crash&gt; p 32+8+8+296+32+4+4+4+4
+$22 = 392
+##然后计算virtio_blk地址偏移392的地址，注意这时候这个是算出来的virtio_blk_vq指针所在的地址
+##得需要读一下这个值才知道这个virtio_blk_vq的地址
+crash&gt; p/x 0xffff95b3004a2e00+392
+$23 = 0xffff95b3004a2f88
+crash&gt; rd 0xffff95b3004a2f88
+ffff95b3004a2f88:  ffff95b2b80d6600                    .f......
+
+##然后看一下virtio_blk_vq结构体
+struct virtio_blk_vq &#123;
+	struct virtqueue *vq;
+	spinlock_t lock;
+	char name[VQ_NAME_LEN];
+&#125; ____cacheline_aligned_in_smp;
+##所以这时候读到的这个结构体的内容的第一个值就是virtqueue的指针
+crash&gt; rd ffff95b2b80d6600
+ffff95b2b80d6600:  ffff95b28e6ae0c0                    ..j.....
+
+##所以virtqueue就是这样子了
+crash&gt; virtqueue ffff95b28e6ae0c0
+struct virtqueue &#123;
+  list = &#123;
+    next = 0xffff95b28e6ae6c0,
+    prev = 0xffff96b1d16c2718
+  &#125;,
+  callback = 0xffffffffc02e3000 &lt;virtblk_done&gt;,
+  name = 0xffff95b2b80d660c &quot;req.0&quot;,
+  vdev = 0xffff96b1d16c2400,
+  index = 0,
+  num_free = 253,
+  priv = 0xffffa2835902d000
+&#125;
+
+##那么从virtqueue怎么获取到vring呢？通过vring_virtqueue结构体
+##而看这个结构体可以看到，vring_virtqueue的首地址其实就是virtqueue结构体
+##所以，ffff95b28e6ae0c0也是这个virtqueue所属的vring_virtqueue的地址
+##所以接下来继续根据偏移来计算这个vring的所在
+struct vring_virtqueue &#123;
+	struct virtqueue vq;
+	bool packed_ring;
+	bool use_dma_api;
+	bool weak_barriers;
+	bool broken;
+	bool indirect;
+	bool event;
+	unsigned int free_head;
+	unsigned int num_added;
+	u16 last_used_idx;
+	union &#123;
+		struct &#123;
+			struct vring vring;
+			u16 avail_flags_shadow;
+			u16 avail_idx_shadow;
+			struct vring_desc_state_split *desc_state;
+			dma_addr_t queue_dma_addr;
+			size_t queue_size_in_bytes;
+		&#125; split;
+		struct &#123;
+			struct &#123;
+				unsigned int num;
+				struct vring_packed_desc *desc;
+				struct vring_packed_desc_event *driver;
+				struct vring_packed_desc_event *device;
+			&#125; vring;
+			bool avail_wrap_counter;
+......
+&#125;;
+
+##所以把上面的偏移计算一下，然后根据这个偏移得出地址
+##注意这时候不用再rd了，因为这就是这个vring的地址，不是指针（看一下virng在vring_virtqueue中不是指针）
+crash&gt; virtqueue |grep -i size
+SIZE: 56
+##然后剩下的字段大概占3个字节？bool凑一个，两个unsigned int凑一个，u16一个
+##那地址就是0xffff95b28e6ae110
+crash&gt; p/x 0xffff95b28e6ae0c0+56+3*8
+$32 = 0xffff95b28e6ae110
+
+##看一下vring的内容
+struct vring &#123;
+	unsigned int num;
+	vring_desc_t *desc;
+	vring_avail_t *avail;
+	vring_used_t *used;
+&#125;;
+
+##所以这三个内容就是desc avail used了
+crash&gt; rd  0xffff95b28e6ae110 4
+ffff95b28e6ae110:  0000000000000100 ffff95b31c1c6000   .........`......
+ffff95b28e6ae120:  ffff95b31c1c7000 ffff95b31c1c7240   .p......@r......
+
+##然后再根据vring_desc_t vring_avail_t vring_used_t结构体的内容去读值
+crash&gt; rd ffff95b31c1c6000 2
+ffff95b31c1c6000:  0000010061f16a18 0001000100000010   .j.a............
+crash&gt; rd ffff95b31c1c7000
+ffff95b31c1c7000:  0000000000080000                    ........
+crash&gt; rd ffff95b31c1c7240
+ffff95b31c1c7240:  0000000000070000                    ........
+##这其实就能读出来avail idx是8，used idx是7了
 </code></pre>
-<p><font color="red">不同的bios厂商使用的工具是不同的，另外请注意，这不可能即时生效，需要下一次重启才行</font></p>
-<ul>
-<li><strong>AMI</strong></li>
-</ul>
-<p>使用<font color="red">SCELNX_64</font>工具可以导入和导出bios选项</p>
-<pre><code class="language-shell">./SCELNX_64 /o /s bios.txt			//导出bios配置，修改bios.txt
-./SCELNX_64 /i /s bios.txt			//导入bios配置
-</code></pre>
-<ul>
-<li><strong>Insyde</strong></li>
-</ul>
-<p>使用<font color="red">InsydeH2OUVE</font>工具</p>
-<pre><code>h2ouve-lx64 -gs xx.txt 导出
-h2ouve-lx64 -ss xx.txt 导入
-</code></pre>
-<ul>
-<li><strong>Byosoft</strong></li>
-</ul>
-<p>使用<font color="red">uniCfg</font></p>
-<pre><code>./uniCfg -RF customset.ini 导出
-./uniCfg -RW customset.ini导入
-</code></pre>
-<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a><center>后记</center></h3><p>还有的地方需要注意，进行<font color="red">某些bios选项的修改后，下次reboot可能会掉电重启</font></p>
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a><center>参考</center></h3><p>​	<a target="_blank" rel="noopener" href="https://travonf.github.io/blog/hw/conf-bios.html">https://travonf.github.io/blog/hw/conf-bios.html</a></p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
