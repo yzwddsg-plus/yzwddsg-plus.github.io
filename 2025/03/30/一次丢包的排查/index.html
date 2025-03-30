@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>qemu kvm添加新feature虚拟化 | YZWDDSG</title>
+  <title>一次丢包的排查 | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="qemu kvm添加新feature虚拟化 | YZWDDSG">
+  <meta name="description" content="一次丢包的排查 | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta property="og:type" content="website">
@@ -514,9 +514,9 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="post-qemu-kvm添加新feature虚拟化" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-一次丢包的排查" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">qemu kvm添加新feature虚拟化</h1>
+        <h1 class="article-title">一次丢包的排查</h1>
     
     <div class="article-meta">
         
@@ -526,7 +526,7 @@
             <i class="iconfont icon-category"></i>
             
             
-            <a  data-rel="虚拟化">虚拟化</a>
+            <a  data-rel="故障排查">故障排查</a>
             
         </span>
         
@@ -534,12 +534,12 @@
     </div>
     <div class="article-meta">
         
-            Created At : <time class="date" title='Updated At: 2025-03-07 22:35:48'>2025-03-06 00:13</time>
+            Created At : <time class="date" title='Updated At: 2025-03-30 16:07:26'>2025-03-30 12:56</time>
         
     </div>
     <div class="article-meta">
         
-        <span>Count:1.8k</span>
+        <span>Count:1.6k</span>
         
         
         
@@ -558,7 +558,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0"><span class="toc-text">学习</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C"><span class="toc-text">实验</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E8%AE%B0"><span class="toc-text">后记</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-text">参考</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%92%E6%9F%A5"><span class="toc-text">排查</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E8%AE%B0"><span class="toc-text">后记</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -574,255 +574,158 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>不太严谨了，应该算是添加新cap的虚拟化</p>
-<h3 id="学习"><a href="#学习" class="headerlink" title="学习"></a><center>学习</center></h3><p>先找一个当前已经存在的feature看一下这个过程，比如KVM_CAP_S390_IRQCHIP这个cap。内核commit为(“KVM: s390: irq routing for adapter interrupts.”)</p>
-<p><strong>libvirt侧：virsh start</strong></p>
-<pre><code>##virsh start启动一个虚机
-cmdStart
-  ---&gt;virDomainCreateWithFlags	##去调用具体驱动的create domian，一般是qemu
-    ---&gt;qemuDomainCreateWithFlags
-      ---&gt;qemuProcessBeginJob
-        ---&gt;qemuDomainObjStart
-          ---&gt;qemuProcessStart
-            ---&gt;qemuProcessLaunch
-              ---&gt;qemuBuildCommandLine	##构建qemu命令
-              ---&gt;virCommandRun
-                ---&gt;virCommandRunAsync
-                  ---&gt;virExec
+        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h3><p>之前有介绍过netconsole，这个模块可以把内核日志转发到远程主机上。如果在加载模块的配置转发的远程主机的端口号是rsyslog的端口号的话，其实就可以做到把本地的内核日志转发到远程的rsyslog，由rsyslog进行统一管理</p>
+<p>再一次实验过程中进行了上面的配置，但是发现远程的主机侧由丢失log的现象发生，因此进行排查</p>
+<h3 id="排查"><a href="#排查" class="headerlink" title="排查"></a><center>排查</center></h3><p>首先，需要确定一件事，本地是否发送了UDP包？远程是否收到了UDP包。这个很关键，必须先确定是本地还是远端出现的问题。</p>
+<p>先netstat -s -u看一下本地和远端，发现远端有一些buffer size error（这块是内核缓冲区）</p>
+<p><img src="/img/17.png" alt="这是一张图片"></p>
+<p>这俩数值相同，所以这块的error全是receive buffer引起的，因为buffer size不够大？</p>
+<p>那把远端的net.core.rmem_max net.core.rmem_default和net.core.netdev_max_backlog都调大一下，还是不行（这是系统层面的）</p>
+<p>然后把rsyslog的buffer size调大一点，再试试（这是进程层面的），再测试就没有上面的error了，所以这个可以通过调大buffer size的大小来缓解</p>
+<p><img src="/img/18.png" alt="这是一张图片"></p>
+<p>但是，还没完，虽然没有error了，但是还是缺少很多log，说明这个虽然可能缓解这个问题，但是不只导致丢log的根源，需要继续排查</p>
+<p><font color="red">尝试tcpdump抓包看一下包是丢在哪里的，这块有个问题需要澄清一下，之前没有注意到，在本地使用tcpdump是抓不到包的，为什么呢？可以看之前讲的netpoll原理，他其实就直接从驱动侧把包发出去了，不走网络协议栈。</font></p>
+<p>但是远端是可以抓这些包的，因为它收到包之后会走协议栈。</p>
+<pre><code class="language-bash">tcpdump -i eth0 udp and src host XXX and dst port 514 -w output.pcap
 </code></pre>
-<p><strong>qemu侧：开始创建虚机</strong></p>
-<pre><code>main			##softmmu/main.,这主要就三条，qemu_init,qemu_main_loop,qemu_cleanup
-  ---&gt;qemu_init			##这里会parse传入的参数，然后根据参数调用对应的函数
-    ---&gt;configure_accelerators		##配置加速器，其实一般也就是kvm
-      ---&gt;do_configure_accelerator
-        ---&gt;accel_init_machine		##这里会调用acc-&gt;init_machine(ms);，kvm的话，也就是kvm_init
-          ---&gt;kvm_init
-            ---&gt;kvm_irqchip_create
-              ---&gt;kvm_check_extension(s, KVM_CAP_S390_IRQCHIP)			##检测是否存在这个feture（实际上是一个发一个KVM_CHECK_EXTENSION的ioctl），也就是实际上是检查kvm是否支持这个feature
-              ---&gt;kvm_vm_enable_cap(s, KVM_CAP_S390_IRQCHIP, 0);		##如果存在的话就enable
-
-#########看一下kvm_vm_enable_cap函数
-##其实是个宏，大致看上去就是初始化一个kvm_enable_cap结构体，其中cap是KVM_CAP_S390_IRQCHIP，flag是0
-##然后初始化一个临时数组把后面的可变参数复制过来
-##然后获取args_tmp和cap.args长度的最小值，应该是怕如果传入的可变参数太多导致cap.args溢出
-##然后把可变参数的args_tmp数组内容copy到cap.args
-##最后去调用kvm_vm_ioctl
-
-#define kvm_vm_enable_cap(s, capability, cap_flags, ...)             \
-    (&#123;                                                               \
-        struct kvm_enable_cap cap = &#123;                                \
-            .cap = capability,                                       \
-            .flags = cap_flags,                                      \
-        &#125;;                                                           \
-        uint64_t args_tmp[] = &#123; __VA_ARGS__ &#125;;                       \
-        size_t n = MIN(ARRAY_SIZE(args_tmp), ARRAY_SIZE(cap.args));  \
-        memcpy(cap.args, args_tmp, n * sizeof(cap.args[0]));         \
-        kvm_vm_ioctl(s, KVM_ENABLE_CAP, &amp;cap);                       \
-    &#125;)
-
-
-int kvm_vm_ioctl(KVMState *s, int type, ...)
+<p><img src="/img/19.png" alt="这是一张图片"></p>
+<p>可以看到远端只收到了6646个包，而本地应该发多少包呢？可以直接dmesg看一下有多少条消息，别忘了这是在调试netconsole丢日志，而netconsole是转发的内核日志。看了下dmesg中有65536条数据。</p>
+<p>那还得确定一个内容，就是本地dmesg有65536条消息，是不是就意味着发了65536个UDP包呢？</p>
+<p>之前已经分析，往netconsole发消息其实就是调用netconsole这个console设备的wirte函数来写，也就是wirte_msg，因此ftrace一下，没发现什么线索</p>
+<p>接下来bpftrace抓一下本地netpoll_send_skb这个函数，这个是真正的向卡侧发包的函数</p>
+<pre><code class="language-c">kprobe:netpoll_send_skb
 &#123;
-    int ret;
-    void *arg;
-    ##这块其实是对可变参数的处理，这是一个可变参数的列表
-    va_list ap;
+    $skb = arg1;
 
-    ##初始化ap，指向type后的第一个参数
-    va_start(ap, type);
-    ##从ap中提取一个void *类型的参数
-    arg = va_arg(ap, void *);
-    va_end(ap);
-
-    trace_kvm_vm_ioctl(type, arg);
-    accel_ioctl_begin();
-    ret = ioctl(s-&gt;vmfd, type, arg);
-    accel_ioctl_end();
-    if (ret == -1) &#123;
-        ret = -errno;
-    &#125;
-    return ret;
+    $len = *(uint32 *)($skb + 0x70);
+    
+    printf(&quot;netpoll_send_skb: skb-&gt;len = %d\n&quot;, $len);
 &#125;
 </code></pre>
-<p>可以看到其实跟KVM_CAP_S390_IRQCHIP相关的就是初始化过程中通过KVM_CHECK_EXTENSION类型的ioctl去查kvm是否支持该feature，如果支持的话，就发KVM_ENABLE_CAP类型的ioctl去enable它</p>
-<p><strong>kernel侧：</strong></p>
-<pre><code>##首先它在include/uapi/linux/kvm.h中定义了这个宏
-#define KVM_CAP_S390_IRQCHIP 99
+<p>这个获取len的方法如下</p>
+<pre><code class="language-c">//netpoll_send_skb的函数参数如下,在skb中存储着这个msg的长度
+netdev_tx_t netpoll_send_skb(struct netpoll *np, struct sk_buff *skb)
+&#123;
+	unsigned long flags;
+	netdev_tx_t ret;
+    ...
+        
+        
+//skb结构体定义如下，我们要找的就是最后的那个len数据
+//因此，需要根据这个结构体内容算出它的偏移，当然了，不好算的话搞一个core或者kcore直接打印一下也可以
+struct sk_buff &#123;
+ union &#123;
+  struct &#123;
+   /* These two members must be first to match sk_buff_head. */
+   struct sk_buff  *next;
+   struct sk_buff  *prev;
 
-##然后看接收KVM_CHECK_EXTENSION ioctl的处理
-kvm_vm_ioctl
-  ---&gt;kvm_vm_ioctl_check_extension_generic
-    ---&gt;kvm_vm_ioctl_check_extension		##这里直接返回了1,所以qemu的ioctl收到1就认为kvm支持这个feature
-
-##在qemu的流程中，这里KVM_CHECK_EXTENSION的ioctl查到kvm支持这个feature了，就发KVM_ENABLE_CAP的ioctl去enable了
-/* for KVM_ENABLE_CAP */
-struct kvm_enable_cap &#123;
-	/* in */
-	__u32 cap;
-	__u32 flags;
-	__u64 args[4];
-	__u8  pad[64];
-&#125;;
-
-kvm_vm_ioctl
-  ---&gt;copy_from_user		##从userspace把kvm_enable_cap结构体的内容copy过来
-  ---&gt;kvm_vm_ioctl_enable_cap_generic
-    ---&gt;kvm_vm_ioctl_enable_cap			##然后这里检查cap中的一些内容，然后打开进行enable的相关操作
-</code></pre>
-<p><font color="red">另外，需要注意下，如果要对一些msr进行虚拟化或透传的话，如果是只有读操作还好，如果会往msr中进行写操作，就需要考虑很多事情了，比如：是否需要考虑虚机和宿主机侧修改msr数据不一致导致问题，是否需要补偿？vcpu从cpu间进行迁移的话需要怎么做？多个vcpu运行在一个cpu上需要怎么做？</font></p>
-<h3 id="实验"><a href="#实验" class="headerlink" title="实验"></a><center>实验</center></h3><p>有一个MSR_PPIN msr，这个在虚机中肯定是没有虚拟化的，将它虚拟化试试看。添加一个新cap，协商cap并允许虚机访问这个msr</p>
-<p>首先先看一下我的宿主机上这个msr的内容（左图）是可以读到的，然后看一下我的虚机中，是读不到的</p>
-<p><img src="/img/1.png" alt="这是一张图片"></p>
-<p>开搞！！！</p>
-<ul>
-<li><strong>修改</strong></li>
-</ul>
-<p><strong>qemu侧修改：</strong></p>
-<pre><code>diff --git a/accel/kvm/kvm-all.c b/accel/kvm/kvm-all.c
-index be2a7adba7..2a37beaac9 100644
---- a/accel/kvm/kvm-all.c
-+++ b/accel/kvm/kvm-all.c
-@@ -2661,6 +2661,10 @@ static int kvm_init(MachineState *ms)
-         &#125;
-     &#125;
-
-+    if(kvm_vm_check_extension(s, KVM_CAP_PPIN)) &#123;
-+        kvm_vm_enable_cap(s, KVM_CAP_PPIN, 0);
-+    &#125;
-+
- #ifdef KVM_CAP_VCPU_EVENTS
-     s-&gt;vcpu_events = kvm_check_extension(s, KVM_CAP_VCPU_EVENTS);
- #endif
-diff --git a/linux-headers/linux/kvm.h b/linux-headers/linux/kvm.h
-index 20a3755fa5..28f70cf1f9 100644
---- a/linux-headers/linux/kvm.h
-+++ b/linux-headers/linux/kvm.h
-@@ -1114,6 +1114,7 @@ struct kvm_ppc_resize_hpt &#123;
- #define KVM_CAP_ARM_MTE 205
- #define KVM_CAP_XSAVE2 208
- #define KVM_CAP_SYS_ATTRIBUTES 209
-+#define KVM_CAP_PPIN 250
-
- #define KVM_CAP_APERFMPERF 500
- #define KVM_CAP_APERFMPERF2 501
-</code></pre>
-<p>这块其实主要就是在linux-headers&#x2F;linux&#x2F;kvm.h新定义一个KVM_CAP_PPIN cap号；然后通过kvm_vm_check_extension和kvm_vm_enable_cap查询和开启这个cap</p>
-<p><strong>kernel侧修改：</strong></p>
-<pre><code>diff --git a/arch/x86/include/asm/kvm_host.h b/arch/x86/include/asm/kvm_host.h
-index 97c9363700ef..b3355fa61149 100644
---- a/arch/x86/include/asm/kvm_host.h
-+++ b/arch/x86/include/asm/kvm_host.h
-@@ -958,6 +958,7 @@ struct kvm_vcpu_arch &#123;
- #if IS_ENABLED(CONFIG_HYPERV)
-        hpa_t hv_root_tdp;
- #endif
-+       u64 ppin;
+   union &#123;
+    struct net_device *dev;
+    /* Some protocols might use this space to store information,
+     * while device pointer would be NULL.
+     * UDP receive path is one user.
+     */
+    unsigned long  dev_scratch;
+   &#125;;
+  &#125;;
+  struct rb_node  rbnode; /* used in netem, ip4 defrag, and tcp stack */
+  struct list_head list;
+  struct llist_node ll_node;
  &#125;;
 
- struct kvm_lpage_info &#123;
-diff --git a/arch/x86/kvm/x86.c b/arch/x86/kvm/x86.c
-index 50841b390a2b..45db5ff78505 100644
---- a/arch/x86/kvm/x86.c
-+++ b/arch/x86/kvm/x86.c
-@@ -4149,6 +4149,9 @@ int kvm_get_msr_common(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
-                msr_info-&gt;data = vcpu-&gt;arch.guest_fpu.xfd_err;
-                break;
-+       case MSR_PPIN:
-+               msr_info-&gt;data = vcpu-&gt;arch.ppin;
-+               break;
- #endif
-        default:
-                if (kvm_pmu_is_valid_msr(vcpu, msr_info-&gt;index))
-@@ -4327,6 +4330,7 @@ int kvm_vm_ioctl_check_extension(struct kvm *kvm, long ext)
-        case KVM_CAP_VAPIC:
-        case KVM_CAP_ENABLE_CAP:
-        case KVM_CAP_VM_DISABLE_NX_HUGE_PAGES:
-+       case KVM_CAP_PPIN:
-                r = 1;
-                break;
-        case KVM_CAP_EXIT_HYPERCALL:
-@@ -6366,6 +6370,9 @@ split_irqchip_unlock:
-                &#125;
-                mutex_unlock(&amp;kvm-&gt;lock);
-                break;
-+       case KVM_CAP_PPIN:
-+               r = 0;
-+               break;
-        default:
-                r = -EINVAL;
-                break;
-diff --git a/include/uapi/linux/kvm.h b/include/uapi/linux/kvm.h
-index 85365bd8ec8d..2f5959fea170 100644
---- a/include/uapi/linux/kvm.h
-+++ b/include/uapi/linux/kvm.h
-@@ -1184,6 +1184,7 @@ struct kvm_ppc_resize_hpt &#123;
- #define KVM_CAP_S390_ZPCI_OP 221
- #define KVM_CAP_S390_CPU_TOPOLOGY 222
- #define KVM_CAP_DIRTY_LOG_RING_ACQ_REL 223
-+#define KVM_CAP_PPIN 250
- #define KVM_CAP_APERFMPERF 500
- #define KVM_CAP_APERFMPERF2 501
+ union &#123;
+  struct sock  *sk;
+  int   ip_defrag_offset;
+ &#125;;
+
+ union &#123;
+  ktime_t  tstamp;
+  u64  skb_mstamp_ns; /* earliest departure time */
+ &#125;;
+ /*
+  * This is the control buffer. It is free to use for every
+  * layer. Please put your private variables there. If you
+  * want to keep them across layers you have to do a skb_clone()
+  * first. This is owned by whoever has the skb queued ATM.
+  */
+ char   cb[48] __aligned(8);
+
+ union &#123;
+  struct &#123;
+   unsigned long _skb_refdst;
+   void  (*destructor)(struct sk_buff *skb);
+  &#125;;
+  struct list_head tcp_tsorted_anchor;
+#ifdef CONFIG_NET_SOCK_MSG
+  unsigned long  _sk_redir;
+#endif
+ &#125;;
+
+#if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
+ unsigned long   _nfct;
+#endif
+ unsigned int  len,
+    data_len;
 </code></pre>
-<p>这块的主要修改有：新定义一个KVM_CAP_PPIN cap号，和qemu中相同；在kvm_vm_ioctl_check_extension和kvm_vm_ioctl_enable_cap中分别提供该cap的查询和enable；在kvm_vcpu_arch定义一个新的ppin变量，主要用于虚机访问msr时 导致vm exit退出时返回的msr的值；kvm_get_msr_common中处理MSR_PPIN，给msr_info-&gt;data赋值，也就是刚才的ppin</p>
-<p><font color="red">这里说明一下，这个并不是一个完整的例子，只是简单测试走一下流程。实际上一般来说，在enable这个cap的时候还需要做一些操作，比如设置一些标志之类，然后在create vcpu的时候根据标志进行处理；然后并没有给ppin进行赋值，实际上应该在vcpu_enter_guest中在vm enter和vm exit的时候对ppin进行赋值，这样在虚机中访问的时候得到的就是和宿主机上相同的值了。在在我上面的例子中，虚机中输出的应该是0，因为并没有给ppin赋值。</font></p>
-<ul>
-<li><strong>结果</strong></li>
-</ul>
-<p>此时虚机侧已经可以看到</p>
-<p><img src="/img/2.png" alt="这是一张图片"></p>
-<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a><center>后记</center></h3><ul>
-<li><p><strong>读msr的方法</strong></p>
-</li>
-<li><ul>
-<li><strong>msr-tools</strong></li>
-</ul>
-</li>
-</ul>
-<p>然后rdmsr 0x0000004f这样就可以读，比如</p>
-<p><img src="/img/3.png" alt="这是一张图片"></p>
-<p>ps：但是我的虚机没有网，没法安装msr-tools</p>
-<ul>
-<li><ul>
-<li><strong>内核模块</strong></li>
-</ul>
-</li>
-</ul>
-<p>可以写内核模块，使用内核rdmsr系列函数</p>
-<p>ps：但是我的宿主机和虚机内核不是同一个内核，还得重编内核或者安装devel包，也有点麻烦</p>
-<ul>
-<li><ul>
-<li><strong>自己编写c程序</strong></li>
-</ul>
-</li>
-</ul>
-<p>strace msr-tools的rdmsr过程可以看到，其实这个是通过读&#x2F;dev&#x2F;cpu&#x2F;X&#x2F;msr来实现的</p>
-<p>那同样我们也可以读这个设备文件来实现，类似下面这样</p>
-<pre><code>#include &lt;stdio.h&gt;
-#include &lt;unistd.h&gt;
-#include &lt;stdint.h&gt;
-#include &lt;fcntl.h&gt;
-
-#define MSR_PPIN    0x0000004f
-int main()
+<p><font color="red">发现bpftrace抓到的包长度和远端tcpdump抓到的包的长度是可以对应上的，这就说明本地抓netpoll_send_skb抓对了，确实是通过这个函数发送的</font></p>
+<p><img src="/img/20.png" alt="这是一张图片"></p>
+<p><img src="/img/21.png" alt="这是一张图片"></p>
+<p>那接下来就看看在本地调用了多少次netpoll_send_skb函数呢？这个是不是能和dmesg的输出对应上呢？经过检查，这两个数字差不多是能对应上的，所以这个就可以说明，<font color="red">内核的日志通过netconsole转发的时候是走netpoll_send_skb的，而且基本是每一行日志都调用了一次netpoll_send_skb</font></p>
+<p>再继续向后分析，看看netpoll_send_skb函数内容，又ftrace了一下dev_kfree_skb_irq，发现没有调用到这个函数，说明都正常到__netpoll_send_skb中去了</p>
+<pre><code class="language-c">netdev_tx_t netpoll_send_skb(struct netpoll *np, struct sk_buff *skb)
 &#123;
-    uint64_t val;
-    int fd = open(&quot;/dev/cpu/0/msr&quot;, O_RDONLY);
-    if (fd &lt; 0) &#123;
-        printf(&quot;open msr failed\n&quot;);
-        return -1;
-    &#125;
+	unsigned long flags;
+	netdev_tx_t ret;
 
-    if(pread(fd, &amp;val, sizeof(val), MSR_PPIN) != sizeof(val)) &#123;
-        printf(&quot;read msr failed\n&quot;);
-        close(fd);
-        return -1;
-    &#125;
-
-    printf(&quot;MSR_PPIN val is %lx\n&quot;, val);
-    return 0;
+	if (unlikely(!np)) &#123;
+		dev_kfree_skb_irq(skb);
+		ret = NET_XMIT_DROP;
+	&#125; else &#123;
+		local_irq_save(flags);
+		ret = __netpoll_send_skb(np, skb);
+		local_irq_restore(flags);
+	&#125;
+	return ret;
 &#125;
 </code></pre>
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a><center>参考</center></h3><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/hanyonglu/archive/2011/05/07/2039916.html">https://www.cnblogs.com/hanyonglu/archive/2011/05/07/2039916.html</a></p>
+<p>再ifconfig看一下，确认这些包是在发送端被丢掉了<font color="red">(PS:其实早该先查看这个的，那就基本不需要前面的证明了，这一个内容差不多就可以证明是发送端的问题了)</font></p>
+<p><img src="/img/22.png" alt="这是一张图片"></p>
+<p>安装dropwatch看一下，这个可以查看丢包发生的函数</p>
+<pre><code>[root@XXX ~]# dropwatch -l kas
+Initalizing kallsyms db
+dropwatch&gt; start
+Enabling monitoring...
+Kernel monitoring activated.
+Issue Ctrl-C to stop monitoring
+4816 drops at __init_scratch_end+2824470d (0xffffffffc084470d)
+6 drops at netlink_broadcast+308 (0xffffffff95ceebd8)
+3 drops at tcp_v4_rcv+82 (0xffffffff95d46482)
+5 drops at unix_stream_connect+2bf (0xffffffff95db2f7f)
+1 drops at tcp_rcv_state_process+f7 (0xffffffff95d37ee7)
+^CGot a stop message
+dropwatch&gt;
+</code></pre>
+<p>可以发现大多数丢在了0xffffffffc084470d，看了下这块也不知道是干什么的。crash一下&#x2F;proc&#x2F;kcore看了一下，没什么发现</p>
+<p>还好我用的6系内核已经实现了drop reason，可以查看丢包原因了，这就简单多了，直接trace一下kfree_skb_reason，它的第二个参数就是drop_reason</p>
+<pre><code class="language-C">#!/usr/bin/env bpftrace
+kprobe:kfree_skb_reason
+&#123;
+    $reason =(uint64 *)arg1;
+
+    printf(&quot;reason %d\n&quot;, $reason);
+&#125;
+</code></pre>
+<p>trace结果发现，大部分drop reason是55，这个数量也基本符合上面的排查</p>
+<pre><code class="language-c">[root@XXX~]# cat bbb |grep 55|wc -l 4183
+</code></pre>
+<p>到内核中查一下这个enum的skb_drop_reason中55代表什么呢？<font color="red">SKB_DROP_REASON_FULL_RING</font></p>
+<p>ring buff满了，调整一下网卡的缓冲区大小，解决</p>
+<p>其实这个如果不是因为网卡是模拟出来的没法使用ethtool -S XXX查看的话，应该早就可以定位到了</p>
+<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a><center>后记</center></h3><p>如果怀疑是缓冲区满了导致的丢包，可以尝试调大三个内容：</p>
+<p>1.网卡队列深度，这个一般通过ethtool -S可以看到是不是在网卡层面丢包</p>
+<p>2.内核缓冲区大小，可以通过调整net.core.rmem_max net.core.rmem_default、net.core.netdev_max_backlog这些内核参数来改变</p>
+<p>3.进程的缓冲区大小。这个就需要根据特定的进程或服务来修改了</p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
