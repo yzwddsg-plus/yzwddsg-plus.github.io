@@ -114,7 +114,7 @@
     <li>
         <div class="all active" data-rel="All">All
             
-                <small>(17)</small>
+                <small>(18)</small>
             
         </div>
     </li>
@@ -143,6 +143,21 @@
 
                 
             </ul>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="调度">
+            
+            调度
+            <small>(1)</small>
+        </div>
         
     </li>
 
@@ -290,8 +305,8 @@
         
     </div>
 </div>
-<input type="hidden" id="yelog_site_posts_number" value="17">
-<input type="hidden" id="yelog_site_word_count" value="31.1k">
+<input type="hidden" id="yelog_site_posts_number" value="18">
+<input type="hidden" id="yelog_site_word_count" value="32.4k">
 <div style="display: none">
     <span id="busuanzi_value_site_uv"></span>
     <span id="busuanzi_value_site_pv"></span>
@@ -342,6 +357,15 @@
 
     
     <nav id="title-list-nav">
+        
+        
+        <a  class="All 调度 "
+           href="/2025/03/31/%E4%BF%AE%E6%94%B9%E8%BF%9B%E7%A8%8B%E4%BF%A1%E6%81%AF%E7%9A%84%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改进程信息的内核模块">修改进程信息的内核模块</span>
+            <span class="post-date" title="2025-03-31 21:53:34">2025/03/31</span>
+        </a>
         
         
         <a  class="All 故障排查 "
@@ -534,7 +558,7 @@
     </div>
     <div class="article-meta">
         
-            Created At : <time class="date" title='Updated At: 2025-03-30 16:07:26'>2025-03-30 12:56</time>
+            Created At : <time class="date" title='Updated At: 2025-03-30 16:09:11'>2025-03-30 12:56</time>
         
     </div>
     <div class="article-meta">
@@ -575,7 +599,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h3><p>之前有介绍过netconsole，这个模块可以把内核日志转发到远程主机上。如果在加载模块的配置转发的远程主机的端口号是rsyslog的端口号的话，其实就可以做到把本地的内核日志转发到远程的rsyslog，由rsyslog进行统一管理</p>
-<p>再一次实验过程中进行了上面的配置，但是发现远程的主机侧由丢失log的现象发生，因此进行排查</p>
+<p>在一次实验过程中进行了上面的配置，但是发现远程的主机侧由丢失log的现象发生，因此进行排查</p>
 <h3 id="排查"><a href="#排查" class="headerlink" title="排查"></a><center>排查</center></h3><p>首先，需要确定一件事，本地是否发送了UDP包？远程是否收到了UDP包。这个很关键，必须先确定是本地还是远端出现的问题。</p>
 <p>先netstat -s -u看一下本地和远端，发现远端有一些buffer size error（这块是内核缓冲区）</p>
 <p><img src="/img/17.png" alt="这是一张图片"></p>
