@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>YZWDDSG</title>
+  <title>执行rpm命令卡死排查 | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="YZWDDSG">
+  <meta name="description" content="执行rpm命令卡死排查 | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta property="og:type" content="website">
@@ -57,7 +57,7 @@
 
 
 <body>
-<aside class="nav mobile">
+<aside class="nav">
     <div class="nav-left">
         <a href="/"
    class="avatar_target">
@@ -553,12 +553,53 @@
         </div>
     </div>
 </aside>
-<div id="post" class="index">
+<div id="post">
     <div class="pjax">
-        <article class="index">
-            <div class="toc-ref">
+        <article id="post-执行rpm命令卡死排查" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#YZWDDSG"><span class="toc-text"> YZWDDSG </span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%A6%E5%90%A7%EF%BC%8C%E5%AD%A6%E6%97%A0%E6%AD%A2%E5%A2%83%EF%BC%8C%E5%A4%AA%E6%B7%B1%E4%BA%86"><span class="toc-text"> 学吧，学无止境，太深了 </span></a></li></ol></li></ol>
+        <h1 class="article-title">执行rpm命令卡死排查</h1>
+    
+    <div class="article-meta">
+        
+        
+        
+        <span class="book">
+            <i class="iconfont icon-category"></i>
+            
+            
+            <a  data-rel="故障排查">故障排查</a>
+            
+        </span>
+        
+        
+    </div>
+    <div class="article-meta">
+        
+            发布时间 : <time class="date" title='最后更新: 2025-04-09 22:13:43'>2025-04-09 22:11</time>
+        
+    </div>
+    <div class="article-meta">
+        
+        <span>字数:1.3k</span>
+        
+        
+        
+        <span class="top-comment" title="跳转至评论区">
+            <a href="#comments">
+                评论:<span class="count-comment">
+                    <span class="spinner">
+                      <div class="cube1"></div>
+                      <div class="cube2"></div>
+                    </span>
+                </span>
+            </a>
+        </span>
+        
+    </div>
+    
+    <div class="toc-ref">
+    
+        
     
 <style>
     .left-col .switch-btn,
@@ -571,43 +612,257 @@
     }
 </style>
 </div>
-            <h1 id="YZWDDSG"><a href="#YZWDDSG" class="headerlink" title=" YZWDDSG "></a><center> YZWDDSG </center></h1><br/>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>有机器执行rpm命令卡死，需要排查一下</p>
+<p><img src="/img/25.png" alt="这是一张图片"></p>
+<p>首先看一下卡住的rpm进程的栈，在等锁，在等什么锁呢？</p>
+<pre><code class="language-c">[root@XXX ~]# cat /proc/93154/stack
+[&lt;0&gt;] futex_wait_queue_me+0xbb/0x110
+[&lt;0&gt;] futex_wait+0xeb/0x260
+[&lt;0&gt;] do_futex+0x2f1/0x520
+[&lt;0&gt;] __x64_sys_futex+0x13b/0x190
+[&lt;0&gt;] do_syscall_64+0x5b/0x1b0
+[&lt;0&gt;] entry_SYSCALL_64_after_hwframe+0x44/0xa9
+[&lt;0&gt;] 0xffffffffffffffff
+</code></pre>
+<p>strace执行一下rpm命令看看，可以发现是在等&#x2F;var&#x2F;lib&#x2F;rpm&#x2F;.dbenv.lock，然后看一下有哪些进程在等这个锁</p>
+<pre><code class="language-c">[root@XXX ~]# lsof /var/lib/rpm/.dbenv.lock
+COMMAND   PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+rpm     37070 root    3u   REG    8,3        0   31 /var/lib/rpm/.dbenv.lock
+rpm     55605 root    3u   REG    8,3        0   31 /var/lib/rpm/.dbenv.lock
+rpm     93154 root    3uW  REG    8,3        0   31 /var/lib/rpm/.dbenv.lock
+</code></pre>
+<p>然后可以发现37070这个进程在等一个file的锁</p>
+<pre><code class="language-c">[root@XXX ~]# cat /proc/37070/stack
+[&lt;0&gt;] do_lock_file_wait+0x6e/0xd0
+[&lt;0&gt;] fcntl_setlk+0x1c1/0x2e0
+[&lt;0&gt;] do_fcntl+0x442/0x640
+[&lt;0&gt;] __x64_sys_fcntl+0x7e/0xb0
+[&lt;0&gt;] do_syscall_64+0x5b/0x1b0
+[&lt;0&gt;] entry_SYSCALL_64_after_hwframe+0x44/0xa9
+[&lt;0&gt;] 0xffffffffffffffff
+</code></pre>
+<p>这个从userspace就看不出来了，因此搞一个vmlinux下来，crash kcore看一下</p>
+<pre><code class="language-c">crash&gt; bt
+PID: 3146   TASK: ffff9c742ba98000  CPU: 9   COMMAND: &quot;rpm&quot;
+ #0 [ffffbf9068a57d40] __schedule at ffffffffa4666c82
+ #1 [ffffbf9068a57de0] schedule at ffffffffa466731f
+ #2 [ffffbf9068a57de8] do_lock_file_wait at ffffffffa40ec63e
+ #3 [ffffbf9068a57e40] fcntl_setlk at ffffffffa40ee721
+ #4 [ffffbf9068a57ea8] do_fcntl at ffffffffa409ec22
+ #5 [ffffbf9068a57f00] __x64_sys_fcntl at ffffffffa409f29e
+ #6 [ffffbf9068a57f38] do_syscall_64 at ffffffffa3e0268b
+ #7 [ffffbf9068a57f50] entry_SYSCALL_64_after_hwframe at ffffffffa4800088
+    RIP: 00007f8c7f9c98d4  RSP: 00007ffdef98ac20  RFLAGS: 00000293
+    RAX: ffffffffffffffda  RBX: 00000000ffffffff  RCX: 00007f8c7f9c98d4
+    RDX: 00007ffdef98aca0  RSI: 0000000000000007  RDI: 0000000000000003
+    RBP: 0000000000000003   R8: 0000000000000001   R9: 0000000000000019
+    R10: 00007ffdef98a0a0  R11: 0000000000000293  R12: 00007ffdef98aca0
+    R13: 00000000025c96d0  R14: 0000000000000002  R15: 0000000000000000
+    ORIG_RAX: 0000000000000048  CS: 0033  SS: 002b
 
-<br/>
-
-<br/>
-
-<br/>
-
-<br/>
-
-<br/>
-
-<h2 id="学吧，学无止境，太深了"><a href="#学吧，学无止境，太深了" class="headerlink" title=" 学吧，学无止境，太深了 "></a><center> 学吧，学无止境，太深了 </center></h2><br/>
-
-<br/>
-
-<br/>
-
-<br/>
-
-<br/>
-
-<br/>
-
-<br/>
-
-<br/>
 
 
+static int do_lock_file_wait(struct file *filp, unsigned int cmd,
+                 struct file_lock *fl)
+&#123;
+    int error;
 
-<img src="https://github.com/yzwddsg-plus/picx-images-hosting/raw/master/1740158351681.1ap4o3gva3.webp" style="zoom:30%;" />
+    error = security_file_lock(filp, fl-&gt;fl_type);
+    if (error)
+        return error;
 
-<center>  旺财镇楼 </center>
+    for (;;) &#123;
+        error = vfs_lock_file(filp, cmd, fl, NULL);
+        if (error != FILE_LOCK_DEFERRED)
+            break;
+        error = wait_event_interruptible(fl-&gt;fl_wait, !fl-&gt;fl_next);
+        if (!error)
+            continue;
 
-        </article>
-        
-        
+        locks_delete_block(fl);
+        break;
+    &#125;
+
+    return error;
+&#125;
+</code></pre>
+<p>可以看到是走到wait_event_interruptible那里了，也就是等file_lock的一个fl_wait，那看一下这个file_lock结构体的内容</p>
+<pre><code class="language-c">#通过do_lock_file_wait函数可以看到file_lock是第三个参数，通过rdx传递
+#如下，也就是rdx和rbp中是file_lock的地址
+
+/home/baidu/linux-4-19/fs/locks.c: 2297
+0xffffffffa40ee713 &lt;fcntl_setlk+435&gt;:   mov    %rbp,%rdx
+0xffffffffa40ee716 &lt;fcntl_setlk+438&gt;:   mov    %r14d,%esi
+0xffffffffa40ee719 &lt;fcntl_setlk+441&gt;:   mov    %r13,%rdi
+0xffffffffa40ee71c &lt;fcntl_setlk+444&gt;:   callq  0xffffffffa40ec5d0 &lt;do_lock_file_wait&gt;
+
+#这里可以看到第三个push把rbp压栈了，所以栈的第三个参数就是file_lock的地址
+crash&gt; dis -lr ffffffffa40ec63e
+/home/baidu/linux-4-19/fs/locks.c: 2202
+0xffffffffa40ec5d0 &lt;do_lock_file_wait&gt;: nopl   0x0(%rax,%rax,1) [FTRACE NOP]
+0xffffffffa40ec5d5 &lt;do_lock_file_wait+5&gt;:       push   %r13
+0xffffffffa40ec5d7 &lt;do_lock_file_wait+7&gt;:       push   %r12
+0xffffffffa40ec5d9 &lt;do_lock_file_wait+9&gt;:       mov    %esi,%r13d
+0xffffffffa40ec5dc &lt;do_lock_file_wait+12&gt;:      push   %rbp
+0xffffffffa40ec5dd &lt;do_lock_file_wait+13&gt;:      push   %rbx
+0xffffffffa40ec5de &lt;do_lock_file_wait+14&gt;:      mov    %rdi,%r12
+0xffffffffa40ec5e1 &lt;do_lock_file_wait+17&gt;:      mov    %rdx,%rbx
+0xffffffffa40ec5e4 &lt;do_lock_file_wait+20&gt;:      sub    $0x30,%rsp
+
+#也就是ffff9c745e8e8000
+crash&gt; bt -f
+PID: 3146   TASK: ffff9c742ba98000  CPU: 9   COMMAND: &quot;rpm&quot;
+ #0 [ffffbf9068a57d40] __schedule at ffffffffa4666c82
+    ffffbf9068a57d48: ffff9c73e40c4400 0000000000000000
+    ffffbf9068a57d58: ffff9c742ba98000 ffff9c4540a630c0
+    ffffbf9068a57d68: ffff9c73c0665c00 ffffbf9068a57dd8
+    ffffbf9068a57d78: ffffffffa4666c82 ffff9c745e8e9c20
+    ffffbf9068a57d88: 000000005bff5a28 ffff9c73c0665c00
+    ffffbf9068a57d98: 0000000000000282 ffffffff00000004
+    ffffbf9068a57da8: b2be7a5fc2479500 ffff9c745e8e8000
+    ffffbf9068a57db8: ffff9c7438a59e00 0000000000000007
+    ffffbf9068a57dc8: 0000000000000007 ffff9c745bff5a28
+    ffffbf9068a57dd8: ffff9c745e8e8050 ffffffffa466731f
+ #1 [ffffbf9068a57de0] schedule at ffffffffa466731f
+    ffffbf9068a57de8: ffffffffa40ec63e
+ #2 [ffffbf9068a57de8] do_lock_file_wait at ffffffffa40ec63e
+    ffffbf9068a57df0: ffffffff00000000 ffff9c742ba98000
+    ffffbf9068a57e00: ffffffffa3ed7150 ffff9c745e8e8058
+    ffffbf9068a57e10: ffff9c745e8e8058 b2be7a5fc2479500
+    ffffbf9068a57e20: ffffbf9068a57eb0 ffff9c745e8e8000
+    ffffbf9068a57e30: 0000000000000000 ffff9c7438a59e00
+    ffffbf9068a57e40: ffffffffa40ee721
+ #3 [ffffbf9068a57e40] fcntl_setlk at ffffffffa40ee721
+    ffffbf9068a57e48: 00000003000002ff 0000000000000001
+    ffffbf9068a57e58: 0000000000000000 0000000000000000
+    ffffbf9068a57e68: 0000000000000000 b2be7a5fc2479500
+    ffffbf9068a57e78: 0000000000000007 ffff9c7438a59e00
+    ffffbf9068a57e88: 00007ffdef98aca0 0000000000000003
+    ffffbf9068a57e98: ffff9c7438a59e00 0000000000000000
+    ffffbf9068a57ea8: ffffffffa409ec22
+</code></pre>
+<p>根据这个地址继续查</p>
+<pre><code class="language-c">crash&gt; file_lock ffff9c745e8e8000 |grep owner
+  fl_owner = 0xffff9c73f00b7380,
+      owner = 0x0,
+      owner = 0x0
+crash&gt; file 0xffff9c73f00b7380 |grep path -A 2
+  f_path = &#123;
+    mnt = 0xffff9c73f00b7390,
+    dentry = 0xffff9c73f00b7390
+crash&gt; dentry 0xffff9c73f00b7390
+struct dentry &#123;
+  d_flags = 4027282320,
+  d_seq = &#123;
+    sequence = 4294941811
+  &#125;,
+  d_hash = &#123;
+    next = 0xffff9c73f00b7390,
+    pprev = 0xffff9c74082ae700
+  &#125;,
+  d_parent = 0x40,
+  d_name = &#123;
+    &#123;
+      &#123;
+        hash = 4027282464,
+        len = 4294941811
+      &#125;,
+      hash_len = 18446634620495295520
+    &#125;,
+    name = 0xffff9c73f00b7408 &quot;\b&quot;
+  &#125;,
+  d_inode = 0xffff9c73f00b7410,
+  d_iname = &quot;\030t\v\360s\234\377\377\310s\v1&#125;\355\377\377\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000&quot;,
+  d_lockref = &#123;
+    &#123;
+      lock_count = 0,
+      &#123;
+        lock = &#123;
+          &#123;
+            rlock = &#123;
+              raw_lock = &#123;
+                &#123;
+                  val = &#123;
+                    counter = 0
+                  &#125;,
+                  &#123;
+                    locked = 0 &#39;\000&#39;,
+                    pending = 0 &#39;\000&#39;
+                  &#125;,
+                  &#123;
+                    locked_pending = 0,
+                    tail = 0
+                  &#125;
+                &#125;
+              &#125;
+            &#125;
+          &#125;
+        &#125;,
+        count = 0
+      &#125;
+    &#125;
+  &#125;,
+  d_op = 0xffffffff,
+  d_sb = 0x0,
+  d_time = 17179869184,
+  d_fsdata = 0x8,
+  &#123;
+    d_lru = &#123;
+      next = 0x1,
+      prev = 0x0
+    &#125;,
+    d_wait = 0x1
+  &#125;,
+  d_child = &#123;
+    next = 0x0,
+    prev = 0x0
+  &#125;,
+  d_subdirs = &#123;
+    next = 0x0,
+    prev = 0x0
+  &#125;,
+  d_u = &#123;
+    d_alias = &#123;
+      next = 0x0,
+      pprev = 0x0
+    &#125;,
+    d_in_lookup_hash = &#123;
+      next = 0x0,
+      pprev = 0x0
+    &#125;,
+    d_rcu = &#123;
+      next = 0x0,
+      func = 0x0
+    &#125;
+  &#125;
+&#125;
+
+#本来想看一下文件路径，但是一看这个ops sb hash_len这些内容就明显不对，所以可能这个file应该已经都没了或者内存被写花了   
+</code></pre>
+<p>回去看一下dmesg</p>
+<pre><code class="language-c">[55862880.876917] [  46049]     0 46049   205891      229   159744        0             0 bash
+[55862880.876919] [  46050]     0 46050   205891      226   163840        0             0 bash
+[55862880.876921] [  46051]     0 46051   205891      228   155648        0             0 bash
+[55862880.876923] Memory cgroup out of memory: Kill process 97129 (XXX) score 33 or sacrifice child
+[55862880.876949] Killed process 97129 (XXX) total-vm:1797332kB, anon-rss:196484kB, file-rss:1768kB, shmem-rss:14988kB
+[55862880.892004] oom_reaper: reaped process 97129 (XXX), now anon-rss:0kB, file-rss:0kB, shmem-rss:0kB
+[55862935.111175] bash (74928): drop_caches: 3
+</code></pre>
+<p>原来是有oom</p>
+<p>所以大致可以推测出：一个进程在访问某个文件的时候持有file_lock锁，然后这时候被oom kill掉了，锁没释放呢。然后执行rpm的时候，可能要去获取这个锁，一直获取不到就卡住了（这时候它也持有着&#x2F;var&#x2F;lib&#x2F;rpm&#x2F;.dbenv.lock锁），而后面再执行其他rpm进程的时候，要获取&#x2F;var&#x2F;lib&#x2F;rpm&#x2F;.dbenv.lock锁，由于这时候这个锁已经被第一个等file_lock锁的进程持有了，所以后面的rpm进程也在等锁卡死了</p>
+
+      
+       <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
+    </div>
+</article>
+
+
+
+
+
     <div id="comments"></div>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
 
@@ -629,6 +884,11 @@
 </script>
 
 
+
+
+
+
+
     </div>
     <div class="copyright">
         <p class="footer-entry">
@@ -637,11 +897,11 @@
 <p class="footer-entry">Built with <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/yelog/hexo-theme-3-hexo" target="_blank">3-hexo</a> theme</p>
 
     </div>
-</div>
-<div class="full-toc">
-    <button class="full" data-title="切换全屏 快捷键 s"><span class="min "></span></button>
+    <div class="full-toc">
+        <button class="full" data-title="切换全屏 快捷键 s"><span class="min "></span></button>
 <a class="" id="rocket" ></a>
 
+    </div>
 </div>
 
 </body>
