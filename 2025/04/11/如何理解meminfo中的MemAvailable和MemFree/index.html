@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>categories | YZWDDSG</title>
+  <title>如何理解meminfo中的MemAvailable和MemFree | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="categories | YZWDDSG">
+  <meta name="description" content="如何理解meminfo中的MemAvailable和MemFree | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta property="og:type" content="website">
@@ -579,24 +579,32 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="page-" class="article article-type-page" itemscope itemprop="blogPost">
+        <article id="post-如何理解meminfo中的MemAvailable和MemFree" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">categories</h1>
+        <h1 class="article-title">如何理解meminfo中的MemAvailable和MemFree</h1>
     
     <div class="article-meta">
         
         
+        
+        <span class="book">
+            <i class="iconfont icon-category"></i>
+            
+            
+            <a  data-rel="内存">内存</a>
+            
+        </span>
         
         
     </div>
     <div class="article-meta">
         
-            Created At : <time class="date" title='Updated At: 2025-02-23 23:43:53'>2025-02-23 23:43</time>
+            Created At : <time class="date" title='Updated At: 2025-04-11 20:11:30'>2025-04-11 19:43</time>
         
     </div>
     <div class="article-meta">
         
-        <span>Count:0</span>
+        <span>Count:2.1k</span>
         
         
         
@@ -615,7 +623,7 @@
     
     <div class="toc-ref">
     
-        
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A0%94%E7%A9%B6"><span class="toc-text">研究</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E8%AE%B0"><span class="toc-text">后记</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E5%90%8E%E8%AE%B0"><span class="toc-text">后后记</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -631,7 +639,191 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h3><p>查线上一些问题的时候，使用free命令或者cat &#x2F;proc&#x2F;meminfo总会看到free和avalible。</p>
+<p>那么这两者有什么区别呢？这俩值是怎么计算出来的呢？</p>
+<p>按理来说avalible是应该比free大的，但是某一天发现一个机器，avalible比free要小，就很奇怪，这块有必要研究一下</p>
+<h3 id="研究"><a href="#研究" class="headerlink" title="研究"></a><center>研究</center></h3><p><a target="_blank" rel="noopener" href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=34e431b0ae398fc54ea69ff85ec700722c9da773">https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=34e431b0ae398fc54ea69ff85ec700722c9da773</a></p>
+<p>首先看这个commit引入的MemAvailable，这里提到，以前人们都是通过free+cached来计算可用的内存，但是对现在的系统来说这已经不适用了。<font color="red">因为cache中包含了很多不能释放的页缓存，比如共享内存段、tmpfs和ramfs，而且cache还不包含一些可以回收的缓存（这一部分在系统空闲时可能是很有用的，但是没有统计在cached中）</font>，当前一个新的workload的可以使用的内存可以根据memfree、active(file)、inactive（file)、SReclaimable以及&#x2F;proc&#x2F;zoneinfo中的low水位线来计算。然后这个patch提供了MemAvailable。我们就不看最原始的MemAvailable计算方式了，直接看一下比较新的内核中的计算方法。</p>
+<p>cat &#x2F;proc&#x2F;meminfo的输出是在meminfo_proc_show函数中展示的，显而易见，MemAvailable是通过si_mem_avalible函数获取到的，因此看一下si_mem_avalible这个函数</p>
+<pre><code class="language-c">long si_mem_available(void)
+&#123;
+    long available;
+    unsigned long pagecache;
+    unsigned long wmark_low = 0;
+    unsigned long pages[NR_LRU_LISTS];
+    unsigned long reclaimable;
+    struct zone *zone;
+    int lru;
+
+    ##这里遍历所有的LRU链表，并计算这些查到的页，有inactivate_anon ,active_none ,inactive_file ,activate_file ,unevictable这几种类型
+    for (lru = LRU_BASE; lru &lt; NR_LRU_LISTS; lru++)
+        pages[lru] = global_node_page_state(NR_LRU_BASE + lru);
+    
+    ##这里是遍历所有zone，计算每个zone中low水位线可用的内存页数量
+    for_each_zone(zone)							
+        wmark_low += low_wmark_pages(zone);
+
+    /*
+     * Estimate the amount of memory available for userspace allocations,
+     * without causing swapping or OOM.
+     */
+    ##查询空闲页数量，totalreserve_pages是一些per-node的reserved页不能用于userspace分配的，减去这一部分不能用于userspace分配的
+    ##注意，，这里的totalreserve_pages不是单个node pglist_data结构体中的reserve内存，是所有node节点的和，这个变量在mm/page_alloc.c中有定义
+    ##unsigned long totalreserve_pages __read_mostly;
+    available = global_zone_page_state(NR_FREE_PAGES) - totalreserve_pages;  
+
+    /*
+     * Not all the page cache can be freed, otherwise the system will
+     * start swapping or thrashing. Assume at least half of the page
+     * cache, or the low watermark worth of cache, needs to stay.
+     * 并不是所有的page cache都能释放，否则系统就进行swap或者抖动了。假设至少需要留一半缓存或者cache的低水位线
+     */
+    ##pagecache是active_file加上inactive_file，然后还需有减去pagecache/2 low水位线的最小值，原因如上
+    pagecache = pages[LRU_ACTIVE_FILE] + pages[LRU_INACTIVE_FILE];
+    pagecache -= min(pagecache / 2, wmark_low);
+    ##然后这部分内存也是可以avalible的，因此加上这部分内存
+    available += pagecache;
+
+    /*
+     * Part of the reclaimable slab and other kernel memory consists of
+     * items that are in use, and cannot be freed. Cap this estimate at the
+     * low watermark.
+     * 有些可回收的slab和其他内核内存正在使用无法被释放，也会设置计算的限制，和上面的pagecache类似
+     */
+    ##可回收内存就是NR_SLAB_RECLAIMABLE_B加NR_KERNEL_MISC_RECLAIMABLE，然后减去min(这个值的一半,low水位线)
+    reclaimable = global_node_page_state_pages(NR_SLAB_RECLAIMABLE_B) +
+        global_node_page_state(NR_KERNEL_MISC_RECLAIMABLE);
+    available += reclaimable - min(reclaimable / 2, wmark_low);
+
+    if (available &lt; 0)
+        available = 0;
+    return available;
+&#125;
+</code></pre>
+<p>所以，<font color="red">free或&#x2F;proc&#x2F;meminfo中展示的memavalible内存其实是: free-预留内存+pagecache+可回收内存 得到的结果（最开始的计算方式是free-low水位线+pagecache+可回收内存）</font></p>
+<p>而memfree的计算是在si_meminfo函数中，很明显可以看到计算的就是NR_FREE_PAGES中的内存</p>
+<p>所以，也就明了了，什么情况下memavalible会比memfree大呢？就有三个因素可能会导致这个问题，totalreserve_pages、pagecache、available，只要这pagecache+available-totalreserve_pages小于0，那么memavalible就会比memfree大。</p>
+<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a><center>后记</center></h3><ul>
+<li><strong>totalreserve_pages</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://blog.51cto.com/u_14987/11127764">https://blog.51cto.com/u_14987/11127764</a></p>
+<p>首先这个变量定义在pglist_data结构体（表示一个node节点的物理内存）中，这也就符合他是一个per-node的变量</p>
+<p>看一下totalreserve_pages的计算是在哪里，__setup_per_zone_wmarks（当vm.min_free_kbytes被修改时，或者有内存热插拔时会触发这个函数，这个函数的作用是确保每个zone内存水位线的值能遵循vm.min_free_kbytes设置的值）和setup_per_zone_lowmem_reserve（在系统启动时会在init_per_zone_wmark_min中调用一次，其他时候当vm.lowmem_reserve_ratio内核参数被改变时都会调用一下这个函数，这个函数的作用是确保每个zone都用正确的page reserve值）</p>
+<p>以上最终都会调用calculate_totalreserve_pages函数去计算reserve page的值，逻辑为:</p>
+<pre><code class="language-c">static void calculate_totalreserve_pages(void)
+&#123;
+	struct pglist_data *pgdat;
+	unsigned long reserve_pages = 0;
+	enum zone_type i, j;
+
+	for_each_online_pgdat(pgdat) &#123;				##遍历每一个node节点
+
+		pgdat-&gt;totalreserve_pages = 0;			##每个node节点的totalreserve_pages先设置为0
+
+		for (i = 0; i &lt; MAX_NR_ZONES; i++) &#123;	##遍历node上的每一个zone
+			struct zone *zone = pgdat-&gt;node_zones + i;
+			long max = 0;
+            ##指的是一个内存区域（zone）中由内核管理的物理页面数量。这些页面是可用于动态分配的内存资源，不包括那些被内核保留、不可用或未使用的页面
+			unsigned long managed_pages = zone_managed_pages(zone);
+
+			/* Find valid and maximum lowmem_reserve in the zone */
+            ##找到所有zone中lowmem_reserve最大的值
+			for (j = i; j &lt; MAX_NR_ZONES; j++) &#123;
+				if (zone-&gt;lowmem_reserve[j] &gt; max)
+					max = zone-&gt;lowmem_reserve[j];
+			&#125;
+
+			/* we treat the high watermark as reserved pages. */
+            ##给这个lowmem_reserve最大的值加上该zone的高水位线
+			max += high_wmark_pages(zone);
+
+            ##保证max不大于managed_pages
+			if (max &gt; managed_pages)
+				max = managed_pages;
+
+			pgdat-&gt;totalreserve_pages += max;
+
+			reserve_pages += max;
+		&#125;
+	&#125;
+	totalreserve_pages = reserve_pages;
+&#125;
+</code></pre>
+<p>所以这个totalreserve_pages的值就是所有node节点的totalreserve_pages的和，每个node中的totalreserve_pages是通过该node节点所有zone中lowmem_reserve最大的值加上该zone的高水位线的和（其实就是lewmem_reserve+高水位线）计算出来的</p>
+<p>通过下面的问题可知，其实这就是每个zone中lowmem_reserve的最大值加上高水位线得出的，目的应该是需要保证内存不低于高水位线且还能够为更高zone分配内存？</p>
+<ul>
+<li><strong>接上，还有个问题就是为什么lowmem_reserve 是一个数组而不是单一的值？</strong></li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://kernelnewbies.kernelnewbies.narkive.com/vlopTR40/how-to-understand-lowmem-reserve-in-a-zone">https://kernelnewbies.kernelnewbies.narkive.com/vlopTR40/how-to-understand-lowmem-reserve-in-a-zone</a></p>
+<p>哈哈哈哈，这个人和我有一样的疑问，12年前的帖子，仿佛看到这个小老外和我一样在看到这块定义时一脸懵的表情了哈哈哈哈哈</p>
+<p>上面的解释我没有看明白，看一下这个 <a target="_blank" rel="noopener" href="https://blog.csdn.net/kickxxx/article/details/8835733">https://blog.csdn.net/kickxxx/article/details/8835733</a> ，这个的解释比较明白一些，说的是内核在分配内存时会尝试从zonelist的第一个zone开始分配，如果这个zone的内存不够分配了，就去从更低级的内存去分配，但是这就会出现一种情况，如果high mem不够分配了就会一直去normal分配，导致normal打满了，因此每个zone需要预留内存（但是这也也不足以解释为什么不直接使用一个值来表示）。看一下setup_per_zone_lowmem_reserve这个函数的实现方式</p>
+<pre><code class="language-c">##其实还挺明了的，遍历每个node的每个zone
+##然后为该zone计算每个比他高的zone中的lowmem_reserve并写入到该zone的lowmem_reserve数组中
+##那么该zone以及比该zone低的zone的lowmem_reserve为什么没有赋值呢？很明显，不需要，都是0
+##首先对于自己本身，当然不需要lowmem_reserve预留内存，自己zone的内存自己随便用
+##另外对于该zone低的zone，也不需要为他们预留内存，因为低的zone不会向高的zone去申请分配内存
+static void setup_per_zone_lowmem_reserve(void)
+&#123;
+	struct pglist_data *pgdat;
+	enum zone_type i, j;
+
+	for_each_online_pgdat(pgdat) &#123;
+		for (i = 0; i &lt; MAX_NR_ZONES - 1; i++) &#123;
+			struct zone *zone = &amp;pgdat-&gt;node_zones[i];
+			int ratio = sysctl_lowmem_reserve_ratio[i];
+			bool clear = !ratio || !zone_managed_pages(zone);
+			unsigned long managed_pages = 0;
+
+			for (j = i + 1; j &lt; MAX_NR_ZONES; j++) &#123;
+				struct zone *upper_zone = &amp;pgdat-&gt;node_zones[j];
+
+				managed_pages += zone_managed_pages(upper_zone);
+
+				if (clear)
+					zone-&gt;lowmem_reserve[j] = 0;
+				else
+				&#123;
+					unsigned long reserve_kb_pages = 0, reserve_ratio_pages = 0;
+
+					reserve_ratio_pages = managed_pages / ratio;
+					if(sysctl_lowmem_reserve_kb[i] &gt; 0) &#123;
+						reserve_kb_pages = sysctl_lowmem_reserve_kb[i] &gt;&gt; (PAGE_SHIFT - 10);
+						if(reserve_kb_pages &lt; reserve_ratio_pages) &#123;
+							reserve_ratio_pages = reserve_kb_pages;
+						&#125;
+					&#125;
+					zone-&gt;lowmem_reserve[j] = reserve_ratio_pages;
+				&#125;
+			&#125;
+		&#125;
+	&#125;
+
+	/* update totalreserve_pages */
+	calculate_totalreserve_pages();
+&#125;
+</code></pre>
+<p>再来个例子就更清楚了</p>
+<pre><code class="language-c">ZONE DMA：
+
+pages free     2816
+        boost    0
+        min      0
+        low      3
+        high     6
+        spanned  4095
+        present  3998
+        managed  3840
+        cma      0
+        protection: (0, 1255, 16384, 16384)
+
+这是/proc/zoneinfo中ZONE DMA中的一段输出，这里的protection其实就是该zone的lowmem_reserve数组了
+这时候如果NOMAL分配内存不够了，就去找DMA，DMA怎么判断要不要分呢，看free pages(2816)是不是大于等于min（存疑） + protection(NORMAL)的内存，如果不够就不分配了
+因此，本zone的lowmem_reserve肯定是0啦，又不需要自己为自己预留
+</code></pre>
+<h3 id="后后记"><a href="#后后记" class="headerlink" title="后后记"></a>后后记</h3><p>2025年4月11日，预报明后天12-13级大风</p>
+<p>早点下班去超市囤下两天的口粮</p>
+<p>超市好多人</p>
+
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
     </div>
