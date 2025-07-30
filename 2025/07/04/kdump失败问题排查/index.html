@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>kdump失败问题排查 | YZWDDSG</title>
+  <meta name="keywords" content="">
+  <meta name="description" content="kdump失败问题排查 | YZWDDSG">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
+<meta property="og:type" content="website">
+<meta property="og:title" content="categories">
+<meta property="og:url" content="http://example.com/categories/index.html">
+<meta property="og:site_name" content="YZWDDSG">
+<meta property="og:locale">
+<meta property="article:published_time" content="2025-02-23T15:43:05.000Z">
+<meta property="article:modified_time" content="2025-02-23T15:43:53.864Z">
+<meta property="article:author" content="YZWDDSG">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="icon" href="/img/avatar.jpg">
+
+<link href="/css/style.css?v=1.1.0" rel="stylesheet">
+
+<link href="/css/hl_theme/atom-dark.css?v=1.1.0" rel="stylesheet">
+
+<link href="//cdn.jsdelivr.net/npm/animate.css@4.1.0/animate.min.css" rel="stylesheet">
+
+<script src="//cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+<script src="/js/titleTip.js?v=1.1.0" ></script>
+
+<script src="//cdn.jsdelivr.net/npm/highlightjs@9.16.2/highlight.pack.min.js"></script>
+<script>
+    hljs.initHighlightingOnLoad();
+</script>
+
+<script src="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js"></script>
+
+
+
+<script src="//cdn.jsdelivr.net/npm/jquery.cookie@1.4.1/jquery.cookie.min.js" ></script>
+
+<script src="/js/iconfont.js?v=1.1.0" ></script>
+<script src="/js/custom-iconfont.js?v=1.1.0" ></script>
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<div style="display: none">
+  <input class="theme_disqus_on" value="false">
+  <input class="theme_preload_comment" value="">
+  <input class="theme_blog_path" value="">
+  <input id="theme_shortcut" value="true" />
+  <input id="theme_highlight_on" value="true" />
+  <input id="theme_code_copy" value="true" />
+</div>
+
+
+
+<body>
+<aside class="nav">
+    <div class="nav-left">
+        <a href="/"
+   class="avatar_target">
+    <img class="avatar"
+         src="/img/avatar.jpg"/>
+</a>
+<div class="author">
+    <span>YZWDDSG</span>
+</div>
+
+<div class="icon">
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+</div>
+
+
+
+
+
+<ul>
+    <li>
+        <div class="all active" data-rel="All">All
+            
+                <small>(28)</small>
+            
+        </div>
+    </li>
+    
+        
+            
+                
+    <li>
+        <div data-rel="硬件">
+            
+            硬件
+            <small>(4)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="调度">
+            
+            调度
+            <small>(2)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="内存">
+            
+            内存
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="存储">
+            
+            存储
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="网络">
+            
+            网络
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="文件系统">
+            
+            文件系统
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="虚拟化">
+            
+            虚拟化
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="power">
+            
+            power
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="OS">
+            
+            OS
+            <small>(3)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="故障排查">
+            
+            故障排查
+            <small>(8)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="其他">
+            
+            其他
+            <small>(2)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="个人">
+            
+            个人
+            <small>(3)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+</ul>
+<div class="left-bottom">
+    <div class="menus">
+        
+            
+            
+            
+    </div>
+    <div>
+        
+            <a class="about  site_url"
+               
+               href="/about">About</a>
+        
+        
+    </div>
+</div>
+<input type="hidden" id="yelog_site_posts_number" value="28">
+<input type="hidden" id="yelog_site_word_count" value="65.1k">
+<div style="display: none">
+    <span id="busuanzi_value_site_uv"></span>
+    <span id="busuanzi_value_site_pv"></span>
+</div>
+
+    </div>
+    <div class="nav-right">
+        <div class="friends-area">
+    <div class="friends-title">
+        Links
+        <i class="iconfont icon-left"></i>
+    </div>
+    <div class="friends-content">
+        <ul>
+            
+            <li><a target="_blank" href="http://yelog.org/">叶落阁</a></li>
+            
+        </ul>
+    </div>
+</div>
+        <div class="title-list">
+    <div class="right-top">
+        <div id="default-panel">
+            <i class="iconfont icon-search" data-title="search shortcut key i"></i>
+            <div class="right-title">All</div>
+            <i class="iconfont icon-file-tree" data-title="switch to outline view shortcut key w"></i>
+        </div>
+        <div id="search-panel">
+            <i class="iconfont icon-left" data-title="return"></i>
+            <input id="local-search-input" autocomplete="off"/>
+            <label class="border-line" for="input"></label>
+            <i class="iconfont icon-case-sensitive" data-title="case sensitive"></i>
+            <i class="iconfont icon-tag" data-title="label"></i>
+        </div>
+        <div id="outline-panel" style="display: none">
+            <div class="right-title">outline</div>
+            <i class="iconfont icon-list" data-title="switch to article list"></i>
+        </div>
+    </div>
+
+    <div class="tags-list">
+    <input id="tag-search" />
+    <div class="tag-wrapper">
+        
+    </div>
+
+</div>
+
+    
+    <nav id="title-list-nav">
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/07/04/kdump%E5%A4%B1%E8%B4%A5%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="kdump失败问题排查">kdump失败问题排查</span>
+            <span class="post-date" title="2025-07-04 23:03:39">2025/07/04</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/06/13/%E8%AE%B0%E4%B8%80%E5%8F%AA%E6%B5%81%E6%B5%AA%E6%96%91%E7%82%B9%E7%8B%97/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="记一只流浪斑点狗">记一只流浪斑点狗</span>
+            <span class="post-date" title="2025-06-13 21:39:16">2025/06/13</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/05/28/AMD-ERAPS/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="AMD ERAPS">AMD ERAPS</span>
+            <span class="post-date" title="2025-05-28 21:52:56">2025/05/28</span>
+        </a>
+        
+        
+        <a  class="All 其他 "
+           href="/2025/04/26/popen%E5%AF%BC%E8%87%B4%E7%9A%84%E9%97%AE%E9%A2%98%E5%8F%8A%E5%88%86%E6%9E%90/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="popen导致的问题及分析">popen导致的问题及分析</span>
+            <span class="post-date" title="2025-04-26 23:15:08">2025/04/26</span>
+        </a>
+        
+        
+        <a  class="All 存储 "
+           href="/2025/04/20/nbd%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%AE%9E%E7%8E%B0/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="nbd驱动的实现">nbd驱动的实现</span>
+            <span class="post-date" title="2025-04-20 16:41:42">2025/04/20</span>
+        </a>
+        
+        
+        <a  class="All 内存 "
+           href="/2025/04/11/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3meminfo%E4%B8%AD%E7%9A%84MemAvailable%E5%92%8CMemFree/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="如何理解meminfo中的MemAvailable和MemFree">如何理解meminfo中的MemAvailable和MemFree</span>
+            <span class="post-date" title="2025-04-11 19:43:19">2025/04/11</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/04/09/%E6%89%A7%E8%A1%8Crpm%E5%91%BD%E4%BB%A4%E5%8D%A1%E6%AD%BB%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="执行rpm命令卡死排查">执行rpm命令卡死排查</span>
+            <span class="post-date" title="2025-04-09 22:11:15">2025/04/09</span>
+        </a>
+        
+        
+        <a  class="All 调度 "
+           href="/2025/04/07/CPU%E5%88%A9%E7%94%A8%E7%8E%87%E4%B8%8D%E5%9D%87%E8%A1%A1%E9%97%AE%E9%A2%98-sched-domain%E5%AD%A6%E4%B9%A0/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="CPU利用率不均衡问题-sched_domain学习">CPU利用率不均衡问题-sched_domain学习</span>
+            <span class="post-date" title="2025-04-07 22:04:47">2025/04/07</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/04/05/PCIE%E8%AE%BE%E5%A4%87%E7%83%AD%E6%8F%92%E6%8B%94/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="PCIE设备热插拔">PCIE设备热插拔</span>
+            <span class="post-date" title="2025-04-05 22:00:12">2025/04/05</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/04/03/%E6%88%91%E5%92%8C%E6%88%91%E7%9A%84%E7%8B%97%E5%AD%90%E4%BB%AC/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="我和我的狗子们">我和我的狗子们</span>
+            <span class="post-date" title="2025-04-03 22:18:32">2025/04/03</span>
+        </a>
+        
+        
+        <a  class="All 调度 "
+           href="/2025/03/31/%E4%BF%AE%E6%94%B9%E8%BF%9B%E7%A8%8B%E4%BF%A1%E6%81%AF%E7%9A%84%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改进程信息的内核模块">修改进程信息的内核模块</span>
+            <span class="post-date" title="2025-03-31 21:53:34">2025/03/31</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/30/%E4%B8%80%E6%AC%A1%E4%B8%A2%E5%8C%85%E7%9A%84%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="一次丢包的排查">一次丢包的排查</span>
+            <span class="post-date" title="2025-03-30 12:56:05">2025/03/30</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/29/systemd-resolved%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="systemd-resolved服务异常">systemd-resolved服务异常</span>
+            <span class="post-date" title="2025-03-29 22:28:32">2025/03/29</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/22/rt%E8%B0%83%E5%BA%A6%E5%99%A8bug%E5%AF%BC%E8%87%B4%E5%AE%95%E6%9C%BA%E7%9A%84%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="rt调度器bug导致宕机的排查">rt调度器bug导致宕机的排查</span>
+            <span class="post-date" title="2025-03-22 21:08:39">2025/03/22</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/21/%E4%BF%AE%E6%94%B9debian%E5%86%85%E6%A0%B8%E6%BA%90%E7%A0%81%E5%B9%B6%E6%89%93%E5%8C%85/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改debian内核源码并打包">修改debian内核源码并打包</span>
+            <span class="post-date" title="2025-03-21 21:53:56">2025/03/21</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/17/%E8%AE%B0%E4%B8%80%E6%AC%A1%E4%BA%91%E7%9B%98%E7%83%AD%E6%8B%94%E5%A4%B1%E8%B4%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="记一次云盘热拔失败">记一次云盘热拔失败</span>
+            <span class="post-date" title="2025-03-17 22:02:52">2025/03/17</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/03/13/MMX%E3%80%81FMA%E3%80%81SSE%E4%B8%8EAVX/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="MMX、FMA、SSE与AVX">MMX、FMA、SSE与AVX</span>
+            <span class="post-date" title="2025-03-13 21:37:54">2025/03/13</span>
+        </a>
+        
+        
+        <a  class="All 文件系统 "
+           href="/2025/03/12/proc%E3%80%81sysctl%E5%92%8Csysfs/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="proc、sysctl和sysfs">proc、sysctl和sysfs</span>
+            <span class="post-date" title="2025-03-12 22:00:23">2025/03/12</span>
+        </a>
+        
+        
+        <a  class="All 其他 "
+           href="/2025/03/11/%E4%BF%AE%E6%94%B9bios%E9%85%8D%E7%BD%AE/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改bios配置">修改bios配置</span>
+            <span class="post-date" title="2025-03-11 21:49:28">2025/03/11</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/10/%E4%BF%AE%E6%94%B9%E5%85%AC%E7%89%88%E5%86%85%E6%A0%B8/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改公版内核">修改公版内核</span>
+            <span class="post-date" title="2025-03-10 22:13:00">2025/03/10</span>
+        </a>
+        
+        
+        <a  class="All power "
+           href="/2025/03/09/proc-cpuinfo%E6%98%BE%E7%A4%BA%E9%A2%91%E7%8E%87%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="/proc/cpuinfo显示频率原理">/proc/cpuinfo显示频率原理</span>
+            <span class="post-date" title="2025-03-09 22:00:49">2025/03/09</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/07/rsyslog%E9%85%8D%E7%BD%AE/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="rsyslog配置">rsyslog配置</span>
+            <span class="post-date" title="2025-03-07 22:36:29">2025/03/07</span>
+        </a>
+        
+        
+        <a  class="All 虚拟化 "
+           href="/2025/03/06/qemu-kvm%E6%B7%BB%E5%8A%A0%E6%96%B0feature%E8%99%9A%E6%8B%9F%E5%8C%96/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="qemu kvm添加新feature虚拟化">qemu kvm添加新feature虚拟化</span>
+            <span class="post-date" title="2025-03-06 00:13:34">2025/03/06</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/02/27/hung-task%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="hung task原理">hung task原理</span>
+            <span class="post-date" title="2025-02-27 22:54:58">2025/02/27</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/02/26/netconsole/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="netconsole">netconsole</span>
+            <span class="post-date" title="2025-02-26 23:01:56">2025/02/26</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/02/26/%E8%88%92%E6%B4%BB%E8%88%92%E6%B4%BB%E7%AD%8B%E9%AA%A8%EF%BC%8C%E6%8A%96%E6%93%9E%E6%8A%96%E6%93%9E%E7%B2%BE%E7%A5%9E/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="舒活舒活筋骨，抖擞抖擞精神">舒活舒活筋骨，抖擞抖擞精神</span>
+            <span class="post-date" title="2025-02-26 00:05:33">2025/02/26</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/02/25/softlockup%E4%B8%8Ehardlockup/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="softlockup与hardlockup">softlockup与hardlockup</span>
+            <span class="post-date" title="2025-02-25 22:13:35">2025/02/25</span>
+        </a>
+        
+        
+        <a  class="All 网络 "
+           href="/2025/02/24/netpoll%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="netpoll原理">netpoll原理</span>
+            <span class="post-date" title="2025-02-24 21:36:30">2025/02/24</span>
+        </a>
+        
+        <div id="no-item-tips">
+
+        </div>
+    </nav>
+    <div id="outline-list">
+    </div>
+</div>
+
+    </div>
+    <div class="hide-list">
+        <div class="semicircle" data-title="Toggle full screen shortcut key s">
+            <div class="brackets first"><</div>
+            <div class="brackets">&gt;</div>
+        </div>
+    </div>
+</aside>
+<div id="post">
+    <div class="pjax">
+        <article id="post-kdump失败问题排查" class="article article-type-post" itemscope itemprop="blogPost">
+    
+        <h1 class="article-title">kdump失败问题排查</h1>
+    
+    <div class="article-meta">
+        
+        
+        
+        <span class="book">
+            <i class="iconfont icon-category"></i>
+            
+            
+            <a  data-rel="故障排查">故障排查</a>
+            
+        </span>
+        
+        
+    </div>
+    <div class="article-meta">
+        
+            Created At : <time class="date" title='Updated At: 2025-07-05 00:25:19'>2025-07-04 23:03</time>
+        
+    </div>
+    <div class="article-meta">
+        
+        <span>Count:6.1k</span>
+        
+        
+        
+        <span class="top-comment" title="Jump to comment area">
+            <a href="#comments">
+                Comment:<span class="count-comment">
+                    <span class="spinner">
+                      <div class="cube1"></div>
+                      <div class="cube2"></div>
+                    </span>
+                </span>
+            </a>
+        </span>
+        
+    </div>
+    
+    <div class="toc-ref">
+    
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEkdump"><span class="toc-text">配置kdump</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#kdump%E5%A4%B1%E8%B4%A5%E6%8E%92%E6%9F%A5"><span class="toc-text">kdump失败排查</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8E%92%E6%9F%A5%E8%BF%87%E7%A8%8B"><span class="toc-text">排查过程</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E7%BB%AD"><span class="toc-text">后续</span></a></li></ol>
+    
+<style>
+    .left-col .switch-btn,
+    .left-col .switch-area {
+        display: none;
+    }
+    .toc-level-3 i,
+    .toc-level-3 ol {
+        display: none !important;
+    }
+</style>
+</div>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><center>前言</center></h3><p>当前，即使是stable的内核，也不是零bug的。既然有bug，就会在使用时导致问题，严重的甚至会导致宕机。</p>
+<p>在Liunx系统中，kdump绝对是排查宕机的好帮手。它的作用是把系统宕机时的内存dump出来，使人们可以根据dump文件分析宕机时的情况，查找宕机原因。</p>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a><center>原理</center></h3><p>简单来说，就是系统panic的时候，启动一个小内核，这个小内核启动成功之后会把当前的内存进行dump，形成一个vmcore文件。然后就可以通过这个vmcore文件来分析宕机时的情况。</p>
+<p>至于panic之后，怎么启动小内核这些代码细节，后续再说（好吧，我还没看）。</p>
+<h3 id="配置kdump"><a href="#配置kdump" class="headerlink" title="配置kdump"></a><center>配置kdump</center></h3><p>kdump的配置主要就是两方面：预留内存+kdump服务</p>
+<p>对于centos来说，需要在cmdline添加crashkernel&#x3D;XXX参数，以便在系统启动时能够预留一部分内存用于kdump小内核启动；系统启动后，需要开启kdump服务，kdump服务的作用之一时会在&#x2F;boot下制作kdump.img，这是小内核启动时会用的initramfs</p>
+<p>对于ubuntu来说，与上面相同，但是服务名字是叫kdump-tools</p>
+<h3 id="kdump失败排查"><a href="#kdump失败排查" class="headerlink" title="kdump失败排查"></a><center>kdump失败排查</center></h3><p>在实际使用中，也许会发现，即使按照上面的内容进行了配置，系统宕机后，也看不到vmcore的产生，因此需要排查看dump为什么会失败？</p>
+<p>kdump失败可以先尝试这两个操作(本人遇到的情况中，大多与这两个有关)：<font color="red">调大预留内存和重新制作kdump.img</font>。如果排除这两个原因，再去继续尝试定位其他失败原因。</p>
+<p>下面搞一个实际排查过程看一下：</p>
+<h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h4><p>该问题的背景是，测试宕机的时候，发现没有生成vmcore，且宕机后不能恢复进到正常的系统中，看串口日志发现一直在下图中进行死循环</p>
+<p><img src="/img/27.png" alt="这是一张图片"></p>
+<h4 id="排查过程"><a href="#排查过程" class="headerlink" title="排查过程"></a><center>排查过程</center></h4><p><strong>是否进入小内核？</strong></p>
+<p>首先需要确认的就是，这个死循环是大内核还是小内核的呢？</p>
+<p>通过一些日志及其他手段能够确认(在BMC发重启，能够正常进入系统，说明进入大内核的过程没问题；另外，通过串口日志的cmdline也能发现端倪，为了让小内核使用尽可能少的预留内存，在配置kdump过程中，会在cmdline添加一些blacklist，禁止加载一些驱动之类，所以大小内核启动时的cmdline是不同的)，<font color="red">这是进入小内核的死循环</font>。</p>
+<p><strong>调大预留内存和重新制作kdump.img尝试</strong></p>
+<p>确认是能够成功进入小内核了，就该直接尝试上面提到的两板斧了。</p>
+<p>经过尝试，没用。</p>
+<p><strong>串口日志分析</strong></p>
+<pre><code class="language-c">[32m  OK  [0m] Started Create Static Device Nodes in /dev.
+         Starting udev Kernel Device Manager...
+[[32m  OK  [0m] Started udev Kernel Device Manager.
+         Starting udev Coldplug all Devices...
+         Mounting Configuration File System...
+[[32m  OK  [0m] Mounted Configuration File System.
+[[32m  OK  [0m] Started udev Coldplug all Devices.
+         Starting dracut initqueue hook...
+[[32m  OK  [0m] Started dracut initqueue hook.
+[[32m  OK  [0m] Reached target Remote File Systems (Pre).
+[[32m  OK  [0m] Reached target Remote File Systems.
+[[32m  OK  [0m] Reached target Initrd Root File System.
+         Starting Reload Configuration from the Real Root...
+[[32m  OK  [0m] Started Reload Configuration from the Real Root.
+[[32m  OK  [0m] Reached target Initrd File Systems.
+[[0m[31m*     [0m] A start job is running for dev-disk...233403b7c.device (5s / 1min 30s)
+[K[[1;31m*[0m[31m*    [0m] A start job is running for dev-disk...233403b7c.device (6s / 1min 30s)
+[K[[31m*[1;31m*[0m[31m*   [0m] A start job is running for dev-disk...233403b7c.device (6s / 1min 30s)
+[K[ [31m*[1;31m*[0m[31m*  [0m] A start job is running for dev-disk...233403b7c.device (7s / 1min 30s)
+[K[  [31m*[1;31m*[0m[31m* [0m] A start job is running for dev-disk...233403b7c.device (7s / 1min 30s)
+[K[   [31m*[1;31m*[0m[31m*[0m] A start job is running for dev-disk...233403b7c.device (8s / 1min 30s)
+[K[    [31m*[1;31m*[0m] A start job is running for dev-disk...233403b7c.device (8s / 1min 30s)
+[K[     [31m*[0m] A start job is running for dev-disk...233403b7c.device (9s / 1min 30s)
+[K[    [31m*[1;31m*[0m] A start job is running for dev-disk...233403b7c.device (9s / 1min 30s)
+[K[   [31m*[1;31m*[0m[31m*[0m] A start job is running for dev-disk...33403b7c.device (10s / 1min 30s)
+[K[  [31m*[1;31m*[0m[31m* [0m] A start job is running for dev-disk...33403b7c.device (10s / 1min 30s)
+[K[ [31m*[1;31m*[0m[31m*  [0m] A start job is running for dev-disk...33403b7c.device (11s / 1min 30s)
+[K[[31m*[1;31m*[0m[31m*   [0m] A start job is running for dev-disk...33403b7c.device (11s / 1min 30s)
+[K[[1;31m*[0m[31m*    [0m] A start job is running for dev-disk...33403b7c.device (12s / 1min 30s)
+[K[[0m[31m*     [0m] A start job is running for dev-disk...33403b7c.device (12s / 1min 30s)
+[K[[1;31m*[0m[31m*    [0m] A start job is running for dev-disk...33403b7c.device (13s / 1min 30s)
+[K[[31m*[1;31m*[0m[31m*   [0m] A start job is running for dev-disk...33403b7c.device (13s / 1min 30s)
+[K[ [31m*[1;31m*[0m[31m*  [0m] A start job is running for dev-disk...33403b7c.device (14s / 1min 30s)
+[K[  [31m*[1;31m*[0m[31m* [0m] A start job is running for dev-disk...33403b7c.device (14s / 1min 30s)
+[K[   [31m*[1;31m*[0m[31m*[0m] A start job is running for dev-disk...33403b7c.device (15s / 1min 30s)
+[K[    [31m*[1;31m*[0m] A start job is running for dev-disk...33403b7c.device (15s / 1min 30s)
+[K[     [31m*[0m] A start job is running for dev-disk...33403b7c.device (16s / 1min 30s)
+[K[    [31m*[1;31m*[0m] A start job is running for dev-disk...33403b7c.device (16s / 1min 30s)
+[K[   [31m*[1;31m*[0m[31m*[0m] A start job is running for dev-disk...33403b7c.device (17s / 1min 30s)
+[K[  [31m*[1;31m*[0m[31m* [0m] A start job is running for dev-disk...33403b7c.device (17s / 1min 30s)
+[K[ [31m*[1;31m*[0m[31m*  [0m] A start job is running for dev-disk...33403b7c.device (18s / 1min 30s)
+[K[[31m*[1;31m*[0m[31m*   [0m] A start job is running for dev-disk...33403b7c.device (18s / 1min 30s)
+[K[[1;31m*[0m[31m*    [0m] A start job is running for dev-disk...33403b7c.device (19s / 1min 30s)
+[K[[0m[31m*     [0m] A start job is running for dev-disk...33403b7c.device (19s / 1min 30s)
+[K[[1;31m*[0m[31m*    [0m] A start job is running for dev-disk...33403b7c.device (20s / 1min 30s)
+[K[[31m*[1;31m*[0m[31m*   [0m] A start job is running for dev-disk...33403b7c.device (20s / 1min 30s)
+[K[ [31m*[1;31m*[0m[31m*  [0m] A start job is running for dev-disk...33403b7c.device (21s / 1min 30s)
+[K[  [31m*[1;31m*[0m[31m* [0m] A start job is running for dev-disk...33403b7c.device (21s / 1min 30s)
+[K[   [31m*[1;31m*[0m[31m*[0m] A start job is running for dev-disk...33403b7c.device (22s / 1min 30s)
+[K[    [31m*[1;31m*[0m] A start job is running for dev-disk...33403b7c.device (22s / 1min 30s)
+[K[     [31m*[0m] A start job is running for dev-disk...33403b7c.device (23s / 1min 30s)
+[K[    [31m*[1;31m*[0m] A start job is running for dev-disk...33403b7c.device (23s / 1min 30s)
+[K[   [31m*[1;31m*[0m[31m*[0m] A start job is running for dev-disk...33403b7c.device (24s / 1min 30s)
+[K[  [31m*[1;31m*[0m[31m* [0m] A start job is running for dev-disk...33403b7c.device (24s / 1min 30s)
+[K[ [31m*[1;31m*[0m[31m*  [0m] A start job is running for dev-disk...33403b7c.device (25s / 1min 30s)
+[K[[31m*[1;31m*[0m[31m*   [0m] A start job is running for dev-disk...33403b7c.device (25s / 1min 30s)
+[K[[1;31m*[0m[31m*    [0m] A start job is running for dev-disk...33403b7c.device (26s / 1min 30s)
+</code></pre>
+<p>分析一手串口日志，可以发现，这个死循环似乎是在进行盘相关的工作？dev-disk…33403b7c.device？？</p>
+<p>接下来正常进入系统，查一下有没有这个id？</p>
+<p><img src="/img/28.png" alt="这是一张图片"></p>
+<p>是有的，而且正巧这个盘就是系统盘</p>
+<p><img src="/img/29.png" alt="这是一张图片"></p>
+<p>所以，这里我们就可以确定，这是<font color="red">小内核挂载系统盘失败，导致小内核启动失败，导致kdump失败</font></p>
+<p><strong>解包kdump.img查看</strong></p>
+<p>把异常机器的kdump.img解包，与正常能够kdump成功的机器上的kdump.img进行对比，发现没什么不同，所以这里就彻底排除了kdump.img的问题</p>
+<p>那这里就有些怀疑，<font color="red">难不成，启动小内核的过程中，盘的uuid变了？导致fstab中的id识别不到了？</font></p>
+<p><strong>小内核断点</strong></p>
+<p>&#x2F;etc&#x2F;sysconfig&#x2F;kdump中的cmdline添加rd.break&#x3D;initqueue，然后再次触发宕机，这时候小内核应该就在死循环之前，进入emergency shell了，能够使用一些基础shell命令进行排查</p>
+<p>在emergency shell中ls -l &#x2F;dev&#x2F;disk&#x2F;by-uuid看一下，发现，根本就没有那个uuid对应的盘。</p>
+<p>所以，不是系统盘的uuid变了，而是压根就没有识别到系统盘</p>
+<p>为什么呢？因为我这个机器的系统盘是virtio-blk的云盘？</p>
+<p>但是根据系统盘的pci bdf（从正常系统中可以拿到）能够看到已经加载了virtio-pci驱动，而且&#x2F;sys&#x2F;bus&#x2F;pci&#x2F;drivers可以看到virtio相关的驱动也都加载了</p>
+<p>所以，<font color="red">这是udev的问题了？难不成是udev没有处理系统盘probe的时候发出的uevent？</font></p>
+<p><strong>重新绑定驱动实验</strong></p>
+<p>先看一个nvme盘的unbind bind的现象：可以看出，nvme盘unbind驱动之后，usr看不到了，重新bind之后，usr能看到这个设备了。符合预期</p>
+<pre><code class="language-c">initqueue:/# ls /dev/disk/by-path -l
+total 0
+lrwxrwxrwx 1 root 0 13 Jul  3 03:51 pci-0000:01:00.0-nvme-1 -&gt; ../../nvme0n1
+lrwxrwxrwx 1 root 0  9 Jul  3 03:51 pci-0000:93:00.0-ata-1.0 -&gt; ../../sda
+lrwxrwxrwx 1 root 0 10 Jul  3 03:51 pci-0000:93:00.0-ata-1.0-part1 -&gt; ../../sda1
+lrwxrwxrwx 1 root 0 13 Jul  3 03:51 pci-0000:a7:00.0-nvme-1 -&gt; ../../nvme1n1
+
+
+initqueue:/sys/bus/pci/drivers/nvme# cd /sys/bus/pci/drivers/nvme
+initqueue:/sys/bus/pci/drivers/nvme# ls
+0000:01:00.0  0000:a7:00.0  bind  module  new_id  remove_id  uevent  unbind
+initqueue:/sys/bus/pci/drivers/nvme# echo 0000:01:00.0 &gt; unbind
+initqueue:/sys/bus/pci/drivers/nvme# ls /dev/disk/by-path/ -l
+total 0
+lrwxrwxrwx 1 root 0  9 Jul  3 03:52 pci-0000:93:00.0-ata-1.0 -&gt; ../../sda
+lrwxrwxrwx 1 root 0 10 Jul  3 03:52 pci-0000:93:00.0-ata-1.0-part1 -&gt; ../../sda1
+lrwxrwxrwx 1 root 0 13 Jul  3 03:52 pci-0000:a7:00.0-nvme-1 -&gt; ../../nvme1n1
+
+initqueue:/sys/bus/pci/drivers/nvme# echo 0000:01:00.0 &gt; bind
+initqueue:/sys/bus/pci/drivers/nvme# ls /dev/disk/by-path/ -l
+total 0
+lrwxrwxrwx 1 root 0 13 Jul  3 03:54 pci-0000:01:00.0-nvme-1 -&gt; ../../nvme0n1
+lrwxrwxrwx 1 root 0  9 Jul  3 03:54 pci-0000:93:00.0-ata-1.0 -&gt; ../../sda
+lrwxrwxrwx 1 root 0 10 Jul  3 03:54 pci-0000:93:00.0-ata-1.0-part1 -&gt; ../../sda1
+lrwxrwxrwx 1 root 0 13 Jul  3 03:54 pci-0000:a7:00.0-nvme-1 -&gt; ../../nvme1n1
+</code></pre>
+<p>再来看系统云盘的过程(bdf可以从正常系统中获得)</p>
+<pre><code class="language-c">initqueue:/# cd /sys/bus/pci/drivers/virtio-pci
+initqueue:/sys/bus/pci/drivers/virtio-pci# ls
+0000:1d:00.0  0000:21:00.0  bind  module  new_id  remove_id  uevent  unbind
+initqueue:/sys/bus/pci/drivers/virtio-pci# echo 0000:1d:00.0 &gt; unbind
+initqueue:/sys/bus/pci/drivers/virtio-pci# echo 0000:1d:00.0 &gt; bind
+
+initqueue:/sys/bus/pci/drivers/virtio-pci# ls /dev/disk/by-path -l
+total 0
+lrwxrwxrwx 1 root 0 13 Jul  3 03:55 pci-0000:01:00.0-nvme-1 -&gt; ../../nvme0n1
+lrwxrwxrwx 1 root 0  9 Jul  3 03:55 pci-0000:93:00.0-ata-1.0 -&gt; ../../sda
+lrwxrwxrwx 1 root 0 10 Jul  3 03:55 pci-0000:93:00.0-ata-1.0-part1 -&gt; ../../sda1
+lrwxrwxrwx 1 root 0 13 Jul  3 03:55 pci-0000:a7:00.0-nvme-1 -&gt; ../../nvme1n1
+</code></pre>
+<p><font color="red">手动bind驱动，也没有在usr层创建设备，为什么？</font></p>
+<p><strong>udevadm测试</strong></p>
+<p>先unbind virtio-pci驱动，然后使用udevadm monitor进行监控，然后再次bind驱动，发现，log中的内容是空的</p>
+<pre><code class="language-c">initqueue:/# cd /sys/bus/pci/drivers/virtio-pci
+initqueue:/sys/bus/pci/drivers/virtio-pci# echo 0000:1d:00.0 &gt; unbind
+    
+udevadm monitor --property &gt; log 2&gt;&amp;1 &amp;
+    
+initqueue:/sys/bus/pci/drivers/virtio-pci# echo 0000:1d:00.0 &gt; bind
+</code></pre>
+<p>对nvme盘进行上述相同的操作，可以抓到udev事件</p>
+<p><font color="red">说明udev就是没有收到uevent并处理，或者，驱动就没有发送uevent？</font></p>
+<p><strong>再看串口信息</strong></p>
+<pre><code class="language-c">initqueue:/# dmesg |grep -i blk -A 5 -B 5
+[   57.333334] xhci_hcd 0000:ec:00.4: request interrupt 251 failed
+[   57.333335] xhci_hcd 0000:ec:00.4: startup error -28
+[   57.333336] xhci_hcd 0000:ec:00.4: USB bus 3 deregistered
+[   57.334354] xhci_hcd 0000:ec:00.4: init 0000:ec:00.4 fail, -28
+[   57.334356] xhci_hcd: probe of 0000:ec:00.4 failed with error -28
+[   58.031020] virtio_blk virtio0: 1/0/0 default/read/poll queues    ###############这里是init_vq打印的log
+[   58.031863] virtio_blk: probe of virtio0 failed with error -28
+[   61.036705] systemd-udevd (414) used greatest stack depth: 12288 bytes left
+[  145.292866] hugepage is reduced from total 503797 to 0
+[  235.510818] hugepage is reduced from total 503797 to 0
+[  325.783468] hugepage is reduced from total 503797 to 0
+</code></pre>
+<p>这里可以看到，之前忽略了一些log，<font color="red">virtio-blk驱动probe失败了！</font></p>
+<p>但是驱动为什么probe失败呢？先看err code，-28，ENOSPC，No space left on device</p>
+<p>但是，大概看了一下，实在不能确定是哪里返回了ENOSPC</p>
+<p><strong>添加debug信息重编virtio-blk</strong></p>
+<p>如此，只能往virtblk_probe函数中加点debug日志然后添加到host内核，然后重做kdump.img，看一下能不能缩小排查范围了，过程如下：</p>
+<p>先在virtblk_probe函数中每个err后都添加debug信息，重编virtio-blk模块</p>
+<p>到异常机器查找find &#x2F;usr&#x2F;lib&#x2F;modules&#x2F;<code>uname -r</code> -name virtio_blk.ko找到模块位置，备份，然后用新模块替换</p>
+<p>删除旧的kdump.img并制作重启kdump服务以制作新的kdump.img</p>
+<p>再次宕机进入小内核，查看dmesg</p>
+<pre><code class="language-c">initqueue:/# dmesg |grep blk
+[   56.909688] virtio_blk: loading out-of-tree module taints kernel.
+[   56.910275] virtio_blk virtio0: 1/0/0 default/read/poll queues
+[   56.911186] virtio_blk virtio0: init_vq err is -28
+[   56.911188] virtio_blk: probe of virtio0 failed with error -28
+</code></pre>
+<p>如此，<font color="red">可以确定，就是virtblk_probe-&gt;init_vq这里失败了，导致驱动probe失败</font></p>
+<p><strong>追踪代码</strong></p>
+<p>通过查看init_vq函数体，可以明显发现，只有两处为err&#x3D;赋返回值的，一处在virtio_cread_feature，一处在virtio_find_vqs</p>
+<p>而virtio_cread_feature处失败是绝对不可能的，可以看到，如果这里失败的话，就不可能会在dmesg中打印后面的default&#x2F;read&#x2F;poll queues log了</p>
+<pre><code class="language-c">err = virtio_cread_feature(vdev, VIRTIO_BLK_F_MQ,
+                   struct virtio_blk_config, num_queues,
+                   &amp;num_vqs);
+    if (err)
+        num_vqs = 1;
+
+    if (!err &amp;&amp; !num_vqs) &#123;
+        dev_err(&amp;vdev-&gt;dev, &quot;MQ advertised but zero queues reported\n&quot;);
+        return -EINVAL;
+    &#125;
+....
+dev_info(&amp;vdev-&gt;dev, &quot;%d/%d/%d default/read/poll queues\n&quot;,
+                vblk-&gt;io_queues[HCTX_TYPE_DEFAULT],
+                vblk-&gt;io_queues[HCTX_TYPE_READ],
+                vblk-&gt;io_queues[HCTX_TYPE_POLL]);
+</code></pre>
+<p>所以，真相只有一个，那就是在virtio_find_vqs失败了</p>
+<pre><code class="language-c">static inline
+int virtio_find_vqs(struct virtio_device *vdev, unsigned nvqs,
+            struct virtqueue *vqs[], vq_callback_t *callbacks[],
+            const char * const names[],
+            struct irq_affinity *desc)
+&#123;
+    return vdev-&gt;config-&gt;find_vqs(vdev, nvqs, vqs, callbacks, names, NULL, desc);
+&#125;
+</code></pre>
+<p>而这里可以看到其实是调用的config-&gt;find_vqs，经过查找，这里应该是vp_find_vqs或vp_modern_find_vqs</p>
+<p>大致看了下这俩函数，不管legacy还是modern的吧，出错应该都是在调用vp_find_vqs函数中失败的</p>
+<pre><code class="language-c">int vp_find_vqs(struct virtio_device *vdev, unsigned int nvqs,
+        struct virtqueue *vqs[], vq_callback_t *callbacks[],
+        const char * const names[], const bool *ctx,
+        struct irq_affinity *desc)
+&#123;
+    int err;
+
+    /* Try MSI-X with one vector per queue. */
+    err = vp_find_vqs_msix(vdev, nvqs, vqs, callbacks, names, true, ctx, desc);
+    if (!err)
+        return 0;
+    /* Fallback: MSI-X with one vector for config, one shared for queues. */
+    err = vp_find_vqs_msix(vdev, nvqs, vqs, callbacks, names, false, ctx, desc);
+    if (!err)
+        return 0;
+    /* Is there an interrupt? If not give up. */
+    if (!(to_vp_device(vdev)-&gt;pci_dev-&gt;irq))
+        return err;
+    /* Finally fall back to regular interrupts. */
+    return vp_find_vqs_intx(vdev, nvqs, vqs, callbacks, names, ctx);
+&#125;
+</code></pre>
+<p>这个看上去应该是分配中断之类的？按照函数体，应该是vp_find_vqs_msix、vp_find_vqs_msix……一路失败，走到最后，只能return vp_find_vqs_intx，但是没想到这个也失败了，返回了ENOSPC</p>
+<p>其实看这个意思，只要这些函数里能成功一个，能申请到中断就好，但是小内核中一个也没有成功</p>
+<p>看一下这个函数</p>
+<pre><code class="language-c">static int vp_find_vqs_intx(struct virtio_device *vdev, unsigned int nvqs,
+        struct virtqueue *vqs[], vq_callback_t *callbacks[],
+        const char * const names[], const bool *ctx)
+&#123;
+    struct virtio_pci_device *vp_dev = to_vp_device(vdev);
+    int i, err, queue_idx = 0;
+
+    vp_dev-&gt;vqs = kcalloc(nvqs, sizeof(*vp_dev-&gt;vqs), GFP_KERNEL);
+    if (!vp_dev-&gt;vqs)
+        return -ENOMEM;
+
+    err = request_irq(vp_dev-&gt;pci_dev-&gt;irq, vp_interrupt, IRQF_SHARED,
+            dev_name(&amp;vdev-&gt;dev), vp_dev);
+    if (err)
+        goto out_del_vqs;
+
+    vp_dev-&gt;intx_enabled = 1;
+    vp_dev-&gt;per_vq_vectors = false;
+    for (i = 0; i &lt; nvqs; ++i) &#123;
+        if (!names[i]) &#123;
+            vqs[i] = NULL;
+            continue;
+        &#125;
+        vqs[i] = vp_setup_vq(vdev, queue_idx++, callbacks[i], names[i],
+                     ctx ? ctx[i] : false,
+                     VIRTIO_MSI_NO_VECTOR);
+        if (IS_ERR(vqs[i])) &#123;
+            err = PTR_ERR(vqs[i]);
+            goto out_del_vqs;
+        &#125;
+    &#125;
+
+    return 0;
+out_del_vqs:
+    vp_del_vqs(vdev);
+    return err;
+&#125;
+</code></pre>
+<p>很明显，只有可能是request_irq失败啦，而request_irq其实是调用request_threaded_irq</p>
+<p>不过再往下又不好分析了</p>
+<p>好在，debugfs还是能mount上的，mount -t debugfs none &#x2F;sys&#x2F;kernel&#x2F;debug</p>
+<p>然后function_graph抓一下request_threaded_irq，如下</p>
+<pre><code class="language-c">initqueue:/# cat log
+# tracer: function_graph
+#
+# CPU  DURATION                  FUNCTION CALLS
+# |     |   |                     |   |   |   |
+ 0)               |  request_threaded_irq() &#123;
+ 0)   0.381 us    |    irq_to_desc();
+ 0)               |    kmalloc_trace() &#123;
+ 0)               |      __kmem_cache_alloc_node() &#123;
+ 0)   0.080 us    |        should_failslab();
+ 0)   0.240 us    |      &#125;
+ 0)   0.491 us    |    &#125;
+ 0)   0.080 us    |    irq_chip_pm_get();
+ 0)               |    __setup_irq() &#123;
+ 0)   0.070 us    |      try_module_get();
+ 0)   0.091 us    |      mutex_lock();
+ 0)               |      _raw_spin_lock_irqsave() &#123;
+ 0)   0.100 us    |        preempt_count_add();
+ 0)   0.250 us    |      &#125;
+ 0)               |      irq_activate() &#123;
+ 0)               |        irq_domain_activate_irq() &#123;
+ 0)               |          __irq_domain_activate_irq() &#123;
+ 0)               |            __irq_domain_activate_irq() &#123;
+ 0)               |              __irq_domain_activate_irq() &#123;
+ 0)               |                x86_vector_activate() &#123;
+ 0)   0.060 us    |                  apic_chip_data.part.23();
+ 0)               |                  _raw_spin_lock_irqsave() &#123;
+ 0)   0.070 us    |                    preempt_count_add();
+ 0)   0.200 us    |                  &#125;
+ 0)   0.061 us    |                  apic_chip_data.part.23();
+ 0)               |                  assign_irq_vector_any_locked() &#123;
+ 0)               |                    assign_vector_locked() &#123;
+ 0)   0.070 us    |                      apic_chip_data.part.23();
+ 0)   0.120 us    |                      irq_matrix_alloc();
+ 0)   0.441 us    |                    &#125;
+ 0)               |                    assign_vector_locked() &#123;
+ 0)   0.071 us    |                      apic_chip_data.part.23();
+ 0)   0.090 us    |                      irq_matrix_alloc();
+ 0)   0.331 us    |                    &#125;
+ 0)   1.022 us    |                  &#125;
+ 0)               |                  _raw_spin_unlock_irqrestore() &#123;
+ 0)   0.061 us    |                    preempt_count_sub();
+ 0)   0.191 us    |                  &#125;
+ 0)   1.915 us    |                &#125;
+ 0)   2.065 us    |              &#125;
+ 0)   2.175 us    |            &#125;
+ 0)   2.385 us    |          &#125;
+ 0)   2.506 us    |        &#125;
+ 0)   2.646 us    |      &#125;
+ 0)               |      _raw_spin_unlock_irqrestore() &#123;
+ 0)   0.090 us    |        preempt_count_sub();
+ 0)   0.250 us    |      &#125;
+ 0)   0.080 us    |      mutex_unlock();
+ 0)   0.080 us    |      module_put();
+ 0)   4.189 us    |    &#125;
+ 0)   0.091 us    |    irq_chip_pm_put();
+ 0)   0.090 us    |    kfree();
+ 0)               |    kfree() &#123;
+ 0)   0.191 us    |      __kmem_cache_free();
+ 0)   0.341 us    |    &#125;
+ 0)   7.898 us    |  &#125;
+ 
+ 
+
+    retval = __setup_irq(irq, desc, action);
+    if (retval) &#123;
+        irq_chip_pm_put(&amp;desc-&gt;irq_data);
+        kfree(action-&gt;secondary);
+        kfree(action);
+    &#125;
+</code></pre>
+<p>能够明显看到，<font color="red">__setup_irq之后去调用irq_chip_pm_put，这说明这时候retval肯定就是那个ENOSPC了</font></p>
+<p>对着这个trace再看一下，这里看上去就是分irq分不出来了，看irq_matrix_alloc有没有ENOSPC？</p>
+<pre><code class="language-c">int irq_matrix_alloc(struct irq_matrix *m, const struct cpumask *msk,
+             bool reserved, unsigned int *mapped_cpu)
+&#123;
+    unsigned int cpu, bit;
+    struct cpumap *cm;
+
+    /*
+     * Not required in theory, but matrix_find_best_cpu() uses
+     * for_each_cpu() which ignores the cpumask on UP .
+     */
+    if (cpumask_empty(msk))
+        return -EINVAL;
+
+    cpu = matrix_find_best_cpu(m, msk);
+    if (cpu == UINT_MAX)
+        return -ENOSPC;
+
+    cm = per_cpu_ptr(m-&gt;maps, cpu);
+    bit = matrix_alloc_area(m, cm, 1, false);
+    if (bit &gt;= m-&gt;alloc_end)
+        return -ENOSPC;
+    cm-&gt;allocated++;
+    cm-&gt;available--;
+    m-&gt;total_allocated++;
+    m-&gt;global_available--;
+    if (reserved)
+        m-&gt;global_reserved--;
+    *mapped_cpu = cpu;
+    trace_irq_matrix_alloc(bit, cpu, m, cm);
+    return bit;
+
+&#125;
+</code></pre>
+<p>再看一下当前的中断情况</p>
+<pre><code class="language-c">initqueue:/# cat /proc/interrupts
+           CPU0
+  0:         67  IR-IO-APIC   2-edge      timer
+  4:       7480  IR-IO-APIC   4-edge      ttyS0
+  8:          1  IR-IO-APIC   8-edge      rtc0
+  9:          0  IR-IO-APIC   9-fasteoi   acpi
+ 29:          0  IOMMU-MSI   0-edge      AMD-Vi
+ 30:          0  IOMMU-MSI   0-edge      AMD-Vi
+ 31:          0  IOMMU-MSI   0-edge      AMD-Vi
+ 32:          0  IOMMU-MSI   0-edge      AMD-Vi
+ 33:          0  IOMMU-MSI   0-edge      AMD-Vi
+ 34:          0  IOMMU-MSI   0-edge      AMD-Vi
+ 35:          0  IOMMU-MSI   0-edge      AMD-Vi
+ 36:          0  IOMMU-MSI   0-edge      AMD-Vi
+ 38:          0  IR-PCI-MSI 6144-edge      PCIe PME
+ 39:          0  IR-PCI-MSI 18432-edge      PCIe PME, pciehp
+ 40:          0  IR-PCI-MSI 20480-edge      PCIe PME, pciehp
+ 41:          0  IR-PCI-MSI 22528-edge      PCIe PME, pciehp
+ 42:          0  IR-PCI-MSI 24576-edge      PCIe PME, pciehp
+ 43:          0  IR-PCI-MSI 116736-edge      PCIe PME
+ 44:          0  IR-PCI-MSI 118784-edge      PCIe PME
+ 46:          0  IR-PCI-MSI 13637632-edge      PCIe PME
+ 47:          0  IR-PCI-MSI 13682688-edge      PCIe PME
+ 49:          0  IR-PCI-MSI 13748224-edge      PCIe PME
+ 51:          1  IR-PCI-MSI 14680064-edge      pciehp
+ 52:          1  IR-PCI-MSI 14696448-edge      pciehp
+ 54:          1  IR-PCI-MSI 14712832-edge      pciehp
+ 55:          6  IR-PCI-MSI 14729216-edge      pciehp
+ 56:          6  IR-PCI-MSI 14745600-edge      pciehp
+ 57:          6  IR-PCI-MSI 14761984-edge      pciehp
+ 58:          6  IR-PCI-MSI 14778368-edge      pciehp
+ 59:          6  IR-PCI-MSI 14794752-edge      pciehp
+ 60:          6  IR-PCI-MSI 14811136-edge      pciehp
+ 61:          6  IR-PCI-MSI 14827520-edge      pciehp
+ 62:          6  IR-PCI-MSI 14843904-edge      pciehp
+ 63:          6  IR-PCI-MSI 14860288-edge      pciehp
+ 64:          6  IR-PCI-MSI 14876672-edge      pciehp
+ 65:          6  IR-PCI-MSI 14893056-edge      pciehp
+ 66:          6  IR-PCI-MSI 14909440-edge      pciehp
+ 67:          1  IR-PCI-MSI 14925824-edge      pciehp
+ 68:          1  IR-PCI-MSI 14942208-edge      pciehp
+ 69:          6  IR-PCI-MSI 14958592-edge      pciehp
+ 70:          6  IR-PCI-MSI 14974976-edge      pciehp
+ 71:          6  IR-PCI-MSI 14991360-edge      pciehp
+ 72:          6  IR-PCI-MSI 15007744-edge      pciehp
+ 73:          6  IR-PCI-MSI 15024128-edge      pciehp
+ 74:          6  IR-PCI-MSI 15040512-edge      pciehp
+ 75:          6  IR-PCI-MSI 15056896-edge      pciehp
+ 76:          6  IR-PCI-MSI 15073280-edge      pciehp
+ 77:          6  IR-PCI-MSI 15089664-edge      pciehp
+ 78:          6  IR-PCI-MSI 15106048-edge      pciehp
+ 79:          6  IR-PCI-MSI 15122432-edge      pciehp
+ 80:          6  IR-PCI-MSI 15138816-edge      pciehp
+ 81:          6  IR-PCI-MSI 15155200-edge      pciehp
+ 82:          6  IR-PCI-MSI 15171584-edge      pciehp
+ 83:          6  IR-PCI-MSI 15187968-edge      pciehp
+ 84:          6  IR-PCI-MSI 26738688-edge      pciehp
+ 85:          6  IR-PCI-MSI 26755072-edge      pciehp
+ 86:          6  IR-PCI-MSI 26771456-edge      pciehp
+ 87:          6  IR-PCI-MSI 26787840-edge      pciehp
+ 88:          6  IR-PCI-MSI 26804224-edge      pciehp
+ 89:          6  IR-PCI-MSI 26820608-edge      pciehp
+ 90:          6  IR-PCI-MSI 26836992-edge      pciehp
+ 91:          6  IR-PCI-MSI 26853376-edge      pciehp
+ 92:          6  IR-PCI-MSI 26869760-edge      pciehp
+ 93:          6  IR-PCI-MSI 26886144-edge      pciehp
+ 94:          6  IR-PCI-MSI 26902528-edge      pciehp
+ 95:          6  IR-PCI-MSI 26918912-edge      pciehp
+ 96:          6  IR-PCI-MSI 26935296-edge      pciehp
+ 97:          6  IR-PCI-MSI 26951680-edge      pciehp
+ 98:          6  IR-PCI-MSI 26968064-edge      pciehp
+ 99:          6  IR-PCI-MSI 26984448-edge      pciehp
+100:          6  IR-PCI-MSI 27000832-edge      pciehp
+101:          6  IR-PCI-MSI 27017216-edge      pciehp
+102:          6  IR-PCI-MSI 27033600-edge      pciehp
+103:          6  IR-PCI-MSI 27049984-edge      pciehp
+104:          6  IR-PCI-MSI 27066368-edge      pciehp
+105:          6  IR-PCI-MSI 27082752-edge      pciehp
+106:          6  IR-PCI-MSI 27099136-edge      pciehp
+107:          6  IR-PCI-MSI 27115520-edge      pciehp
+108:          6  IR-PCI-MSI 27131904-edge      pciehp
+109:          6  IR-PCI-MSI 27148288-edge      pciehp
+110:          6  IR-PCI-MSI 27164672-edge      pciehp
+111:          6  IR-PCI-MSI 27181056-edge      pciehp
+112:          6  IR-PCI-MSI 27197440-edge      pciehp
+113:          6  IR-PCI-MSI 27213824-edge      pciehp
+114:          6  IR-PCI-MSI 27230208-edge      pciehp
+116:          0  IR-PCI-MSI 62396416-edge      PCIe PME
+117:          0  IR-PCI-MSI 62441472-edge      PCIe PME, pciehp
+118:          0  IR-PCI-MSI 62443520-edge      PCIe PME, pciehp
+119:          0  IR-PCI-MSI 62445568-edge      PCIe PME, pciehp
+120:          0  IR-PCI-MSI 62447616-edge      PCIe PME, pciehp
+122:          0  IR-PCI-MSI 62507008-edge      PCIe PME
+124:          0  IR-PCI-MSI 74979328-edge      PCIe PME
+125:          0  IR-PCI-MSI 75059200-edge      PCIe PME
+126:          0  IR-PCI-MSI 75089920-edge      PCIe PME
+127:          0  IR-PCI-MSI 75091968-edge      PCIe PME
+129:          0  IR-PCI-MSI 87037952-edge      PCIe PME
+130:          0  IR-PCI-MSI 87050240-edge      PCIe PME, pciehp
+131:          0  IR-PCI-MSI 87052288-edge      PCIe PME, pciehp
+132:          0  IR-PCI-MSI 87054336-edge      PCIe PME, pciehp
+133:          0  IR-PCI-MSI 87056384-edge      PCIe PME, pciehp
+134:          0  IR-PCI-MSI 87148544-edge      PCIe PME
+135:          0  IR-PCI-MSI 87150592-edge      PCIe PME
+137:          0  IR-PCI-MSI 100145152-edge      PCIe PME
+138:          0  IR-PCI-MSI 100194304-edge      PCIe PME, pciehp
+139:          0  IR-PCI-MSI 100196352-edge      PCIe PME, pciehp
+141:          0  IR-PCI-MSI 100255744-edge      PCIe PME
+143:          0  IR-PCI-MSI 111679488-edge      PCIe PME
+145:          0  IR-PCI-MSI 111790080-edge      PCIe PME
+147:          0  IR-PCI-MSI 122165248-edge      PCIe PME
+148:          0  IR-PCI-MSI 122179584-edge      PCIe PME, pciehp
+149:          0  IR-PCI-MSI 122181632-edge      PCIe PME, pciehp
+150:          0  IR-PCI-MSI 122275840-edge      PCIe PME
+151:          0  IR-PCI-MSI 122277888-edge      PCIe PME
+153:          8  IR-PCI-MSI 524288-edge      nvme0q0
+155:          0  IR-PCI-MSI 3145728-edge      ahci0
+156:          0  IR-PCI-MSI 3145729-edge      ahci1
+157:          0  IR-PCI-MSI 3145730-edge      ahci2
+158:          0  IR-PCI-MSI 3145731-edge      ahci3
+159:          0  IR-PCI-MSI 3145732-edge      ahci4
+160:          0  IR-PCI-MSI 3145733-edge      ahci5
+161:          0  IR-PCI-MSI 3145734-edge      ahci6
+162:          0  IR-PCI-MSI 3145735-edge      ahci7
+172:          8  IR-PCI-MSI 87556096-edge      nvme1q0
+173:       3165  IR-PCI-MSI 524289-edge      nvme0q1
+174:       3165  IR-PCI-MSI 87556097-edge      nvme1q1
+176:          0  IR-PCI-MSI 3147776-edge      ahci0
+177:          0  IR-PCI-MSI 3147777-edge      ahci1
+178:          0  IR-PCI-MSI 3147778-edge      ahci2
+179:          0  IR-PCI-MSI 3147779-edge      ahci3
+180:          0  IR-PCI-MSI 3147780-edge      ahci4
+181:          0  IR-PCI-MSI 3147781-edge      ahci5
+182:          0  IR-PCI-MSI 3147782-edge      ahci6
+183:          0  IR-PCI-MSI 3147783-edge      ahci7
+193:       1549  IR-PCI-MSI 77070336-edge      ahci0
+195:          0  IR-PCI-MSI 77070338-edge      ahci2
+196:          0  IR-PCI-MSI 77070339-edge      ahci3
+197:          0  IR-PCI-MSI 77070340-edge      ahci4
+198:          0  IR-PCI-MSI 77070341-edge      ahci5
+199:          0  IR-PCI-MSI 77070342-edge      ahci6
+200:          0  IR-PCI-MSI 77070343-edge      ahci7
+210:          0  IR-PCI-MSI 77072384-edge      ahci0
+211:          0  IR-PCI-MSI 77072385-edge      ahci1
+212:          0  IR-PCI-MSI 77072386-edge      ahci2
+213:          0  IR-PCI-MSI 77072387-edge      ahci3
+214:          0  IR-PCI-MSI 77072388-edge      ahci4
+215:          0  IR-PCI-MSI 77072389-edge      ahci5
+216:          0  IR-PCI-MSI 77072390-edge      ahci6
+217:          0  IR-PCI-MSI 77072391-edge      ahci7
+227:          0  IR-PCI-MSI 90177536-edge      ahci0
+228:          0  IR-PCI-MSI 90177537-edge      ahci1
+229:          0  IR-PCI-MSI 90177538-edge      ahci2
+230:          0  IR-PCI-MSI 90177539-edge      ahci3
+231:          0  IR-PCI-MSI 90177540-edge      ahci4
+232:          0  IR-PCI-MSI 90177541-edge      ahci5
+233:          0  IR-PCI-MSI 90177542-edge      ahci6
+234:          0  IR-PCI-MSI 90177543-edge      ahci7
+244:          0  IR-PCI-MSI 90179584-edge      ahci[0000:ac:00.1]
+246:          0  IR-PCI-MSI 124256256-edge      ahci[0000:ed:00.0]
+248:          0  IR-PCI-MSI 124258304-edge      ahci[0000:ed:00.1]
+250:          0  IR-PCI-MSI 2629632-edge      xhci_hcd
+NMI:          2   Non-maskable interrupts
+LOC:      87976   Local timer interrupts
+SPU:          0   Spurious interrupts
+PMI:          2   Performance monitoring interrupts
+IWI:          0   IRQ work interrupts
+RTR:          0   APIC ICR read retries
+RES:          0   Rescheduling interrupts
+CAL:          0   Function call interrupts
+TLB:          0   TLB shootdowns
+TRM:          0   Thermal event interrupts
+THR:          0   Threshold APIC interrupts
+DFR:          0   Deferred Error APIC interrupts
+MCE:          0   Machine check exceptions
+MCP:          0   Machine check polls
+ERR:          0
+MIS:          0
+PIN:          0   Posted-interrupt notification event
+NPI:          0   Nested posted-interrupt event
+PIW:          0   Posted-interrupt wakeup event
+</code></pre>
+<pre><code class="language-c">vector_matrix = irq_alloc_matrix(NR_VECTORS, FIRST_EXTERNAL_VECTOR,
+                     FIRST_SYSTEM_VECTOR);
+                     
+irq_alloc_matrix设置m-&gt;alloc_end为FIRST_SYSTEM_VECTOR
+  
+    
+可以看到在irq_matrix_alloc的比较里，是比较的bit和m-&gt;alloc_end
+  
+  
+#ifdef CONFIG_X86_LOCAL_APIC
+#define FIRST_SYSTEM_VECTOR        LOCAL_TIMER_VECTOR
+#else
+#define FIRST_SYSTEM_VECTOR        NR_VECTORS
+#endif
+
+我们配置了CONFIG_X86_LOCAL_APIC，所以
+#define LOCAL_TIMER_VECTOR        0xec
+
+
+也就是m-&gt;alloc_end是0xec，即236？
+</code></pre>
+<p>所以，这里就可以得出结论：<font color="red">virtio blk设备申请中断，分配失败，返回了ENOSPC，导致系统盘没有成功挂上，导致小内核启动失败。而中断向量不足的根因就是：kdump小内核的cmdline中配置了nr_cpus&#x3D;1即使用一个cpu启动，所以所有设备中断全都分配到这一个cpu上，导致本cpu的中断向量不足够分配了</font></p>
+<p>所以解决方法也简单，多使用几个cpu启动小内核就好了</p>
+<h3 id="后续"><a href="#后续" class="headerlink" title="后续"></a><center>后续</center></h3><p>一个有用的网站：<a target="_blank" rel="noopener" href="https://fedoraproject.org/wiki/How_to_debug_Dracut_problems">https://fedoraproject.org/wiki/How_to_debug_Dracut_problems</a></p>
+<p>介绍了一些debug dracut的方法，看上去比较有用的有这几种:</p>
+<pre><code class="language-c">##把这个添加到cmdline，如果找不到根，会显示shell
+rd.shell		
+
+##这个是真滴强，感谢这个，让我定位了上面的问题
+##把这个加到cmdline中，可以在指定的阶段断点，进入emergency shell中，进行调试
+##可以使用egrep &#39;rd.?break&#39; /usr/lib/dracut/modules.d/99base/init.sh来确定支持的断点
+rd.break=[cmdline|pre-udev|pre-trigger|initqueue|pre-mount|mount|pre-pivot|cleanup]
+</code></pre>
+<p>另外，对于kdump的调试，比如，进入断点的shell中只能使用一些基础命令，如果想使用一些高级命令该怎么做呢？这个可以看一下&#x2F;etc&#x2F;kdump.conf中的extra_bins，这个看上去是可以把一些binary打包到kdump.img中，看上去挺实用的，虽然我尝试传入lspci失败了</p>
+
+      
+       <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
+    </div>
+</article>
+
+
+
+
+
+    <div id="comments"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+<script type="text/javascript">
+    $.getScript('/js/gitalk.js', function () {
+        var gitalk = new Gitalk({
+            clientID: 'Ov23lihTjDF3jklWOX9b',
+            clientSecret: '1304f65e90138886cd32255710839a4ba192f266',
+            repo: 'yzwddsg-plus.github.io',
+            owner: 'yzwddsg-plus',
+            admin: ['yzwddsg-plus'],
+            id: decodeURI(location.pathname),
+            distractionFreeMode: 'true',
+            language: 'zh-CN',
+            perPage: parseInt('10',10)
+        })
+        gitalk.render('comments')
+    })
+</script>
+
+
+
+
+
+
+
+    </div>
+    <div class="copyright">
+        <p class="footer-entry">
+    YZWDDSG
+</p>
+<p class="footer-entry">Built with <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/yelog/hexo-theme-3-hexo" target="_blank">3-hexo</a> theme</p>
+
+    </div>
+    <div class="full-toc">
+        <button class="full" data-title="Toggle full screen shortcut key s"><span class="min "></span></button>
+<a class="" id="rocket" ></a>
+
+    </div>
+</div>
+
+</body>
+<script src="/js/jquery.pjax.js?v=1.1.0" ></script>
+
+<script src="/js/script.js?v=1.1.0" ></script>
+<script>
+    var img_resize = 'default';
+    function initArticle() {
+        /*渲染对应的表格样式*/
+        
+
+        /*渲染打赏样式*/
+        
+
+        /*高亮代码块行号*/
+        
+
+        /*访问数量*/
+        
+
+        /*代码高亮，行号对齐*/
+        $('.pre-numbering').css('line-height',$('.has-numbering').css('line-height'));
+
+        
+        
+    }
+
+    /*打赏页面隐藏与展示*/
+    
+
+</script>
+
+<!--加入行号的高亮代码块样式-->
+
+<!--自定义样式设置-->
+<style>
+    
+    
+    .nav-right .title-list nav a .post-title, .nav-right .title-list #local-search-result a .post-title {
+        color: #383636;
+    }
+    
+    
+    .nav-right .title-list nav a .post-date, .nav-right .title-list #local-search-result a .post-date {
+        color: #5e5e5f;
+    }
+    
+    
+    .nav-right nav a.hover, #local-search-result a.hover{
+        background-color: #e2e0e0;
+    }
+    
+    
+
+    /*列表样式*/
+    
+
+    /* 背景图样式 */
+    
+    
+
+
+    /*引用块样式*/
+    
+
+    /*文章列表背景图*/
+    
+    .nav-right:before {
+        content: ' ';
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.3;
+        background: url("https://i.loli.net/2019/07/22/5d3521411f3f169375.png");
+        background-repeat: no-repeat;
+        background-position: 50% 0;
+        -ms-background-size: cover;
+        -o-background-size: cover;
+        -moz-background-size: cover;
+        -webkit-background-size: cover;
+        background-size: cover;
+    }
+    
+
+    
+    #post .pjax article :not(pre) > code {
+        color: #24292e;
+        font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,Courier,monospace;
+        background-color: rgba(27,31,35,.05);
+        border-radius: 3px;
+        font-size: 85%;
+        margin: 0;
+        padding: .2em .4em;
+    }
+    
+</style>
+
+
+
+
+
+
+
+</html>

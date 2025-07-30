@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>rt调度器bug导致宕机的排查 | YZWDDSG</title>
+  <meta name="keywords" content="">
+  <meta name="description" content="rt调度器bug导致宕机的排查 | YZWDDSG">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
+<meta property="og:type" content="website">
+<meta property="og:title" content="categories">
+<meta property="og:url" content="http://example.com/categories/index.html">
+<meta property="og:site_name" content="YZWDDSG">
+<meta property="og:locale">
+<meta property="article:published_time" content="2025-02-23T15:43:05.000Z">
+<meta property="article:modified_time" content="2025-02-23T15:43:53.864Z">
+<meta property="article:author" content="YZWDDSG">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="icon" href="/img/avatar.jpg">
+
+<link href="/css/style.css?v=1.1.0" rel="stylesheet">
+
+<link href="/css/hl_theme/atom-dark.css?v=1.1.0" rel="stylesheet">
+
+<link href="//cdn.jsdelivr.net/npm/animate.css@4.1.0/animate.min.css" rel="stylesheet">
+
+<script src="//cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+<script src="/js/titleTip.js?v=1.1.0" ></script>
+
+<script src="//cdn.jsdelivr.net/npm/highlightjs@9.16.2/highlight.pack.min.js"></script>
+<script>
+    hljs.initHighlightingOnLoad();
+</script>
+
+<script src="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js"></script>
+
+
+
+<script src="//cdn.jsdelivr.net/npm/jquery.cookie@1.4.1/jquery.cookie.min.js" ></script>
+
+<script src="/js/iconfont.js?v=1.1.0" ></script>
+<script src="/js/custom-iconfont.js?v=1.1.0" ></script>
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<div style="display: none">
+  <input class="theme_disqus_on" value="false">
+  <input class="theme_preload_comment" value="">
+  <input class="theme_blog_path" value="">
+  <input id="theme_shortcut" value="true" />
+  <input id="theme_highlight_on" value="true" />
+  <input id="theme_code_copy" value="true" />
+</div>
+
+
+
+<body>
+<aside class="nav">
+    <div class="nav-left">
+        <a href="/"
+   class="avatar_target">
+    <img class="avatar"
+         src="/img/avatar.jpg"/>
+</a>
+<div class="author">
+    <span>YZWDDSG</span>
+</div>
+
+<div class="icon">
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+</div>
+
+
+
+
+
+<ul>
+    <li>
+        <div class="all active" data-rel="All">All
+            
+                <small>(28)</small>
+            
+        </div>
+    </li>
+    
+        
+            
+                
+    <li>
+        <div data-rel="硬件">
+            
+            硬件
+            <small>(4)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="调度">
+            
+            调度
+            <small>(2)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="内存">
+            
+            内存
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="存储">
+            
+            存储
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="网络">
+            
+            网络
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="文件系统">
+            
+            文件系统
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="虚拟化">
+            
+            虚拟化
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="power">
+            
+            power
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="OS">
+            
+            OS
+            <small>(3)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="故障排查">
+            
+            故障排查
+            <small>(8)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="其他">
+            
+            其他
+            <small>(2)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="个人">
+            
+            个人
+            <small>(3)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+</ul>
+<div class="left-bottom">
+    <div class="menus">
+        
+            
+            
+            
+    </div>
+    <div>
+        
+            <a class="about  site_url"
+               
+               href="/about">About</a>
+        
+        
+    </div>
+</div>
+<input type="hidden" id="yelog_site_posts_number" value="28">
+<input type="hidden" id="yelog_site_word_count" value="65.1k">
+<div style="display: none">
+    <span id="busuanzi_value_site_uv"></span>
+    <span id="busuanzi_value_site_pv"></span>
+</div>
+
+    </div>
+    <div class="nav-right">
+        <div class="friends-area">
+    <div class="friends-title">
+        Links
+        <i class="iconfont icon-left"></i>
+    </div>
+    <div class="friends-content">
+        <ul>
+            
+            <li><a target="_blank" href="http://yelog.org/">叶落阁</a></li>
+            
+        </ul>
+    </div>
+</div>
+        <div class="title-list">
+    <div class="right-top">
+        <div id="default-panel">
+            <i class="iconfont icon-search" data-title="search shortcut key i"></i>
+            <div class="right-title">All</div>
+            <i class="iconfont icon-file-tree" data-title="switch to outline view shortcut key w"></i>
+        </div>
+        <div id="search-panel">
+            <i class="iconfont icon-left" data-title="return"></i>
+            <input id="local-search-input" autocomplete="off"/>
+            <label class="border-line" for="input"></label>
+            <i class="iconfont icon-case-sensitive" data-title="case sensitive"></i>
+            <i class="iconfont icon-tag" data-title="label"></i>
+        </div>
+        <div id="outline-panel" style="display: none">
+            <div class="right-title">outline</div>
+            <i class="iconfont icon-list" data-title="switch to article list"></i>
+        </div>
+    </div>
+
+    <div class="tags-list">
+    <input id="tag-search" />
+    <div class="tag-wrapper">
+        
+    </div>
+
+</div>
+
+    
+    <nav id="title-list-nav">
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/07/04/kdump%E5%A4%B1%E8%B4%A5%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="kdump失败问题排查">kdump失败问题排查</span>
+            <span class="post-date" title="2025-07-04 23:03:39">2025/07/04</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/06/13/%E8%AE%B0%E4%B8%80%E5%8F%AA%E6%B5%81%E6%B5%AA%E6%96%91%E7%82%B9%E7%8B%97/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="记一只流浪斑点狗">记一只流浪斑点狗</span>
+            <span class="post-date" title="2025-06-13 21:39:16">2025/06/13</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/05/28/AMD-ERAPS/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="AMD ERAPS">AMD ERAPS</span>
+            <span class="post-date" title="2025-05-28 21:52:56">2025/05/28</span>
+        </a>
+        
+        
+        <a  class="All 其他 "
+           href="/2025/04/26/popen%E5%AF%BC%E8%87%B4%E7%9A%84%E9%97%AE%E9%A2%98%E5%8F%8A%E5%88%86%E6%9E%90/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="popen导致的问题及分析">popen导致的问题及分析</span>
+            <span class="post-date" title="2025-04-26 23:15:08">2025/04/26</span>
+        </a>
+        
+        
+        <a  class="All 存储 "
+           href="/2025/04/20/nbd%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%AE%9E%E7%8E%B0/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="nbd驱动的实现">nbd驱动的实现</span>
+            <span class="post-date" title="2025-04-20 16:41:42">2025/04/20</span>
+        </a>
+        
+        
+        <a  class="All 内存 "
+           href="/2025/04/11/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3meminfo%E4%B8%AD%E7%9A%84MemAvailable%E5%92%8CMemFree/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="如何理解meminfo中的MemAvailable和MemFree">如何理解meminfo中的MemAvailable和MemFree</span>
+            <span class="post-date" title="2025-04-11 19:43:19">2025/04/11</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/04/09/%E6%89%A7%E8%A1%8Crpm%E5%91%BD%E4%BB%A4%E5%8D%A1%E6%AD%BB%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="执行rpm命令卡死排查">执行rpm命令卡死排查</span>
+            <span class="post-date" title="2025-04-09 22:11:15">2025/04/09</span>
+        </a>
+        
+        
+        <a  class="All 调度 "
+           href="/2025/04/07/CPU%E5%88%A9%E7%94%A8%E7%8E%87%E4%B8%8D%E5%9D%87%E8%A1%A1%E9%97%AE%E9%A2%98-sched-domain%E5%AD%A6%E4%B9%A0/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="CPU利用率不均衡问题-sched_domain学习">CPU利用率不均衡问题-sched_domain学习</span>
+            <span class="post-date" title="2025-04-07 22:04:47">2025/04/07</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/04/05/PCIE%E8%AE%BE%E5%A4%87%E7%83%AD%E6%8F%92%E6%8B%94/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="PCIE设备热插拔">PCIE设备热插拔</span>
+            <span class="post-date" title="2025-04-05 22:00:12">2025/04/05</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/04/03/%E6%88%91%E5%92%8C%E6%88%91%E7%9A%84%E7%8B%97%E5%AD%90%E4%BB%AC/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="我和我的狗子们">我和我的狗子们</span>
+            <span class="post-date" title="2025-04-03 22:18:32">2025/04/03</span>
+        </a>
+        
+        
+        <a  class="All 调度 "
+           href="/2025/03/31/%E4%BF%AE%E6%94%B9%E8%BF%9B%E7%A8%8B%E4%BF%A1%E6%81%AF%E7%9A%84%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改进程信息的内核模块">修改进程信息的内核模块</span>
+            <span class="post-date" title="2025-03-31 21:53:34">2025/03/31</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/30/%E4%B8%80%E6%AC%A1%E4%B8%A2%E5%8C%85%E7%9A%84%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="一次丢包的排查">一次丢包的排查</span>
+            <span class="post-date" title="2025-03-30 12:56:05">2025/03/30</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/29/systemd-resolved%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="systemd-resolved服务异常">systemd-resolved服务异常</span>
+            <span class="post-date" title="2025-03-29 22:28:32">2025/03/29</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/22/rt%E8%B0%83%E5%BA%A6%E5%99%A8bug%E5%AF%BC%E8%87%B4%E5%AE%95%E6%9C%BA%E7%9A%84%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="rt调度器bug导致宕机的排查">rt调度器bug导致宕机的排查</span>
+            <span class="post-date" title="2025-03-22 21:08:39">2025/03/22</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/21/%E4%BF%AE%E6%94%B9debian%E5%86%85%E6%A0%B8%E6%BA%90%E7%A0%81%E5%B9%B6%E6%89%93%E5%8C%85/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改debian内核源码并打包">修改debian内核源码并打包</span>
+            <span class="post-date" title="2025-03-21 21:53:56">2025/03/21</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/17/%E8%AE%B0%E4%B8%80%E6%AC%A1%E4%BA%91%E7%9B%98%E7%83%AD%E6%8B%94%E5%A4%B1%E8%B4%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="记一次云盘热拔失败">记一次云盘热拔失败</span>
+            <span class="post-date" title="2025-03-17 22:02:52">2025/03/17</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/03/13/MMX%E3%80%81FMA%E3%80%81SSE%E4%B8%8EAVX/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="MMX、FMA、SSE与AVX">MMX、FMA、SSE与AVX</span>
+            <span class="post-date" title="2025-03-13 21:37:54">2025/03/13</span>
+        </a>
+        
+        
+        <a  class="All 文件系统 "
+           href="/2025/03/12/proc%E3%80%81sysctl%E5%92%8Csysfs/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="proc、sysctl和sysfs">proc、sysctl和sysfs</span>
+            <span class="post-date" title="2025-03-12 22:00:23">2025/03/12</span>
+        </a>
+        
+        
+        <a  class="All 其他 "
+           href="/2025/03/11/%E4%BF%AE%E6%94%B9bios%E9%85%8D%E7%BD%AE/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改bios配置">修改bios配置</span>
+            <span class="post-date" title="2025-03-11 21:49:28">2025/03/11</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/10/%E4%BF%AE%E6%94%B9%E5%85%AC%E7%89%88%E5%86%85%E6%A0%B8/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改公版内核">修改公版内核</span>
+            <span class="post-date" title="2025-03-10 22:13:00">2025/03/10</span>
+        </a>
+        
+        
+        <a  class="All power "
+           href="/2025/03/09/proc-cpuinfo%E6%98%BE%E7%A4%BA%E9%A2%91%E7%8E%87%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="/proc/cpuinfo显示频率原理">/proc/cpuinfo显示频率原理</span>
+            <span class="post-date" title="2025-03-09 22:00:49">2025/03/09</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/07/rsyslog%E9%85%8D%E7%BD%AE/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="rsyslog配置">rsyslog配置</span>
+            <span class="post-date" title="2025-03-07 22:36:29">2025/03/07</span>
+        </a>
+        
+        
+        <a  class="All 虚拟化 "
+           href="/2025/03/06/qemu-kvm%E6%B7%BB%E5%8A%A0%E6%96%B0feature%E8%99%9A%E6%8B%9F%E5%8C%96/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="qemu kvm添加新feature虚拟化">qemu kvm添加新feature虚拟化</span>
+            <span class="post-date" title="2025-03-06 00:13:34">2025/03/06</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/02/27/hung-task%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="hung task原理">hung task原理</span>
+            <span class="post-date" title="2025-02-27 22:54:58">2025/02/27</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/02/26/netconsole/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="netconsole">netconsole</span>
+            <span class="post-date" title="2025-02-26 23:01:56">2025/02/26</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/02/26/%E8%88%92%E6%B4%BB%E8%88%92%E6%B4%BB%E7%AD%8B%E9%AA%A8%EF%BC%8C%E6%8A%96%E6%93%9E%E6%8A%96%E6%93%9E%E7%B2%BE%E7%A5%9E/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="舒活舒活筋骨，抖擞抖擞精神">舒活舒活筋骨，抖擞抖擞精神</span>
+            <span class="post-date" title="2025-02-26 00:05:33">2025/02/26</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/02/25/softlockup%E4%B8%8Ehardlockup/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="softlockup与hardlockup">softlockup与hardlockup</span>
+            <span class="post-date" title="2025-02-25 22:13:35">2025/02/25</span>
+        </a>
+        
+        
+        <a  class="All 网络 "
+           href="/2025/02/24/netpoll%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="netpoll原理">netpoll原理</span>
+            <span class="post-date" title="2025-02-24 21:36:30">2025/02/24</span>
+        </a>
+        
+        <div id="no-item-tips">
+
+        </div>
+    </nav>
+    <div id="outline-list">
+    </div>
+</div>
+
+    </div>
+    <div class="hide-list">
+        <div class="semicircle" data-title="Toggle full screen shortcut key s">
+            <div class="brackets first"><</div>
+            <div class="brackets">&gt;</div>
+        </div>
+    </div>
+</aside>
+<div id="post">
+    <div class="pjax">
+        <article id="post-rt调度器bug导致宕机的排查" class="article article-type-post" itemscope itemprop="blogPost">
+    
+        <h1 class="article-title">rt调度器bug导致宕机的排查</h1>
+    
+    <div class="article-meta">
+        
+        
+        
+        <span class="book">
+            <i class="iconfont icon-category"></i>
+            
+            
+            <a  data-rel="故障排查">故障排查</a>
+            
+        </span>
+        
+        
+    </div>
+    <div class="article-meta">
+        
+            Created At : <time class="date" title='Updated At: 2025-03-22 21:57:46'>2025-03-22 21:08</time>
+        
+    </div>
+    <div class="article-meta">
+        
+        <span>Count:5.4k</span>
+        
+        
+        
+        <span class="top-comment" title="Jump to comment area">
+            <a href="#comments">
+                Comment:<span class="count-comment">
+                    <span class="spinner">
+                      <div class="cube1"></div>
+                      <div class="cube2"></div>
+                    </span>
+                </span>
+            </a>
+        </span>
+        
+    </div>
+    
+    <div class="toc-ref">
+    
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%92%E6%9F%A5"><span class="toc-text">排查</span></a></li></ol>
+    
+<style>
+    .left-col .switch-btn,
+    .left-col .switch-area {
+        display: none;
+    }
+    .toc-level-3 i,
+    .toc-level-3 ol {
+        display: none !important;
+    }
+</style>
+</div>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h3><p>​	在测试系统抖动时候，我们有时候会使用cyclictest这个工具。</p>
+<p>​	但是，在Ubuntu22上测试的时候几乎每次都会宕机，其他系统上没有出现这个问题</p>
+<p>​	经过排查，最终确定与内核rt调度器的一个bug有关</p>
+<h3 id="排查"><a href="#排查" class="headerlink" title="排查"></a><center>排查</center></h3><p>首先我们当前已知的触发宕机的条件是：</p>
+<ul>
+<li><p><strong>系统上有multipathd这个进程（这是一个io多路径的进程，用于一个设备上路径损坏的时候可以使用另一个路径）</strong></p>
+</li>
+<li><p><strong>系统上运行cyclictest</strong></p>
+</li>
+</ul>
+<p>首先根据宕机的栈我们可以确定是softlockup引起的宕机，而且每次宕机都是宕在multipathd这里，<font color="red">所以可以明确的是宕机由multipathd引起的</font>，kill掉multipathd进程就不会出现这个问题了。</p>
+<p>那么为什么加载了multipathd服务就会出问题？继续排查</p>
+<p>crash分析一下vmcore，首先虽然每次core在不同的地方，但是我们可以明确的是都是core在multipathd这个进程</p>
+<p>看一下multipathd进程共有7个线程</p>
+<pre><code class="language-bash">root@XXX:~# pidstat -p 4087 -t
+Linux 5.15.0-72-generic (XXX) 	01/20/2025 	_x86_64_	(384 CPU)
+
+11:31:06 AM   UID      TGID       TID    %usr %system  %guest   %wait    %CPU   CPU  Command
+11:31:06 AM     0      4087         -    0.00    0.00    0.00    0.00    0.00   279  multipathd
+11:31:06 AM     0         -      4087    0.00    0.00    0.00    0.00    0.00   279  |__multipathd
+11:31:06 AM     0         -      4097    0.00    0.00    0.00    0.00    0.00   287  |__multipathd
+11:31:06 AM     0         -      4098    0.00    0.00    0.00    0.00    0.00    87  |__multipathd
+11:31:06 AM     0         -      4099    0.00    0.00    0.00    0.00    0.00    87  |__multipathd
+11:31:06 AM     0         -      4100    0.00    0.00    0.00    0.00    0.00   272  |__multipathd
+11:31:06 AM     0         -      4101    0.00    0.00    0.00    0.00    0.00    80  |__multipathd
+11:31:06 AM     0         -      4102    0.00    0.00    0.00    0.00    0.00    80  |__multipathd
+</code></pre>
+<p>然后找了一个还没宕机的相同环境的系统，通过cat &#x2F;proc&#x2F;XXX&#x2F;tasks&#x2F;XXX&#x2F;stack看一下每个线程在做什么</p>
+<p>然后发现multipathd一共7个线程，其中三个线程在poll，三个线程在queue等待唤醒，剩下的那个线程是第六个，在进行一些check工作</p>
+<p>而通过vmcore确认，发现每次core掉的multipathd线程其实就是第6个线程，也就是在check的线程</p>
+<p>该线程正常的栈如下</p>
+<pre><code class="language-bash">root@XXX:~# cat /proc/4087/task/4101/stack
+[&lt;0&gt;] hrtimer_nanosleep+0x99/0x120
+[&lt;0&gt;] common_nsleep+0x44/0x50
+[&lt;0&gt;] __x64_sys_clock_nanosleep+0xd2/0x160
+[&lt;0&gt;] do_syscall_64+0x59/0xc0
+[&lt;0&gt;] entry_SYSCALL_64_after_hwframe+0x61/0xcb
+</code></pre>
+<p>看上去它执行的其实就是： <a target="_blank" rel="noopener" href="https://github.com/opensvc/multipath-tools/blob/master/multipathd/main.c">https://github.com/opensvc/multipath-tools/blob/master/multipathd/main.c</a> 中的checkerloop函数，大致过程就是检查路径然后sleep</p>
+<p><font color="red">至此可以确认是multipathd的第六个线程也就是checkerloop线程引起的宕机</font></p>
+<p>再看一下相关进程的优先级和调度类</p>
+<pre><code class="language-bash">#define SCHED_NORMAL            0
+#define SCHED_FIFO              1
+#define SCHED_RR                2
+#define SCHED_BATCH             3
+/* SCHED_ISO: reserved but not implemented yet */
+#define SCHED_IDLE              5
+#define SCHED_DEADLINE          6
+
+##这是触发宕机的multipathd线程，rt线程，RR策略，也就是时间片的rt线程
+crash&gt; task ff1d16af4e8f8000|grep policy
+  policy = 2,
+  mempolicy = 0x0,
+crash&gt; task ff1d16af4e8f8000|grep sched_class
+  sched_class = 0xffffffffa1eea290 &lt;rt_sched_class&gt;,
+crash&gt; task ff1d16af4e8f8000 |grep prio
+  prio = 0,
+  static_prio = 120,
+  normal_prio = 0,
+  rt_priority = 99,
+    prio = 0,
+    prio_list = &#123;
+
+##这是cyclictest的线程，rt线程，fifo策略
+crash&gt; task ff1d16af6f935e80 |grep policy
+  policy = 1,
+  mempolicy = 0x0,
+crash&gt; task ff1d16af6f935e80 |grep sched_class
+  sched_class = 0xffffffffa1eea290 &lt;rt_sched_class&gt;,
+crash&gt; task ff1d16af6f935e80 |grep prio
+  prio = 19,
+  static_prio = 120,
+  normal_prio = 19,
+  rt_priority = 80,
+    prio = 140,
+    prio_list = &#123;
+
+##cyclictest的优先级是80比multipathd的99要低
+</code></pre>
+<p><font color="red">至此可以确定multipathd的checkerloop线程和cyclictest一样都是rt线程优先级，且multipathd的chekerloop线程优先级是99比cyclictest的80要高</font></p>
+<p>好了，上面都已经明了了，再继续分析一下core</p>
+<p>看一下触发softlockup的cpu的timer，果然是有任务都超时了还没有执行（其他的cpu上没有这个问题，但是cpu0上挂了好多好多ghes_poll_func，但是这个与本core应该没关系，我们不受这个场外因素影响）</p>
+<p>该cpu上的rq如下，<font color="red">确实有timer超时了</font></p>
+<pre><code class="language-bash">crash&gt; timer -C 240
+JIFFIES
+4306062733
+
+TIMER_BASES[240][BASE_STD]: ff1d176b4f4207c0
+  EXPIRES        TTE        TIMER_LIST     FUNCTION
+  4306058428   -4305  ffffffffa2e83ee0  ffffffffa097a210  &lt;clocksource_watchdog&gt;
+  4306097530   34797  ff1d176b4f41fc20  ffffffffa0861530  &lt;mce_timer_fn&gt;
+TIMER_BASES[240][BASE_DEF]: ff1d176b4f421a40
+  EXPIRES        TTE     TIMER_LIST     FUNCTION
+  (none)
+
+
+crash&gt; runq -c 240
+CPU 240 RUNQUEUE: ff1d176b4f430b80
+  CURRENT: PID: 4069   TASK: ff1d16af4e8f8000  COMMAND: &quot;multipathd&quot;
+  RT PRIO_ARRAY: ff1d176b4f430e40
+     [  0] PID: 4069   TASK: ff1d16af4e8f8000  COMMAND: &quot;multipathd&quot;
+     [ 19] PID: 1392590  TASK: ff1d16af58b48000  COMMAND: &quot;cyclictest&quot;
+  CFS RB_ROOT: ff1d176b4f430cc0
+     [120] PID: 3073   TASK: ff1d16af5f4b8000  COMMAND: &quot;kworker/240:2&quot;
+     [100] PID: 3898   TASK: ff1d16af6d128000  COMMAND: &quot;kworker/240:1H&quot;
+</code></pre>
+<p>那么有可能是什么原因导致了stop_work一直没有更新时间戳呢？首先想到的就是是不是multipathd执行的内容陷入到内核中去有死循环或者死锁之类的？但是看了下multipathd中checkerlopp函数的代码又感觉没什么问题，而且他会执行nanosleep睡眠，也就是理论上并不会一直占用cpu，因为sleep会进行schedule让出cpu。</p>
+<p>到这里仿佛没什么头绪了。于是把&#x2F;etc&#x2F;multipath.conf配置文件中加上verbosity 4，然后multipath -r然后systemctl restart multipathd，让multipathd打印更详细的日志，然后再触发一下cyclictest导致的宕机，看了下没什么问题感觉，还是在执行checkerloop中的定时判断检查，然后就突然宕机了。</p>
+<p><img src="/img/10.png" alt="这是一张图片"></p>
+<p><font color="red">根据开启multipathd的log我们可以确定chekerloop线程其实是有执行nanosleep的，没有什么异常</font></p>
+<p>所以这时候大胆推测一下是不是和rt调度器有关系？看一下vmcore中checkerloop线程所在的cpu上有没有挂一些ipi任务。</p>
+<pre><code class="language-bash">crash&gt; p call_single_queue:240
+per_cpu(call_single_queue, 240) = $1 = &#123;
+  first = 0xff1d176e5011d878
+&#125;
+crash&gt; list 0xff1d176e5011d878
+ff1d176e5011d878
+crash&gt; call_single_data_t ff1d176e5011d878
+struct call_single_data_t &#123;
+  node = &#123;
+    llist = &#123;
+      next = 0x0
+    &#125;,
+    &#123;
+      u_flags = 35,
+      a_flags = &#123;
+        counter = 35
+      &#125;
+    &#125;,
+    src = 0,
+    dst = 0
+  &#125;,
+  func = 0xffffffffa091f400 &lt;rto_push_irq_work_func&gt;,
+  info = 0xfc4ab0200000001
+&#125;
+</code></pre>
+<p>确实<font color="red">发生问题的cpu上call_single_queue上挂着任务</font>呢，而其他的cpu中是没有挂任务的，<font color="red">挂的任务是rto_push_irq_work_func</font>。那是不是这个这个cpu上一直在处理ipi导致触发了softlockup的watchdog呢？</p>
+<p>还是看看这个rto_push_irq_work_func函数是做什么的，看上去应该是rt调度的负载均衡相关的东西</p>
+<pre><code class="language-bash">void rto_push_irq_work_func(struct irq_work *work)
+&#123;
+        struct root_domain *rd =
+                container_of(work, struct root_domain, rto_push_work);
+        struct rq *rq;
+        int cpu;
+
+        rq = this_rq();
+
+        /*
+         * We do not need to grab the lock to check for has_pushable_tasks.
+         * When it gets updated, a check is made if a push is possible.
+         */
+         //has_pushable_tasks就是检查rq中的rq-&gt;rt.pushable_tasks是否为空
+         //push_rt_task的作用是，如果当前cpu有超过1个的rt任务，就检查一下没有在运行的任务是不是可以
+         //迁移到其他的正在运行低优先级的任务的cpu上去
+        if (has_pushable_tasks(rq)) &#123;
+                raw_spin_rq_lock(rq);
+                while (push_rt_task(rq, true))
+                        ;
+                raw_spin_rq_unlock(rq);
+        &#125;
+
+        raw_spin_lock(&amp;rd-&gt;rto_lock);
+
+        /* Pass the IPI to the next rt overloaded queue */
+        //发ipi给下一个rt overloaded queue？什么意思？应该是值发ipi给下一个过载的cpu，让下一个cpu也去执行负载均衡吧？
+        cpu = rto_next_cpu(rd);
+
+        raw_spin_unlock(&amp;rd-&gt;rto_lock);
+
+        if (cpu &lt; 0) &#123;
+                sched_put_rd(rd);
+                return;
+        &#125;
+
+        /* Try the next RT overloaded CPU */
+        //入队一个irq work
+        irq_work_queue_on(&amp;rd-&gt;rto_push_work, cpu);
+&#125;
+</code></pre>
+<p><font color="red">至此可以猜测是该cpu在处理rt调度器负载均衡相关的任务</font></p>
+<p>先大概看一下谁会去调用这个函数？</p>
+<pre><code class="language-bash">balance_rt
+pull_rt_task
+tell_cpu_to_push
+     irq_work_queue_on(&amp;rq-&gt;rd-&gt;rto_push_work, cpu);
+</code></pre>
+<p>看一下pick_next_task中什么时候会去调用balance呢？删除fair class中的一部分没用的内容，可以看到如果prev的sched_class不是小于等于fair的话（显然cyclictest和multipathd是rt class不满足这个条件），就会去先执行put_prev_task_balance，而put_prev_task_balance是干什么呢？其实就是从prev所属的sched class开始遍历并执行每个class的balance，对于rt来说，那自然就是balance_rt函数</p>
+<pre><code class="language-c">__pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
+&#123;
+..........
+        if (likely(prev-&gt;sched_class &lt;= &amp;fair_sched_class &amp;&amp;
+                   rq-&gt;nr_running == rq-&gt;cfs.h_nr_running)) &#123;
+..............
+        &#125;
+
+restart:
+        put_prev_task_balance(rq, prev, rf);
+        for_each_class(class) &#123;
+                p = class-&gt;pick_next_task(rq);
+                if (p)
+                        return p;
+        &#125;
+
+
+static void put_prev_task_balance(struct rq *rq, struct task_struct *prev,
+                                  struct rq_flags *rf)
+&#123;
+。。。。。。
+        const struct sched_class *class;
+        for_class_range(class, prev-&gt;sched_class, &amp;idle_sched_class) &#123;
+                if (class-&gt;balance(rq, prev, rf))
+                        break;
+        &#125;
+。。。。。。
+        put_prev_task(rq, prev);
+&#125;
+</code></pre>
+<p><font color="red">所以我们基本可以得出，cyclictest和multipathd调度出去的时候应该都会执行balance。</font></p>
+<p>因此从balance_rt开始看</p>
+<pre><code class="language-c">static int balance_rt(struct rq *rq, struct task_struct *p, struct rq_flags *rf)
+&#123;
+        if (!on_rt_rq(&amp;p-&gt;rt) &amp;&amp; need_pull_rt_task(rq, p)) &#123;
+                rq_unpin_lock(rq, rf);
+                pull_rt_task(rq);
+                rq_repin_lock(rq, rf);
+        &#125;
+
+        return sched_stop_runnable(rq) || sched_dl_runnable(rq) || sched_rt_runnable(rq);
+&#125;
+
+##如果当前rq中最高优先级的任务还不如正在运行的prio高，就需要拉任务下来？？？
+##这块看core怎么感觉有些问题
+static inline bool need_pull_rt_task(struct rq *rq, struct task_struct *prev)
+&#123;
+        /* Try to pull RT tasks here if we lower this rq&#39;s prio */
+        return rq-&gt;online &amp;&amp; rq-&gt;rt.highest_prio.curr &gt; prev-&gt;prio;
+&#125;
+</code></pre>
+<p>pull_rt_task的大致过程：</p>
+<pre><code class="language-c">static void pull_rt_task(struct rq *this_rq)
+&#123;
+        int this_cpu = this_rq-&gt;cpu, cpu;
+        bool resched = false;
+        struct task_struct *p, *push_task;
+        struct rq *src_rq;
+        int rt_overload_count = rt_overloaded(this_rq);
+
+        //没有overload的cpu就返回
+        if (likely(!rt_overload_count))
+                return;
+
+        /*
+         * Match the barrier from rt_set_overloaded; this guarantees that if we
+         * see overloaded we must also see the rto_mask bit.
+         */
+        smp_rmb();
+
+        /* If we are the only overloaded CPU do nothing */
+        //若当前cpu一个overload的，就什么都不做
+        if (rt_overload_count == 1 &amp;&amp;
+            cpumask_test_cpu(this_rq-&gt;cpu, this_rq-&gt;rd-&gt;rto_mask))
+                return;
+
+#ifdef HAVE_RT_PUSH_IPI
+        if (sched_feat(RT_PUSH_IPI)) &#123;
+                //通知其他cpu push task？
+                tell_cpu_to_push(this_rq);
+                return;
+        &#125;
+#endif
+        //遍历所有在mask中的cpu
+        for_each_cpu(cpu, this_rq-&gt;rd-&gt;rto_mask) &#123;
+                //跳过当前cpu
+                if (this_cpu == cpu)
+                        continue;
+
+                //获取源rq，也就是遍历的cpu的rq作为源rq，因为需要从这些东西上push任务上去给之前的cpu pull
+                src_rq = cpu_rq(cpu);
+
+                /*
+                 * Don&#39;t bother taking the src_rq-&gt;lock if the next highest
+                 * task is known to be lower-priority than our current task.
+                 * This may look racy, but if this value is about to go
+                 * logically higher, the src_rq will push this task away.
+                 * And if its going logically lower, we do not care
+                 */
+                 //如果src rq中highest_prio.next，也就是下一个要调度的rt进程的prio大于当前的rq中的highest_prio.curr就跳过？
+                 //也就是，src rq中的下一个要调度的任务的优先级比当前小就跳过？
+                if (src_rq-&gt;rt.highest_prio.next &gt;=
+                    this_rq-&gt;rt.highest_prio.curr)
+                        continue;
+
+                /*
+                 * We can potentially drop this_rq&#39;s lock in
+                 * double_lock_balance, and another CPU could
+                 * alter this_rq
+                 */
+                push_task = NULL;
+                double_lock_balance(this_rq, src_rq);
+
+                /*
+                 * We can pull only a task, which is pushable
+                 * on its rq, and no others.
+                 */
+                 //从src rq中挑一个最高优先级的任务
+                p = pick_highest_pushable_task(src_rq, this_cpu);
+
+                /*
+                 * Do we have an RT task that preempts
+                 * the to-be-scheduled task?
+                 */
+                 //从src rq中push上来的任务是不是优先级比当前cpu上的最高优先级的任务的优先级高？
+                 //是的话抢占？
+                if (p &amp;&amp; (p-&gt;prio &lt; this_rq-&gt;rt.highest_prio.curr)) &#123;
+                        WARN_ON(p == src_rq-&gt;curr);
+                        WARN_ON(!task_on_rq_queued(p));
+
+                        /*
+                         * There&#39;s a chance that p is higher in priority
+                         * than what&#39;s currently running on its CPU.
+                         * This is just that p is waking up and hasn&#39;t
+                         * had a chance to schedule. We only pull
+                         * p if it is lower in priority than the
+                         * current task on the run queue
+                         */
+                         //如果p比他自己的cpu中正在运行的任务的优先级高，那就不管
+                        if (p-&gt;prio &lt; src_rq-&gt;curr-&gt;prio)
+                                goto skip;
+                        //如果p禁止migration，就先获取这个task？
+                        //如果咩禁止，就从src rq中删除，然后设置task到本cpu，然后激活这个task？
+                        if (is_migration_disabled(p)) &#123;
+                                push_task = get_push_task(src_rq);
+                        &#125; else &#123;
+                                deactivate_task(src_rq, p, 0);
+                                set_task_cpu(p, this_cpu);
+                                activate_task(this_rq, p, 0);
+                                resched = true;
+                        &#125;
+                        /*
+                         * We continue with the search, just in
+                         * case there&#39;s an even higher prio task
+                         * in another runqueue. (low likelihood
+                &#125;
+skip:
+                double_unlock_balance(this_rq, src_rq);
+                //如果是上面的禁止迁移的task，就向目标cpu发stop_work，让目标cpu执行push_work？
+                if (push_task) &#123;
+                        raw_spin_rq_unlock(this_rq);
+                        stop_one_cpu_nowait(src_rq-&gt;cpu, push_cpu_stop,
+                                            push_task, &amp;src_rq-&gt;push_work);
+                        raw_spin_rq_lock(this_rq);
+                &#125;
+        &#125;
+
+        if (resched)
+                resched_curr(this_rq);
+&#125;
+
+
+
+
+tell_cpu_to_push
+irq_work_queue_on
+__smp_call_single_queue
+send_call_function_single_ipi
+</code></pre>
+<p>继续看一下core</p>
+<pre><code>enqueue_task_rt/sched_rt_rq_enqueue
+enqueue_rt_entity
+__enqueue_rt_entity
+inc_rt_tasks
+inc_rt_migration
+rt_set_overload
+
+static inline void rt_set_overload(struct rq *rq)
+&#123;
+	if (!rq-&gt;online)
+		return;
+
+	cpumask_set_cpu(rq-&gt;cpu, rq-&gt;rd-&gt;rto_mask);
+	/*
+	 * Make sure the mask is visible before we set
+	 * the overload count. That is checked to determine
+	 * if we should look at the mask. It would be a shame
+	 * if we looked at the mask, but the mask was not
+	 * updated yet.
+	 *
+	 * Matched by the barrier in pull_rt_task().
+	 */
+	smp_wmb();
+	atomic_inc(&amp;rq-&gt;rd-&gt;rto_count);
+&#125;            ........
+</code></pre>
+<p>现在可以看到rto_mask确实被置位了，那么怎么置位的呢？</p>
+<p>大致就是在enqueue或者dequeue的时候会inc或者dec对应的task，在这里就会判断是否overload了</p>
+<pre><code class="language-c">enqueue_task_rt/sched_rt_rq_enqueue
+enqueue_rt_entity
+__enqueue_rt_entity
+inc_rt_tasks
+inc_rt_migration
+rt_set_overload
+
+static inline void rt_set_overload(struct rq *rq)
+&#123;
+	if (!rq-&gt;online)
+		return;
+
+	cpumask_set_cpu(rq-&gt;cpu, rq-&gt;rd-&gt;rto_mask);
+	/*
+	 * Make sure the mask is visible before we set
+	 * the overload count. That is checked to determine
+	 * if we should look at the mask. It would be a shame
+	 * if we looked at the mask, but the mask was not
+	 * updated yet.
+	 *
+	 * Matched by the barrier in pull_rt_task().
+	 */
+	smp_wmb();
+	atomic_inc(&amp;rq-&gt;rd-&gt;rto_count);
+&#125;
+</code></pre>
+<p>（vmcore中的root_domain的overload是1表明，enqueue se之后，把overload设置成1之后，该cpu上就没有再dequeue过rt任务了，因为一直都在overload？所以就是一直在占用cpu？）</p>
+<p><font color="red">至此可以猜测是multipathd那个cpu overload了，导致一直有ipi中断需要处理，让它把task push上去</font></p>
+<p>这表示，出问题的cpu上有两个rt任务了，可迁移的任务有一个，其实也就是multipathd，因为cyclictest我们肯定是绑核的，不能迁移</p>
+<p>这正好可以对应上update_rt_migration函数设置overhead</p>
+<pre><code class="language-c">crash&gt; rq ff40900c4ddf0b80 |grep rt_nr_total
+    rt_nr_total = 2,
+crash&gt; rq ff40900c4ddf0b80 |grep rt_nr_migratory
+    rt_nr_migratory = 1,
+
+
+static void update_rt_migration(struct rt_rq *rt_rq)
+&#123;
+        if (rt_rq-&gt;rt_nr_migratory &amp;&amp; rt_rq-&gt;rt_nr_total &gt; 1) &#123;
+                if (!rt_rq-&gt;overloaded) &#123;
+                        rt_set_overload(rq_of_rt_rq(rt_rq));
+                        rt_rq-&gt;overloaded = 1;
+                &#125;
+        &#125; else if (rt_rq-&gt;overloaded) &#123;
+                rt_clear_overload(rq_of_rt_rq(rt_rq));
+                rt_rq-&gt;overloaded = 0;
+        &#125;
+&#125;
+</code></pre>
+<p>那么为什么overhead了就会宕机呢？？？</p>
+<p>联系之前开启multipathd的日志，难不成和check线程的每次tick一秒钟有关系？不应该呀，这个是有sleep 1 的操作的会让出cpu，怎么还会softlockup呢？</p>
+<p><strong>所以现在的线索和疑点如下：</strong></p>
+<ol>
+<li>宕机应该和rt进程的负载均衡有关，因为宕机的cpu上会发现挂着rto_push_irq_work_func的irq work，这个应该是cpu上rt进程overhead导致的，一般认为cpu上挂了大于1个的rt进程的时候就认为overheade了（当然还有别的一些判断条件，比如进程是否能迁移到其他cpu之类的，不过从core中可以看出，这个绝对是overhead了，从root_domain的rto_mask可以看出），需要负载均衡一下</li>
+<li>为什么multipathd的其他线程没有导致宕机？都是checkerloop这个线程导致的？</li>
+</ol>
+<p>还是需要有问题的环境去调试一下，但是开了ftrace之后问题就不好复现了。于是写了个bpftrace脚本监控一下rto_push_irq_work_func函数。</p>
+<p>可以确定的是，在出问题时rto_push_irq_work_func函数调用激增，那么谁会调用这个呢？看了下只有tell_cpu_to_push和rto_push_irq_work_func函数。而tell_cpu_to_push是被pull_rt_task调用的，也就是其他cpu需要向这个异常cpu通知拉任务下来的时候会调用。另一处调用就是rto_push_irq_work_func里调用了，这个有可能是自己给自己发ipi然后调用这个rto_push_irq_work_func，然后在这个函数里再自己给自己发ipi导致这个死循环一直发ipi让这个cpu去处理softirq？但是看了下这块的函数逻辑，理论上应该不会，他应该是找当前cpu的next cpu，也就是rto cpumask中当前cpu的下一个overlaod的cpu去调用，rd-&gt;rto_cpu的赋值看上去问题不大。</p>
+<p>要搞清楚是谁谁让异常cpu调用一直处理中断，还是要trace清楚，是谁大量调用的rto_push_irq_work_func函数。</p>
+<p>perf probe ‘rto_push_irq_work_func’</p>
+<p>perf record -e probe:rto_push_irq_work_func -aR sleep 30</p>
+<p>然后又perf probe了一下tell_cpu_to_push，大概就明白了</p>
+<p><font color="red">cyclictest调度的时候会触发rt balance，这个就会发ipi让异常cpu push任务上去，但是短时间内大量的发的话就处理不过来了</font></p>
+<p><a target="_blank" rel="noopener" href="https://lore.kernel.org/lkml/xhsmhpm3vb6ws.mognet@vschneid.remote.csb/T/">https://lore.kernel.org/lkml/xhsmhpm3vb6ws.mognet@vschneid.remote.csb/T/</a></p>
+<p>然后看到社区有人遇到过类似的问题</p>
+<p>所以这个过程就很清晰了：</p>
+<ol>
+<li><font color="red">开启cyclictest，每个cpu上会有一个绑核的cyclictest的rt进程，他的优先级是80</font></li>
+<li><font color="red">ubuntu22上会有一个multipathd进程，他有一个优先级为99的chckerloop的rt线程</font></li>
+<li><font color="red">当multipathd的chckerloop运行时，他所在的cpu上（假设是X号cpu）还存在cyclictest的rt线程，因此有两个线程，所以系统会认为这个cpu overload了</font></li>
+<li><font color="red">其他cpu上的cyclictest运行时，进行调度或者sleep（这会进行schedule，schedule到swapper的话，其实就是往低优先级的任务进行调度了）的时候，发现需要负载均衡，于是就使用tell_cpu_to_push（这个过程会增加rq-&gt;rd-&gt;rto_loop_next）向X发送ipi让它去push task</font></li>
+<li><font color="red">X上现在正运行multipathd的checkerloop，而且该cpu上的cyclictest是绑核的没办法migration，因此也就没有pushable_tasks，也就不会把task push上去。然后在rto_push_irq_work_func中就会继续执行rto_next_cpu去找下一个overload的cpu，通过rto_next_cpu代码逻辑可以知道，他是从X开始从rto_mask中寻找下一个overload的cpu，很明显，它找不到，因为只有X是overload的，于是此时rd-&gt;rto_cpu被置为-1，但是他还会去尝试去判断rto_loop_next &#x3D;&#x3D; rto_loop，如果不相等的话，就把rto_loop赋值成rto_loop_next，然后继续循环，很明显，再进入下一轮循环后，rto_cpu此时的值是-1，那在找cpu的时候就会把X给return了，因此又会去调用irq_work_queue_on往自己所在的X上发ipi执行rto_push_irq_work_func，然后X上唤醒irq work去执行rto_push_irq_work_func还是没办法执行把task push上去，因为只有multipathd的checkerloop是pushable的，但是他正在运行，所以此时是没有pushable task的，而其他cpu也还在一直给它发ipi，他就一直不断处理中断，最终导致softlockup</font></li>
+</ol>
+<p>那么这该怎么解决呢？一个是像那个patch一样如果没有pushable task的话就直接返回？或者如果cpu是当前cpu的话就返回，不让他自己给自己发ipi（这个是不是不太合理，应该是允许这样的情况发生的吧）？或者能不能从overload的判定下手（如果是每个cpu上都有绑核的cyclictest这种rt进程的情况，并且有更高优先级的rt运行在一个cpu上的时候，这个是不是就不判定overload？？？不对，也不合理，因为我们没办法假设每个cpu上绑核的rt进程的任务是什么样的，因此，只要某个cpu上有可push的任务的时候，其实就应该判定为overload的）？</p>
+<p><a target="_blank" rel="noopener" href="https://lkml2.uits.iu.edu/hypermail/linux/kernel/1704.2/04980.html">https://lkml2.uits.iu.edu/hypermail/linux/kernel/1704.2/04980.html</a></p>
+<p>结合这个的话，看上去可能确实存在问题啊？rto_loop_next是用来标记cpu往低优先级的任务进行调度（比如cyclictest sleep的话进行schedule到swapper），而cyclictest会进行很多这样的重复操作，这就有可能导致rto_loop老是追不上rto_loop_next，从而导致除了cyclictest的cpu往X上发ipi，X cpu上执行rto_push_irq_work_func时候也会给自己发ipi。</p>
+<p>这样合理嘛？不让cpu自己给自己发ipi了，应该可以减少很多没用的ipi，但是应该还是没办法解决cyclictest的那些cpu给X发ipi</p>
+<pre><code class="language-c">diff --git a/kernel/sched/rt.c b/kernel/sched/rt.c
+index bd66a46b06ac..2ebb7f75ff79 100644
+--- a/kernel/sched/rt.c
++++ b/kernel/sched/rt.c
+@@ -2165,8 +2165,12 @@ static int rto_next_cpu(struct root_domain *rd)
+
+                rd-&gt;rto_cpu = cpu;
+
+-               if (cpu &lt; nr_cpu_ids)
+-                       return cpu;
++               if (cpu &lt; nr_cpu_ids) &#123;
++                       if (cpu != smp_processor_id())
++                               return cpu;
++                       else
++                               return -1;
++               &#125;
+
+                rd-&gt;rto_cpu = -1;
+</code></pre>
+<p>看来社区已经有人解决了</p>
+<p>sched&#x2F;rt: Make rt_rq-&gt;pushable_tasks updates drive rto_mask(<a target="_blank" rel="noopener" href="https://lore.kernel.org/lkml/20230811112044.3302588-1-vschneid@redhat.com/T/">https://lore.kernel.org/lkml/20230811112044.3302588-1-vschneid@redhat.com/T/</a>)</p>
+<p>这个解法妙，是从根本上解决问题的，产生这个问题的根本原因并不是说rto_push_irq_work_func给自己发ipi，而是由大量的cyclictest rt进程的sleep导致的schedule检测到需要进行rt balance，那么rt balance怎么做呢，它就找之前已经在root_domain中是否已经设置了overload，并在rto_mask中寻找overload的cpu，然后向这些overload的cpu发送ipi起执行rto_push_irq_work_func这个irq work，这个rto_push_irq_work_func函数的主要内容是什么呢？就是把pushable task push上去。</p>
+<p>而为什么cyclictest导致宕机了呢？因为在softlockup的那个cpu上，存在cyclictest和multipathd两个rt进程，cyclictest是绑核的不可迁移，只有multipathd是可迁移的，但是按照当前的设置方式来说，当enqueue multipathd的时候，因为它是可迁移的，所以rt_nr_migratory此时是1，而rt_nr_total是2大于1（因为有之前的cyclictest rt进程在），所以就符合了update_rt_migration函数中的判断，所以就认为该cpu上是overload的。但实际上，当multipathd运行的时候，pushable task队列中并没有可以push的task，为什么呢？因为只有multipathd是可push的但是它正在运行，所以这就导致其他的cyclictest的cpu检测到这个multipathd的cpu overload了，去给他发ipi，但是这个cpu执行rto_push_irq_work_func函数相当于并没有什么实质操作，因为此时他没有可push的任务，这就导致的问题的产生，其他的cyclictest的cpu还是会一直给它发ipi，因为他们一直认为他是overload的，但是这个cpu上并没有把任何task push上去，所以就相当于一直空执行rto_push_irq_work_func，最终导致了softlockup。</p>
+<p>所以，产生本问题的根因应该是：<font color="red">这种情况下（两个rt线程，一个rt线程是绑核的，另一个是不绑核的可以迁移的，但是这个可迁移的task正在cpu上运行）就不应该把这个cpu判定为overload，因为它当前就没有可以push的task。</font></p>
+<p>sched&#x2F;rt: Make rt_rq-&gt;pushable_tasks updates drive rto_mask这个patch怎么解决的这个问题呢？他把原本的判定overload的方式去掉了，原本的判断时机是在<strong>enqueue_rt_entity&#x2F;dequeue_rt_entity</strong>中最终调用到update_rt_migration来判断是否overload（也就是根据rt_nr_migratory和rt_nr_total）。把这个判断时机放到了<strong>enqueue_pushable_task和dequeue_pushable_task</strong>中，这俩是在enqueue_task_rt&#x2F;dequeue_task_rt会调用。如下所示，在enqueue_task_rt中，以前是在enqueue_rt_entity直接检测并设置overload的，现在放到了enqueue_pushable_task中。假设还是cyclictest导致宕机的那种情况，当multiptahd enqueue的时候，进入if (!task_current(rq, p) &amp;&amp; p-&gt;nr_cpus_allowed &gt; 1)判断，因为要先判断一下task_current(rq, p)，也就是当前的task是不是正在running的，如果是的话，就不设置overload，所以就不会出现这种情况了，妙啊，还得是社区大佬们</p>
+<pre><code class="language-c">static void
+enqueue_task_rt(struct rq *rq, struct task_struct *p, int flags)
+&#123;
+        struct sched_rt_entity *rt_se = &amp;p-&gt;rt;
+
+        if (flags &amp; ENQUEUE_WAKEUP)
+                rt_se-&gt;timeout = 0;
+
+        check_schedstat_required();
+        update_stats_wait_start_rt(rt_rq_of_se(rt_se), rt_se);
+
+        enqueue_rt_entity(rt_se, flags);
+
+        if (!task_current(rq, p) &amp;&amp; p-&gt;nr_cpus_allowed &gt; 1)
+                enqueue_pushable_task(rq, p);
+&#125;
+</code></pre>
+
+      
+       <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
+    </div>
+</article>
+
+
+
+
+
+    <div id="comments"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+<script type="text/javascript">
+    $.getScript('/js/gitalk.js', function () {
+        var gitalk = new Gitalk({
+            clientID: 'Ov23lihTjDF3jklWOX9b',
+            clientSecret: '1304f65e90138886cd32255710839a4ba192f266',
+            repo: 'yzwddsg-plus.github.io',
+            owner: 'yzwddsg-plus',
+            admin: ['yzwddsg-plus'],
+            id: decodeURI(location.pathname),
+            distractionFreeMode: 'true',
+            language: 'zh-CN',
+            perPage: parseInt('10',10)
+        })
+        gitalk.render('comments')
+    })
+</script>
+
+
+
+
+
+
+
+    </div>
+    <div class="copyright">
+        <p class="footer-entry">
+    YZWDDSG
+</p>
+<p class="footer-entry">Built with <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/yelog/hexo-theme-3-hexo" target="_blank">3-hexo</a> theme</p>
+
+    </div>
+    <div class="full-toc">
+        <button class="full" data-title="Toggle full screen shortcut key s"><span class="min "></span></button>
+<a class="" id="rocket" ></a>
+
+    </div>
+</div>
+
+</body>
+<script src="/js/jquery.pjax.js?v=1.1.0" ></script>
+
+<script src="/js/script.js?v=1.1.0" ></script>
+<script>
+    var img_resize = 'default';
+    function initArticle() {
+        /*渲染对应的表格样式*/
+        
+
+        /*渲染打赏样式*/
+        
+
+        /*高亮代码块行号*/
+        
+
+        /*访问数量*/
+        
+
+        /*代码高亮，行号对齐*/
+        $('.pre-numbering').css('line-height',$('.has-numbering').css('line-height'));
+
+        
+        
+    }
+
+    /*打赏页面隐藏与展示*/
+    
+
+</script>
+
+<!--加入行号的高亮代码块样式-->
+
+<!--自定义样式设置-->
+<style>
+    
+    
+    .nav-right .title-list nav a .post-title, .nav-right .title-list #local-search-result a .post-title {
+        color: #383636;
+    }
+    
+    
+    .nav-right .title-list nav a .post-date, .nav-right .title-list #local-search-result a .post-date {
+        color: #5e5e5f;
+    }
+    
+    
+    .nav-right nav a.hover, #local-search-result a.hover{
+        background-color: #e2e0e0;
+    }
+    
+    
+
+    /*列表样式*/
+    
+
+    /* 背景图样式 */
+    
+    
+
+
+    /*引用块样式*/
+    
+
+    /*文章列表背景图*/
+    
+    .nav-right:before {
+        content: ' ';
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.3;
+        background: url("https://i.loli.net/2019/07/22/5d3521411f3f169375.png");
+        background-repeat: no-repeat;
+        background-position: 50% 0;
+        -ms-background-size: cover;
+        -o-background-size: cover;
+        -moz-background-size: cover;
+        -webkit-background-size: cover;
+        background-size: cover;
+    }
+    
+
+    
+    #post .pjax article :not(pre) > code {
+        color: #24292e;
+        font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,Courier,monospace;
+        background-color: rgba(27,31,35,.05);
+        border-radius: 3px;
+        font-size: 85%;
+        margin: 0;
+        padding: .2em .4em;
+    }
+    
+</style>
+
+
+
+
+
+
+
+</html>

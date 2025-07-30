@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>nbd驱动的实现 | YZWDDSG</title>
+  <meta name="keywords" content="">
+  <meta name="description" content="nbd驱动的实现 | YZWDDSG">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
+<meta property="og:type" content="website">
+<meta property="og:title" content="categories">
+<meta property="og:url" content="http://example.com/categories/index.html">
+<meta property="og:site_name" content="YZWDDSG">
+<meta property="og:locale">
+<meta property="article:published_time" content="2025-02-23T15:43:05.000Z">
+<meta property="article:modified_time" content="2025-02-23T15:43:53.864Z">
+<meta property="article:author" content="YZWDDSG">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="icon" href="/img/avatar.jpg">
+
+<link href="/css/style.css?v=1.1.0" rel="stylesheet">
+
+<link href="/css/hl_theme/atom-dark.css?v=1.1.0" rel="stylesheet">
+
+<link href="//cdn.jsdelivr.net/npm/animate.css@4.1.0/animate.min.css" rel="stylesheet">
+
+<script src="//cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+<script src="/js/titleTip.js?v=1.1.0" ></script>
+
+<script src="//cdn.jsdelivr.net/npm/highlightjs@9.16.2/highlight.pack.min.js"></script>
+<script>
+    hljs.initHighlightingOnLoad();
+</script>
+
+<script src="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js"></script>
+
+
+
+<script src="//cdn.jsdelivr.net/npm/jquery.cookie@1.4.1/jquery.cookie.min.js" ></script>
+
+<script src="/js/iconfont.js?v=1.1.0" ></script>
+<script src="/js/custom-iconfont.js?v=1.1.0" ></script>
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<div style="display: none">
+  <input class="theme_disqus_on" value="false">
+  <input class="theme_preload_comment" value="">
+  <input class="theme_blog_path" value="">
+  <input id="theme_shortcut" value="true" />
+  <input id="theme_highlight_on" value="true" />
+  <input id="theme_code_copy" value="true" />
+</div>
+
+
+
+<body>
+<aside class="nav">
+    <div class="nav-left">
+        <a href="/"
+   class="avatar_target">
+    <img class="avatar"
+         src="/img/avatar.jpg"/>
+</a>
+<div class="author">
+    <span>YZWDDSG</span>
+</div>
+
+<div class="icon">
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+</div>
+
+
+
+
+
+<ul>
+    <li>
+        <div class="all active" data-rel="All">All
+            
+                <small>(28)</small>
+            
+        </div>
+    </li>
+    
+        
+            
+                
+    <li>
+        <div data-rel="硬件">
+            
+            硬件
+            <small>(4)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="调度">
+            
+            调度
+            <small>(2)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="内存">
+            
+            内存
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="存储">
+            
+            存储
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="网络">
+            
+            网络
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="文件系统">
+            
+            文件系统
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="虚拟化">
+            
+            虚拟化
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="power">
+            
+            power
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="OS">
+            
+            OS
+            <small>(3)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="故障排查">
+            
+            故障排查
+            <small>(8)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="其他">
+            
+            其他
+            <small>(2)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="个人">
+            
+            个人
+            <small>(3)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+</ul>
+<div class="left-bottom">
+    <div class="menus">
+        
+            
+            
+            
+    </div>
+    <div>
+        
+            <a class="about  site_url"
+               
+               href="/about">About</a>
+        
+        
+    </div>
+</div>
+<input type="hidden" id="yelog_site_posts_number" value="28">
+<input type="hidden" id="yelog_site_word_count" value="65.1k">
+<div style="display: none">
+    <span id="busuanzi_value_site_uv"></span>
+    <span id="busuanzi_value_site_pv"></span>
+</div>
+
+    </div>
+    <div class="nav-right">
+        <div class="friends-area">
+    <div class="friends-title">
+        Links
+        <i class="iconfont icon-left"></i>
+    </div>
+    <div class="friends-content">
+        <ul>
+            
+            <li><a target="_blank" href="http://yelog.org/">叶落阁</a></li>
+            
+        </ul>
+    </div>
+</div>
+        <div class="title-list">
+    <div class="right-top">
+        <div id="default-panel">
+            <i class="iconfont icon-search" data-title="search shortcut key i"></i>
+            <div class="right-title">All</div>
+            <i class="iconfont icon-file-tree" data-title="switch to outline view shortcut key w"></i>
+        </div>
+        <div id="search-panel">
+            <i class="iconfont icon-left" data-title="return"></i>
+            <input id="local-search-input" autocomplete="off"/>
+            <label class="border-line" for="input"></label>
+            <i class="iconfont icon-case-sensitive" data-title="case sensitive"></i>
+            <i class="iconfont icon-tag" data-title="label"></i>
+        </div>
+        <div id="outline-panel" style="display: none">
+            <div class="right-title">outline</div>
+            <i class="iconfont icon-list" data-title="switch to article list"></i>
+        </div>
+    </div>
+
+    <div class="tags-list">
+    <input id="tag-search" />
+    <div class="tag-wrapper">
+        
+    </div>
+
+</div>
+
+    
+    <nav id="title-list-nav">
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/07/04/kdump%E5%A4%B1%E8%B4%A5%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="kdump失败问题排查">kdump失败问题排查</span>
+            <span class="post-date" title="2025-07-04 23:03:39">2025/07/04</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/06/13/%E8%AE%B0%E4%B8%80%E5%8F%AA%E6%B5%81%E6%B5%AA%E6%96%91%E7%82%B9%E7%8B%97/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="记一只流浪斑点狗">记一只流浪斑点狗</span>
+            <span class="post-date" title="2025-06-13 21:39:16">2025/06/13</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/05/28/AMD-ERAPS/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="AMD ERAPS">AMD ERAPS</span>
+            <span class="post-date" title="2025-05-28 21:52:56">2025/05/28</span>
+        </a>
+        
+        
+        <a  class="All 其他 "
+           href="/2025/04/26/popen%E5%AF%BC%E8%87%B4%E7%9A%84%E9%97%AE%E9%A2%98%E5%8F%8A%E5%88%86%E6%9E%90/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="popen导致的问题及分析">popen导致的问题及分析</span>
+            <span class="post-date" title="2025-04-26 23:15:08">2025/04/26</span>
+        </a>
+        
+        
+        <a  class="All 存储 "
+           href="/2025/04/20/nbd%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%AE%9E%E7%8E%B0/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="nbd驱动的实现">nbd驱动的实现</span>
+            <span class="post-date" title="2025-04-20 16:41:42">2025/04/20</span>
+        </a>
+        
+        
+        <a  class="All 内存 "
+           href="/2025/04/11/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3meminfo%E4%B8%AD%E7%9A%84MemAvailable%E5%92%8CMemFree/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="如何理解meminfo中的MemAvailable和MemFree">如何理解meminfo中的MemAvailable和MemFree</span>
+            <span class="post-date" title="2025-04-11 19:43:19">2025/04/11</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/04/09/%E6%89%A7%E8%A1%8Crpm%E5%91%BD%E4%BB%A4%E5%8D%A1%E6%AD%BB%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="执行rpm命令卡死排查">执行rpm命令卡死排查</span>
+            <span class="post-date" title="2025-04-09 22:11:15">2025/04/09</span>
+        </a>
+        
+        
+        <a  class="All 调度 "
+           href="/2025/04/07/CPU%E5%88%A9%E7%94%A8%E7%8E%87%E4%B8%8D%E5%9D%87%E8%A1%A1%E9%97%AE%E9%A2%98-sched-domain%E5%AD%A6%E4%B9%A0/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="CPU利用率不均衡问题-sched_domain学习">CPU利用率不均衡问题-sched_domain学习</span>
+            <span class="post-date" title="2025-04-07 22:04:47">2025/04/07</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/04/05/PCIE%E8%AE%BE%E5%A4%87%E7%83%AD%E6%8F%92%E6%8B%94/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="PCIE设备热插拔">PCIE设备热插拔</span>
+            <span class="post-date" title="2025-04-05 22:00:12">2025/04/05</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/04/03/%E6%88%91%E5%92%8C%E6%88%91%E7%9A%84%E7%8B%97%E5%AD%90%E4%BB%AC/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="我和我的狗子们">我和我的狗子们</span>
+            <span class="post-date" title="2025-04-03 22:18:32">2025/04/03</span>
+        </a>
+        
+        
+        <a  class="All 调度 "
+           href="/2025/03/31/%E4%BF%AE%E6%94%B9%E8%BF%9B%E7%A8%8B%E4%BF%A1%E6%81%AF%E7%9A%84%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改进程信息的内核模块">修改进程信息的内核模块</span>
+            <span class="post-date" title="2025-03-31 21:53:34">2025/03/31</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/30/%E4%B8%80%E6%AC%A1%E4%B8%A2%E5%8C%85%E7%9A%84%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="一次丢包的排查">一次丢包的排查</span>
+            <span class="post-date" title="2025-03-30 12:56:05">2025/03/30</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/29/systemd-resolved%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="systemd-resolved服务异常">systemd-resolved服务异常</span>
+            <span class="post-date" title="2025-03-29 22:28:32">2025/03/29</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/22/rt%E8%B0%83%E5%BA%A6%E5%99%A8bug%E5%AF%BC%E8%87%B4%E5%AE%95%E6%9C%BA%E7%9A%84%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="rt调度器bug导致宕机的排查">rt调度器bug导致宕机的排查</span>
+            <span class="post-date" title="2025-03-22 21:08:39">2025/03/22</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/21/%E4%BF%AE%E6%94%B9debian%E5%86%85%E6%A0%B8%E6%BA%90%E7%A0%81%E5%B9%B6%E6%89%93%E5%8C%85/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改debian内核源码并打包">修改debian内核源码并打包</span>
+            <span class="post-date" title="2025-03-21 21:53:56">2025/03/21</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/17/%E8%AE%B0%E4%B8%80%E6%AC%A1%E4%BA%91%E7%9B%98%E7%83%AD%E6%8B%94%E5%A4%B1%E8%B4%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="记一次云盘热拔失败">记一次云盘热拔失败</span>
+            <span class="post-date" title="2025-03-17 22:02:52">2025/03/17</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/03/13/MMX%E3%80%81FMA%E3%80%81SSE%E4%B8%8EAVX/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="MMX、FMA、SSE与AVX">MMX、FMA、SSE与AVX</span>
+            <span class="post-date" title="2025-03-13 21:37:54">2025/03/13</span>
+        </a>
+        
+        
+        <a  class="All 文件系统 "
+           href="/2025/03/12/proc%E3%80%81sysctl%E5%92%8Csysfs/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="proc、sysctl和sysfs">proc、sysctl和sysfs</span>
+            <span class="post-date" title="2025-03-12 22:00:23">2025/03/12</span>
+        </a>
+        
+        
+        <a  class="All 其他 "
+           href="/2025/03/11/%E4%BF%AE%E6%94%B9bios%E9%85%8D%E7%BD%AE/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改bios配置">修改bios配置</span>
+            <span class="post-date" title="2025-03-11 21:49:28">2025/03/11</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/10/%E4%BF%AE%E6%94%B9%E5%85%AC%E7%89%88%E5%86%85%E6%A0%B8/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改公版内核">修改公版内核</span>
+            <span class="post-date" title="2025-03-10 22:13:00">2025/03/10</span>
+        </a>
+        
+        
+        <a  class="All power "
+           href="/2025/03/09/proc-cpuinfo%E6%98%BE%E7%A4%BA%E9%A2%91%E7%8E%87%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="/proc/cpuinfo显示频率原理">/proc/cpuinfo显示频率原理</span>
+            <span class="post-date" title="2025-03-09 22:00:49">2025/03/09</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/07/rsyslog%E9%85%8D%E7%BD%AE/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="rsyslog配置">rsyslog配置</span>
+            <span class="post-date" title="2025-03-07 22:36:29">2025/03/07</span>
+        </a>
+        
+        
+        <a  class="All 虚拟化 "
+           href="/2025/03/06/qemu-kvm%E6%B7%BB%E5%8A%A0%E6%96%B0feature%E8%99%9A%E6%8B%9F%E5%8C%96/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="qemu kvm添加新feature虚拟化">qemu kvm添加新feature虚拟化</span>
+            <span class="post-date" title="2025-03-06 00:13:34">2025/03/06</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/02/27/hung-task%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="hung task原理">hung task原理</span>
+            <span class="post-date" title="2025-02-27 22:54:58">2025/02/27</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/02/26/netconsole/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="netconsole">netconsole</span>
+            <span class="post-date" title="2025-02-26 23:01:56">2025/02/26</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/02/26/%E8%88%92%E6%B4%BB%E8%88%92%E6%B4%BB%E7%AD%8B%E9%AA%A8%EF%BC%8C%E6%8A%96%E6%93%9E%E6%8A%96%E6%93%9E%E7%B2%BE%E7%A5%9E/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="舒活舒活筋骨，抖擞抖擞精神">舒活舒活筋骨，抖擞抖擞精神</span>
+            <span class="post-date" title="2025-02-26 00:05:33">2025/02/26</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/02/25/softlockup%E4%B8%8Ehardlockup/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="softlockup与hardlockup">softlockup与hardlockup</span>
+            <span class="post-date" title="2025-02-25 22:13:35">2025/02/25</span>
+        </a>
+        
+        
+        <a  class="All 网络 "
+           href="/2025/02/24/netpoll%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="netpoll原理">netpoll原理</span>
+            <span class="post-date" title="2025-02-24 21:36:30">2025/02/24</span>
+        </a>
+        
+        <div id="no-item-tips">
+
+        </div>
+    </nav>
+    <div id="outline-list">
+    </div>
+</div>
+
+    </div>
+    <div class="hide-list">
+        <div class="semicircle" data-title="Toggle full screen shortcut key s">
+            <div class="brackets first"><</div>
+            <div class="brackets">&gt;</div>
+        </div>
+    </div>
+</aside>
+<div id="post">
+    <div class="pjax">
+        <article id="post-nbd驱动的实现" class="article article-type-post" itemscope itemprop="blogPost">
+    
+        <h1 class="article-title">nbd驱动的实现</h1>
+    
+    <div class="article-meta">
+        
+        
+        
+        <span class="book">
+            <i class="iconfont icon-category"></i>
+            
+            
+            <a  data-rel="存储">存储</a>
+            
+        </span>
+        
+        
+    </div>
+    <div class="article-meta">
+        
+            Created At : <time class="date" title='Updated At: 2025-04-20 17:02:54'>2025-04-20 16:41</time>
+        
+    </div>
+    <div class="article-meta">
+        
+        <span>Count:5.3k</span>
+        
+        
+        
+        <span class="top-comment" title="Jump to comment area">
+            <a href="#comments">
+                Comment:<span class="count-comment">
+                    <span class="spinner">
+                      <div class="cube1"></div>
+                      <div class="cube2"></div>
+                    </span>
+                </span>
+            </a>
+        </span>
+        
+    </div>
+    
+    <div class="toc-ref">
+    
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0"><span class="toc-text">学习</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A8%A1%E5%9D%97%E5%8F%82%E6%95%B0"><span class="toc-text">模块参数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E7%BB%93%E6%9E%84%E4%BD%93"><span class="toc-text">相关结构体</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-text">初始化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%87%E7%A8%8B%E5%8F%8A%E5%8E%9F%E7%90%86"><span class="toc-text">过程及原理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C"><span class="toc-text">实验</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E8%AE%B0"><span class="toc-text">后记</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-text">参考</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E5%90%8E%E8%AE%B0"><span class="toc-text">后后记</span></a></li></ol>
+    
+<style>
+    .left-col .switch-btn,
+    .left-col .switch-area {
+        display: none;
+    }
+    .toc-level-3 i,
+    .toc-level-3 ol {
+        display: none !important;
+    }
+</style>
+</div>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>NBD(Network Block Device)，允许把远端的块设备映射到本地，像访问本地块设备一样访问远端设备</p>
+<h3 id="学习"><a href="#学习" class="headerlink" title="学习"></a><center>学习</center></h3><p>首先只有配置了CONFIG_BLK_DEV_NBD配置选项才能启用nbd驱动的编译</p>
+<h4 id="模块参数"><a href="#模块参数" class="headerlink" title="模块参数"></a>模块参数</h4><p>insmod&#x2F;modprobe nbd模块的时候，可以带两个参数：</p>
+<p>nbds_max：初始化的nbd设备数，默认16个，加载nbd模块后可以看到&#x2F;dev下又nbd0-nbd15</p>
+<p>max_part：指定每个nbd设备的最大分区数，默认16个</p>
+<h4 id="相关结构体"><a href="#相关结构体" class="headerlink" title="相关结构体"></a>相关结构体</h4><pre><code class="language-c">struct nbd_device &#123;
+  #用于多队列的id请求的tag set
+	struct blk_mq_tag_set tag_set;
+  #index,就是/dev/nbd0 /dev/nbd1中的0 1
+	int index;
+  #config和设备的引用计数
+	refcount_t config_refs;
+	refcount_t refs;
+	struct nbd_config *config;
+	struct mutex config_lock;
+	struct gendisk *disk;
+  
+	struct workqueue_struct *recv_workq;
+	struct work_struct remove_work;
+
+	struct list_head list;
+	struct task_struct *task_setup;
+
+	unsigned long flags;
+  #nbd-client的pid
+	pid_t pid; /* pid of nbd-client, if attached */
+  #后端设备的标识符
+	char *backend;
+&#125;;
+</code></pre>
+<h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><pre><code class="language-c">#define NBD_MAJOR		43   /* Network block device	*/
+static int __init nbd_init(void)
+&#123;
+	#检查参数合法性
+  ......
+  #注册一个blk设备，名字叫nbd，主设备号是43
+	if (register_blkdev(NBD_MAJOR, &quot;nbd&quot;))
+		return -EIO;
+
+  #分配一个workqueue，看名字的意思是delete nbd的？
+	nbd_del_wq = alloc_workqueue(&quot;nbd-del&quot;, WQ_UNBOUND, 0);
+	if (!nbd_del_wq) &#123;
+		unregister_blkdev(NBD_MAJOR, &quot;nbd&quot;);
+		return -ENOMEM;
+	&#125;
+  #初始化一个netlink family，关于netlink的原理及使用后面再写一篇
+	if (genl_register_family(&amp;nbd_genl_family)) &#123;
+		destroy_workqueue(nbd_del_wq);
+		unregister_blkdev(NBD_MAJOR, &quot;nbd&quot;);
+		return -EINVAL;
+	&#125;
+  #这里如果配置了CONFIG_DEBUG_FS，会在/sys/kernel/debug下创建一个nbd目录，可以用来debug
+	nbd_dbg_init();
+
+  #添加nbds_max个设备
+	for (i = 0; i &lt; nbds_max; i++)
+		nbd_dev_add(i, 1);
+	return 0;
+&#125;
+
+
+
+#register_blkdev过程，注册一个新的blk device
+int __register_blkdev(unsigned int major, const char *name,
+		void (*probe)(dev_t devt))
+&#123;
+	#处理major为0的情况。也就是没有指定主设备号，临时随机生成一个主设备号
+	if (major == 0) &#123;
+    #从高到低遍历major_names数组，尝试找到一个没有被分配过的设备号
+		for (index = ARRAY_SIZE(major_names)-1; index &gt; 0; index--) &#123;
+			if (major_names[index] == NULL)
+				break;
+		&#125;
+
+		if (index == 0) &#123;
+			printk(&quot;%s: failed to get major for %s\n&quot;,
+			       __func__, name);
+			ret = -EBUSY;
+			goto out;
+		&#125;
+    #找到就赋值给major
+		major = index;
+		ret = major;
+	&#125;
+
+  #不能超过最大值，当前是512，6.5内核上
+	if (major &gt;= BLKDEV_MAJOR_MAX) &#123;
+		pr_err(&quot;%s: major requested (%u) is greater than the maximum (%u) for %s\n&quot;,
+		       __func__, major, BLKDEV_MAJOR_MAX-1, name);
+
+		ret = -EINVAL;
+		goto out;
+	&#125;
+
+  #从slab分配一个blk_major_name结构体
+	p = kmalloc(sizeof(struct blk_major_name), GFP_KERNEL);
+	if (p == NULL) &#123;
+		ret = -ENOMEM;
+		goto out;
+	&#125;
+
+  #给这个结构体的相关元素赋值
+	p-&gt;major = major;
+#ifdef CONFIG_BLOCK_LEGACY_AUTOLOAD
+	p-&gt;probe = probe;
+#endif
+	strscpy(p-&gt;name, name, sizeof(p-&gt;name));
+	p-&gt;next = NULL;
+	index = major_to_index(major);
+
+	spin_lock(&amp;major_names_spinlock);
+  #遍历该index下的所有blk_major_name节点
+	for (n = &amp;major_names[index]; *n; n = &amp;(*n)-&gt;next) &#123;
+		if ((*n)-&gt;major == major)
+			break;
+	&#125;
+  #如果!n，也就是n是null，说明这个major还没被注册，可以挂上这个链表
+	if (!*n)
+		*n = p;
+	else
+		ret = -EBUSY;
+	spin_unlock(&amp;major_names_spinlock);
+
+	if (ret &lt; 0) &#123;
+		printk(&quot;register_blkdev: cannot get major %u for %s\n&quot;,
+		       major, name);
+		kfree(p);
+	&#125;
+out:
+	mutex_unlock(&amp;major_names_lock);
+	return ret;
+&#125;
+
+
+
+
+#nbd_dev_add过程
+static struct nbd_device *nbd_dev_add(int index, unsigned int refs)
+&#123;
+	struct nbd_device *nbd;
+	struct gendisk *disk;
+	int err = -ENOMEM;
+  #从slab申请nbd_device结构体
+	nbd = kzalloc(sizeof(struct nbd_device), GFP_KERNEL);
+	if (!nbd)
+		goto out;
+
+  #配置tag_set
+	nbd-&gt;tag_set.ops = &amp;nbd_mq_ops;
+	nbd-&gt;tag_set.nr_hw_queues = 1;
+	nbd-&gt;tag_set.queue_depth = 128;
+	nbd-&gt;tag_set.numa_node = NUMA_NO_NODE;
+	nbd-&gt;tag_set.cmd_size = sizeof(struct nbd_cmd);
+	nbd-&gt;tag_set.flags = BLK_MQ_F_SHOULD_MERGE |
+		BLK_MQ_F_BLOCKING;
+	nbd-&gt;tag_set.driver_data = nbd;
+  #init一个work，执行的函数是nbd_dev_remove_work，就是删掉tag_set gendisk等相关内容，最后释放nbd_device
+	INIT_WORK(&amp;nbd-&gt;remove_work, nbd_dev_remove_work);
+	nbd-&gt;backend = NULL;
+
+	err = blk_mq_alloc_tag_set(&amp;nbd-&gt;tag_set);
+	if (err)
+		goto out_free_nbd;
+
+  #这块从加锁到释放都是在从xarray中申请一个index
+  #看到idr又想起之前写修改进程信息的内核模块的时候，namespace管理pid会通过idr来申请pid
+	mutex_lock(&amp;nbd_index_mutex);
+	if (index &gt;= 0) &#123;
+		err = idr_alloc(&amp;nbd_index_idr, nbd, index, index + 1,
+				GFP_KERNEL);
+		if (err == -ENOSPC)
+			err = -EEXIST;
+	&#125; else &#123;
+		err = idr_alloc(&amp;nbd_index_idr, nbd, 0,
+				(MINORMASK &gt;&gt; part_shift) + 1, GFP_KERNEL);
+		if (err &gt;= 0)
+			index = err;
+	&#125;
+	nbd-&gt;index = index;
+	mutex_unlock(&amp;nbd_index_mutex);
+	if (err &lt; 0)
+		goto out_free_tags;
+  #这里是分配gendisk
+	disk = blk_mq_alloc_disk(&amp;nbd-&gt;tag_set, NULL);
+	if (IS_ERR(disk)) &#123;
+		err = PTR_ERR(disk);
+		goto out_free_idr;
+	&#125;
+	nbd-&gt;disk = disk;
+
+  #这里申请workqueue，用于接收server的数据包
+	nbd-&gt;recv_workq = alloc_workqueue(&quot;nbd%d-recv&quot;,
+					  WQ_MEM_RECLAIM | WQ_HIGHPRI |
+					  WQ_UNBOUND, 0, nbd-&gt;index);
+	if (!nbd-&gt;recv_workq) &#123;
+		dev_err(disk_to_dev(nbd-&gt;disk), &quot;Could not allocate knbd recv work queue.\n&quot;);
+		err = -ENOMEM;
+		goto out_err_disk;
+	&#125;
+
+	/*
+	 * Tell the block layer that we are not a rotational device
+	 */
+  #初始化gendisk
+  #这个注释的意思是通知block layer这不是旋转的设备，也就是这不是机械硬盘，不用去搞寻道优化那些
+	blk_queue_flag_set(QUEUE_FLAG_NONROT, disk-&gt;queue);
+	disk-&gt;queue-&gt;limits.discard_granularity = 0;
+	blk_queue_max_discard_sectors(disk-&gt;queue, 0);
+	blk_queue_max_segment_size(disk-&gt;queue, UINT_MAX);
+	blk_queue_max_segments(disk-&gt;queue, USHRT_MAX);
+	blk_queue_max_hw_sectors(disk-&gt;queue, 65536);
+	disk-&gt;queue-&gt;limits.max_sectors = 256;
+
+	mutex_init(&amp;nbd-&gt;config_lock);
+	refcount_set(&amp;nbd-&gt;config_refs, 0);
+	/*
+	 * Start out with a zero references to keep other threads from using
+	 * this device until it is fully initialized.
+	 */
+	refcount_set(&amp;nbd-&gt;refs, 0);
+	INIT_LIST_HEAD(&amp;nbd-&gt;list);
+	disk-&gt;major = NBD_MAJOR;
+	disk-&gt;first_minor = index &lt;&lt; part_shift;
+	disk-&gt;minors = 1 &lt;&lt; part_shift;
+	disk-&gt;fops = &amp;nbd_fops;
+	disk-&gt;private_data = nbd;
+	sprintf(disk-&gt;disk_name, &quot;nbd%d&quot;, index);
+  #add_disk中会发uevent通知让udev添加设备
+	err = add_disk(disk);
+	if (err)
+		goto out_free_work;
+......
+&#125;
+</code></pre>
+<p>以上，nbd的初始化可以简单总结为：</p>
+<ul>
+<li><ul>
+<li><font color='red'>注册block device</font></li>
+<li><font color='red'>初始化netlink family</font></li>
+<li><font color='red'>添加blk设备</font></li>
+</ul>
+</li>
+</ul>
+<p><font color='red'>其中，注册block device阶段，只是向major_names注册了name和major，到add_device阶段才是分配初始化nbd_device、gendisk这些，最后向userspace发uevent让udev添加设备</font></p>
+<blockquote>
+<p>注：</p>
+<p>1.以上也可以看出该怎么注册一个块设备呢？应该先register_blkdev注册主设备号和名字，然后再添加blk设备，初始化具体的device和gendisk等内容，最后再add gendisk的时候向udev发出uevent，让udev在userspace添加设备</p>
+<p>2.major_names管理。major是0时，__register_blkdev函数中可以看到其实是从高到低遍历major_names数组去寻找空闲major的，这块是怎么管理的？在block&#x2F;genhd.c中可以看到静态定义了一个blk_major_name指针数组，长度是BLKDEV_MAJOR_HASH_SIZE 255，这个blk_major_name中主要包含name major和blk_major_name指针。就是根据这个blk_major_name指针数组major_names去管理这些设备号的。但是我们很明显可以看到BLKDEV_MAJOR_MAX是512，那么这个255长度的数组怎么管理最大512个主设备号的呢？用hash来管理，可以看到major_to_index函数内容就是return major % BLKDEV_MAJOR_HASH_SIZE; 一般1-255的major号都已经有了指定的设备了，256-512是可以用作动态指定的。比如8号scsi设备和263都存储在major_names[8]，其实就是搞了一个hash桶，把这512-1个设备号映射进255长度的major_names数组中，同一个hash桶中的元素通过链表来进行组织。</p>
+<p>其实这块就有个疑问了，看__register_blkdev中是从512遍历到1的，如果256-512的major都已经被注册了，会不会去占用那些已经明确指定设备类型但是因为没有加载驱动就还没有注册的major号呢？如果使用的话，那该设备类型后续如果想要再注册是不是就不能注册了？后面做个实验试一下。</p>
+<p>3.gendisk的作用。抽象了块设备，比如ssd、机械硬盘这些。其实，我理解就是相当于文件系统中VFS的作用，VFS提供了对实际使用的文件系统的更上一层的抽象，gendisk也是如此。比如VFS中的read write其实是最终其实是调用对应文件系统的read write去进行实际的读写，gendisk中的block_device_operations中也有一些submit_bio、open、release、poll_io、ioctl等函数指针，这些可想而知最终也是去调用对应的块设备驱动上去执行提交io等操作。另外，add_disk函数中会向udev发uevent，这个会通知uevent再&#x2F;dev下创建设备。</p>
+<p>4.这里还有个问题，很明显，可以看到在添加设备的时候，使用的是alloc_workqueue函数去申请workqueue，在我之前的认知中，workqueue那不就是通过kworker去做的工作嘛？但是我却在系统上看到了实实在在的nbd0-recv内核线程？为什么？原来是因为在alloc_workqueue的时候设置了WQ_MEM_RECLAIM，然后稍微追一下可以看到会调用init_rescuer函数，如果设置了WQ_MEM_RECLAIM，就使用wq的name创建一个专用的内核线程，而不是使用workqueue。为什么？可以看下WQ_MEM_RECLAIM		&#x3D; 1 &lt;&lt; 3, &#x2F;* may be used for memory reclaim *&#x2F;，也就是这种工作是有可能用于内存回收的，那为什么内存回收就不能使用kworker？因为容易形成死锁，首先，kworker执行的任务如果触发内存回收，那么谁会去回收内存呢？kworker会参与，比如脏页回写这些。所以kworker如果触发内存回收可能会与kworker本身造成死锁？</p>
+</blockquote>
+<h4 id="过程及原理"><a href="#过程及原理" class="headerlink" title="过程及原理"></a>过程及原理</h4><p>以spdk使用nbd为例，不过我不懂spdk，所以这块就大概看一下就好了，重点还是关注下nbd驱动的实现</p>
+<p>首先spdk实现了一个start_nbd_disk的rpc，这个start_nbd_disk函数主要做的其实就是打开对应的nbd设备去ioctl设置相关内容，目前看spdk的start_nbd_disk函数会先后执行下面这几个ioctl</p>
+<pre><code class="language-c">NBD_SET_BLKSIZE
+NBD_SET_SIZE_BLOCKS
+NBD_CLEAR_SOCK
+NBD_SET_SOCK
+NBD_SET_FLAGS
+</code></pre>
+<p>然后spdk会用pthread_create创建一个名为nbd_start_kernel的线程，这个线程去发一个NBD_DO_IT的ioctl</p>
+<p>关闭连接和清理先不关注</p>
+<p>所以去看下内核中这些ioctl实现了什么？</p>
+<pre><code class="language-c">#内核中实际会调用到__nbd_ioctl
+
+#NBD_SET_BLKSIZE实现
+#实际上就是调用了nbd_set_size函数去设置了下nbd设备对应的nbd_device结构体的config中的bytesize和blksize_bits
+
+#NBD_SET_SIZE_BLOCKS
+#也是去调用nbd_set_size函数，上面那个是设置块大小，这个是传的块数量？
+
+#NBD_CLEAR_SOCK
+#调用nbd_clear_sock_ioctl，这里就是去清理socket
+
+#nbd_add_socket
+#这里绑定socket，这个函数的第二个参数arg传入的就是spdk创建的scoket的fd
+static int nbd_add_socket(struct nbd_device *nbd, unsigned long arg,
+			  bool netlink)
+&#123;
+  #获取socket
+	sock = nbd_get_socket(nbd, arg, &amp;err);
+
+  #清理请求队列，确保重新绑定socket时候不会有错误请求
+	blk_mq_freeze_queue(nbd-&gt;disk-&gt;queue);
+
+  #若非netlink且没有task_setup且没有被bound，则设置task_setup
+	if (!netlink &amp;&amp; !nbd-&gt;task_setup &amp;&amp;
+	    !test_bit(NBD_RT_BOUND, &amp;config-&gt;runtime_flags))
+		nbd-&gt;task_setup = current;
+
+  #若非netlink且(没有task_setup不是current或已经被bound)，则设置跳出
+	if (!netlink &amp;&amp;
+	    (nbd-&gt;task_setup != current ||
+	     test_bit(NBD_RT_BOUND, &amp;config-&gt;runtime_flags))) &#123;
+		dev_err(disk_to_dev(nbd-&gt;disk),
+			&quot;Device being setup by another task&quot;);
+		err = -EBUSY;
+		goto put_socket;
+	&#125;
+
+  #分配nsock结构体
+	nsock = kzalloc(sizeof(*nsock), GFP_KERNEL);
+  #重新分配config socks内存，把新增的sock放进去
+	socks = krealloc(config-&gt;socks, (config-&gt;num_connections + 1) *
+			 sizeof(struct nbd_sock *), GFP_KERNEL);
+  
+	config-&gt;socks = socks;
+
+	nsock-&gt;fallback_index = -1;
+	nsock-&gt;dead = false;
+	mutex_init(&amp;nsock-&gt;tx_lock);
+	nsock-&gt;sock = sock;
+	nsock-&gt;pending = NULL;
+	nsock-&gt;sent = 0;
+	nsock-&gt;cookie = 0;
+	socks[config-&gt;num_connections++] = nsock;
+	atomic_inc(&amp;config-&gt;live_connections);
+	blk_mq_unfreeze_queue(nbd-&gt;disk-&gt;queue);
+
+	return 0;
+
+put_socket:
+	blk_mq_unfreeze_queue(nbd-&gt;disk-&gt;queue);
+	sockfd_put(sock);
+	return err;
+&#125;
+
+
+#NBD_DO_IT过程
+nbd_start_device_ioctl
+  -&gt;nbd_start_device	#启动设备
+  -&gt;set_bit(GD_NEED_PART_SCAN, &amp;nbd-&gt;disk-&gt;state)	#设置分区扫描标志
+  -&gt;wait_event_interruptible
+  -&gt;#上面wait_event_interruptible是等上面有事件中断的话，就关闭socket退出
+#其中最主要的nbd_start_device函数为
+static int nbd_start_device(struct nbd_device *nbd)
+&#123;
+	if (nbd-&gt;pid)
+		return -EBUSY;
+	if (!config-&gt;socks)
+		return -EINVAL;
+  #如果连接数大于1，但是却没有设置NBD_FLAG_CAN_MULTI_CONN，也就是不支持多连接
+	if (num_connections &gt; 1 &amp;&amp;
+	    !(config-&gt;flags &amp; NBD_FLAG_CAN_MULTI_CONN)) &#123;
+		dev_err(disk_to_dev(nbd-&gt;disk), &quot;server does not support multiple connections per device.\n&quot;);
+		return -EINVAL;
+	&#125;
+
+  #更新队列
+	blk_mq_update_nr_hw_queues(&amp;nbd-&gt;tag_set, config-&gt;num_connections);
+	nbd-&gt;pid = task_pid_nr(current);
+
+	nbd_parse_flags(nbd);
+  #创建sysfs
+	error = device_create_file(disk_to_dev(nbd-&gt;disk), &amp;pid_attr);
+	#设置NBD_RT_HAS_PID_FILE
+	set_bit(NBD_RT_HAS_PID_FILE, &amp;config-&gt;runtime_flags);
+
+  #在debugfs下创建相关接口
+	nbd_dev_dbg_init(nbd);
+  #遍历每个连接，这里可能是由multi_conn的情况
+	for (i = 0; i &lt; num_connections; i++) &#123;
+		struct recv_thread_args *args;
+
+		args = kzalloc(sizeof(*args), GFP_KERNEL);
+		if (!args) &#123;
+			sock_shutdown(nbd);
+			/*
+			 * If num_connections is m (2 &lt; m),
+			 * and NO.1 ~ NO.n(1 &lt; n &lt; m) kzallocs are successful.
+			 * But NO.(n + 1) failed. We still have n recv threads.
+			 * So, add flush_workqueue here to prevent recv threads
+			 * dropping the last config_refs and trying to destroy
+			 * the workqueue from inside the workqueue.
+			 */
+			if (i)
+				flush_workqueue(nbd-&gt;recv_workq);
+			return -ENOMEM;
+		&#125;
+    #给sk设置__GFP_MEMALLOC标志，确保内存紧张的时候也能分配内存
+		sk_set_memalloc(config-&gt;socks[i]-&gt;sock-&gt;sk);
+    #如果设置了timeout的话，就给queue也设置上
+		if (nbd-&gt;tag_set.timeout)
+			config-&gt;socks[i]-&gt;sock-&gt;sk-&gt;sk_sndtimeo =
+				nbd-&gt;tag_set.timeout;
+		atomic_inc(&amp;config-&gt;recv_threads);
+		refcount_inc(&amp;nbd-&gt;config_refs);
+    #初始化recv_work，并放入recv_workq队列
+		INIT_WORK(&amp;args-&gt;work, recv_work);
+		args-&gt;nbd = nbd;
+		args-&gt;index = i;
+		queue_work(nbd-&gt;recv_workq, &amp;args-&gt;work);
+	&#125;
+	return nbd_set_size(nbd, config-&gt;bytesize, nbd_blksize(config));
+&#125;
+
+#recv_work的过程如下
+static void recv_work(struct work_struct *work)
+&#123;
+  #死循环
+	while (1) &#123;
+		struct nbd_reply reply;
+    #读reply失败则退出
+		if (nbd_read_reply(nbd, args-&gt;index, &amp;reply))
+			break;
+
+		#获取引用计数，防止出现use after free，且如果队列已经冻结了或没有inflight io则退出
+		if (!percpu_ref_tryget(&amp;q-&gt;q_usage_counter)) &#123;
+			dev_err(disk_to_dev(nbd-&gt;disk), &quot;%s: no io inflight\n&quot;,
+				__func__);
+			break;
+		&#125;
+
+    #处理IO
+		cmd = nbd_handle_reply(nbd, args-&gt;index, &amp;reply);
+
+    #将PDU(protocol date unit)转换为rq
+		rq = blk_mq_rq_from_pdu(cmd);
+		if (likely(!blk_should_fake_timeout(rq-&gt;q))) &#123;
+			bool complete;
+      #加锁，查看是否可以清楚inflight io状态
+			mutex_lock(&amp;cmd-&gt;lock);
+			complete = __test_and_clear_bit(NBD_CMD_INFLIGHT,
+							&amp;cmd-&gt;flags);
+			mutex_unlock(&amp;cmd-&gt;lock);
+      #完成io
+			if (complete)
+				blk_mq_complete_request(rq);
+		&#125;
+    #释放引用计数
+		percpu_ref_put(&amp;q-&gt;q_usage_counter);
+	&#125;
+
+	nsock = config-&gt;socks[args-&gt;index];
+	mutex_lock(&amp;nsock-&gt;tx_lock);
+	nbd_mark_nsock_dead(nbd, nsock, 1);
+	mutex_unlock(&amp;nsock-&gt;tx_lock);
+
+	nbd_config_put(nbd);
+	atomic_dec(&amp;config-&gt;recv_threads);
+  #如果上面死循环退出了，唤醒recv_wq，也就是上面do_it后面执行wait_event_interruptible等待的，就是去处理退出
+	wake_up(&amp;config-&gt;recv_wq);
+	kfree(args);
+&#125;
+</code></pre>
+<p>以上，过程可以总结为：</p>
+<ul>
+<li><ul>
+<li><font color='red'>设置块设备，分区大小、分区数等</font></li>
+<li><font color='red'>添加socket，放入nbd_device中的config-&gt;sock中去，此时前期准备完成了</font></li>
+<li><font color='red'>start_device，把recv_work加入队列中，也就是最开始初始化过程中的nbd0-recv线程。recv_work的作用就是一个死循环，接收远端的响应并处理</font></li>
+<li><font color='red'>start_device执行完，把recv_work加入队列后，就阻塞住了，wait_event_interruptible等待退出事件唤醒并处理（也就是上面的recv_work退出死循环的话会唤醒recv_wq）</font></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>注：</p>
+<p>1.由此可见，nbd_device中的task_setup的作用是进行标记。也就是把执行set_socket的task作为setup的task，防止其他task在这个nbd_device上绑定socket？这个在<a target="_blank" rel="noopener" href="https://patchwork.kernel.org/project/linux-block/patch/1481208755-24700-1-git-send-email-jbacik@fb.com/">https://patchwork.kernel.org/project/linux-block/patch/1481208755-24700-1-git-send-email-jbacik@fb.com/</a>  中也可见一斑。</p>
+<p>2.好像没有涉及到之前初始化过程中的netlink？<a target="_blank" rel="noopener" href="https://patchwork.kernel.org/project/linux-block/patch/1491512527-4286-6-git-send-email-jbacik@fb.com/">https://patchwork.kernel.org/project/linux-block/patch/1491512527-4286-6-git-send-email-jbacik@fb.com/</a>  在这可以看出，ioctl和netlink使用nbd设备的两种方式，netlink可扩展性强一些，而且解决了使用ioctl方式的线程在NBD_DO_IT ioctl时阻塞的问题(spdk这里也有注释，nbd_start_kernel这个线程在调用NBD_DO_IT ioctl后会一直阻塞，知道断开连接)。而spdk中为什么没使用netlink呢？一个可能是处于效率和简介性考虑？另一个出于兼容性考虑？毕竟ioctl要早很多，看netlink是17年才合入的。</p>
+<p>3.为什么在nbd_add_socket要分别判断netlink、task_setup和NBD_RT_BOUND？使用其中一个不行嘛？看代码中那两处判断可以大致明白：netlink主要指示该任务是否是netlink发起，用于区分netlink和ioctl；task_setup是用于标记ioctl的，当其中一个task执行ioctl add scoket时候，设置task_setup防止其他线程抢占；而NBD_RT_BOUND是netlink用的，在nbd_genl_connect会设置这个标志位，表示这个设备已经被bound了，在ioctl的实现中也会去检查这个标志位，如果发现已经bound了，ioctl就不会执行了。所以，同一个nbd设备同一时间段只能被ioctl或netlink使用，不能两种方式混用？为什么ioctl和netlink的标志方式不同呢？deepseek解答了一波，很妙，因为ioctl是线程相关的且严格串行的，因此标志它的方式可以直接使用一个task_struct指针指向current；而netlink是异步的且线程无关，因此没办法使用task_struct指针，只能在flag上搞一个标志位了。</p>
+<p>4.inflight IO到底干嘛的？查了一下，描述的是io到了驱动层，但是还没完成的一种状态。以nbd为例，执行nbd_queue_rq函数把rq入队的时候会set_bit置位NBD_CMD_INFLIGHT，然后在recv_work中将NBD_CMD_INFLIGHT清理掉，表示IO处理完成。</p>
+</blockquote>
+<p>所以，理论上一次正常的nbd请求是怎样的呢？<font color='red'>client读写请求-&gt;nbd驱动rq-&gt;封装通过socket发送到server-&gt;server处理-&gt;server返回-&gt;recv_work处理返回的响应</font></p>
+<p>所以nbd模块的作用是什么？我觉得主要是这两点：<font color='red'>1.提供了一个设备，在&#x2F;dev下提供了nbd设备使server可以映射，使用户可以读写2.对nbd协议进行了封装，提供了读写设备的ops，通过ops可以封装用户的读写操作发送到server，提供了recv_work解析并处理server的返回</font></p>
+<h3 id="实验"><a href="#实验" class="headerlink" title="实验"></a><center>实验</center></h3><p>如之前所看，在注册设备时，如果不指定major的话，会从高到低遍历查找一个可用的major。这时候会不会把预留的major给用上呢。做个实验试一下，写一个模块不指定major尝试循环注册512个设备，当然，肯定不可能全部注册，因为这时候已经有很多major被使用了，我想做的只是把剩余没使用的占满。</p>
+<p>步骤如下：</p>
+<p>1.先卸载nbd模块（当然也可以是其他模块）</p>
+<p>2.加载test模块占领所有major</p>
+<p>3.加载nbd模块</p>
+<pre><code class="language-shell">[root@XXX ~]# ll /dev/nbd*
+ls: cannot access /dev/nbd*: No such file or directory
+
+#insmod我写的模块，可以看到此时注册了200多设备
+[root@XXX tmp]# dmesg |tail -20
+[  965.367037] register 221 start
+[  965.367038] register 221 end
+[  965.367039] register 222 start
+[  965.367040] register 222 end
+[  965.367041] register 223 start
+[  965.367041] register 223 end
+[  965.367042] register 224 start
+[  965.367043] register 224 end
+[  965.367043] register 225 start
+[  965.367044] register 225 end
+[  965.367045] register 226 start
+[  965.367046] register 226 end
+[  965.367046] register 227 start
+[  965.367047] register 227 end
+[  965.367048] register 228 start
+[  965.367049] register 228 end
+[  965.367049] register 229 start
+[  965.367050] register 229 end
+[  965.367051] register 230 start
+[  965.367051] __register_blkdev: failed to get major for test230
+
+[root@XXX tmp]# modprobe nbd
+modprobe: ERROR: could not insert &#39;nbd&#39;: Input/output error
+</code></pre>
+<p>果然，出现IO error了，因为在nbd模块里如果注册失败就是要返回-EIO</p>
+<p>所以，如果模块没加载的话，大量注册major为0的随机major的设备，是会把这些设备号占用的，会导致真正使用该major的驱动加载失败</p>
+<p>PS：刚开始用的kvm模块做实验，发现kvm模块能加载上。原因是kvm模块使用的的MISC_MAJOR字符设备major号，不止kvm在用，其他的一些东西也在用，所以我只把kvm模块卸载了，其他模块可能还在占用这个major号，所以我的test模块不会使用这个major号，所以kvm依旧能加载上。</p>
+<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a><center>后记</center></h3><p><strong>1.看一下当前的&#x2F;dev&#x2F;nbd*，可以看到每个nbd设备之间的次设备号隔了32</strong></p>
+<p><img src="/img/26.png" alt="这是一张图片"></p>
+<p>这是因为要给每个nbd设备的分区预留设备号，这个可以在nbd_dev_add函数中看到有disk-&gt;first_minor &#x3D; index &lt;&lt; part_shift;disk-&gt;minors &#x3D; 1 &lt;&lt; part_shift;这么一句。这里可能有点疑问，为什么max_part是16但是却预留32个次设备号呢？这是因为part_shift &#x3D; fls(max_part);中寻找last bit的时候是从1开始数的，也就是数到16的那个bit是5。这样看上去也是合理的，因为first_minor通常是为整个设备使用的。所以是不是可以这么理解，虽然max_part是16，但是再加上用于整个设备的first_minor，实际上是是需要17个次设备号的。</p>
+<p><strong>2.nbd协议</strong></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/NetworkBlockDevice/nbd/blob/master/doc/proto.md">https://github.com/NetworkBlockDevice/nbd/blob/master/doc/proto.md</a> </p>
+<p>协议介绍有说，nbd的后端并不一定是块设备，也可能是一个文件，它主要关注的是一段字节以及对这段字节特定偏移的一些操作</p>
+<p>所以理论上说，其实只要server端按照nbd协议实现，任何的块设备或者文件或者一段数据都可以，甚至可以nbd套nbd，一层一层套着玩</p>
+<p><strong>3.一个很奇怪的事</strong></p>
+<p>在上面的代码中可以看到，nbd驱动是在start_device的时候才去判断 NBD_FLAG_CAN_MULTI_CONN的，为什么这样？按理来说是不是在add_sock的时候就应该去判断是不是支持multi_conn了？如果不支持就应该在add_sock的时候拒绝，而省的在去krealloc然后延迟到start_device的时候再去判断？</p>
+<p>这个可以看一下<a target="_blank" rel="noopener" href="https://github.com/NetworkBlockDevice/nbd/blob/master/doc/proto.md">https://github.com/NetworkBlockDevice/nbd/blob/master/doc/proto.md</a> 可能是因为nbd协议有一个协商的步骤吧，需要先建立连接，然后再去协商server端是否支持multi_conn这些特性？如果在add_sock的时候还没有协商是否支持multi_conn就拒绝了，实际上server事有可能支持的。果然，有些看似不合理的背后都是有他的原因的。</p>
+<p><strong>4.netlink的方式还没看</strong></p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a><center>参考</center></h3><p><a target="_blank" rel="noopener" href="https://patchwork.kernel.org/project/linux-block/patch/1491512527-4286-6-git-send-email-jbacik@fb.com/">https://patchwork.kernel.org/project/linux-block/patch/1491512527-4286-6-git-send-email-jbacik@fb.com/</a></p>
+<p><a target="_blank" rel="noopener" href="https://patchwork.kernel.org/project/linux-block/patch/1481208755-24700-1-git-send-email-jbacik@fb.com/">https://patchwork.kernel.org/project/linux-block/patch/1481208755-24700-1-git-send-email-jbacik@fb.com/</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/NetworkBlockDevice/nbd/blob/master/doc/proto.md">https://github.com/NetworkBlockDevice/nbd/blob/master/doc/proto.md</a> </p>
+<h3 id="后后记"><a href="#后后记" class="headerlink" title="后后记"></a><center>后后记</center></h3><p>发现个事，我是使用云文档来写这些东西的。当我使用两个设备编辑这篇内容的时候。比如在mac上对文章进行了修改，我的台式机上能近乎实时检测到内容的改变，什么原理呢？类似inotify，fanotify？</p>
+
+      
+       <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
+    </div>
+</article>
+
+
+
+
+
+    <div id="comments"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+<script type="text/javascript">
+    $.getScript('/js/gitalk.js', function () {
+        var gitalk = new Gitalk({
+            clientID: 'Ov23lihTjDF3jklWOX9b',
+            clientSecret: '1304f65e90138886cd32255710839a4ba192f266',
+            repo: 'yzwddsg-plus.github.io',
+            owner: 'yzwddsg-plus',
+            admin: ['yzwddsg-plus'],
+            id: decodeURI(location.pathname),
+            distractionFreeMode: 'true',
+            language: 'zh-CN',
+            perPage: parseInt('10',10)
+        })
+        gitalk.render('comments')
+    })
+</script>
+
+
+
+
+
+
+
+    </div>
+    <div class="copyright">
+        <p class="footer-entry">
+    YZWDDSG
+</p>
+<p class="footer-entry">Built with <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/yelog/hexo-theme-3-hexo" target="_blank">3-hexo</a> theme</p>
+
+    </div>
+    <div class="full-toc">
+        <button class="full" data-title="Toggle full screen shortcut key s"><span class="min "></span></button>
+<a class="" id="rocket" ></a>
+
+    </div>
+</div>
+
+</body>
+<script src="/js/jquery.pjax.js?v=1.1.0" ></script>
+
+<script src="/js/script.js?v=1.1.0" ></script>
+<script>
+    var img_resize = 'default';
+    function initArticle() {
+        /*渲染对应的表格样式*/
+        
+
+        /*渲染打赏样式*/
+        
+
+        /*高亮代码块行号*/
+        
+
+        /*访问数量*/
+        
+
+        /*代码高亮，行号对齐*/
+        $('.pre-numbering').css('line-height',$('.has-numbering').css('line-height'));
+
+        
+        
+    }
+
+    /*打赏页面隐藏与展示*/
+    
+
+</script>
+
+<!--加入行号的高亮代码块样式-->
+
+<!--自定义样式设置-->
+<style>
+    
+    
+    .nav-right .title-list nav a .post-title, .nav-right .title-list #local-search-result a .post-title {
+        color: #383636;
+    }
+    
+    
+    .nav-right .title-list nav a .post-date, .nav-right .title-list #local-search-result a .post-date {
+        color: #5e5e5f;
+    }
+    
+    
+    .nav-right nav a.hover, #local-search-result a.hover{
+        background-color: #e2e0e0;
+    }
+    
+    
+
+    /*列表样式*/
+    
+
+    /* 背景图样式 */
+    
+    
+
+
+    /*引用块样式*/
+    
+
+    /*文章列表背景图*/
+    
+    .nav-right:before {
+        content: ' ';
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.3;
+        background: url("https://i.loli.net/2019/07/22/5d3521411f3f169375.png");
+        background-repeat: no-repeat;
+        background-position: 50% 0;
+        -ms-background-size: cover;
+        -o-background-size: cover;
+        -moz-background-size: cover;
+        -webkit-background-size: cover;
+        background-size: cover;
+    }
+    
+
+    
+    #post .pjax article :not(pre) > code {
+        color: #24292e;
+        font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,Courier,monospace;
+        background-color: rgba(27,31,35,.05);
+        border-radius: 3px;
+        font-size: 85%;
+        margin: 0;
+        padding: .2em .4em;
+    }
+    
+</style>
+
+
+
+
+
+
+
+</html>

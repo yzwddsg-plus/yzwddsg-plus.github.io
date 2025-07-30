@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>MMX、FMA、SSE与AVX | YZWDDSG</title>
+  <meta name="keywords" content="">
+  <meta name="description" content="MMX、FMA、SSE与AVX | YZWDDSG">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
+<meta property="og:type" content="website">
+<meta property="og:title" content="categories">
+<meta property="og:url" content="http://example.com/categories/index.html">
+<meta property="og:site_name" content="YZWDDSG">
+<meta property="og:locale">
+<meta property="article:published_time" content="2025-02-23T15:43:05.000Z">
+<meta property="article:modified_time" content="2025-02-23T15:43:53.864Z">
+<meta property="article:author" content="YZWDDSG">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="icon" href="/img/avatar.jpg">
+
+<link href="/css/style.css?v=1.1.0" rel="stylesheet">
+
+<link href="/css/hl_theme/atom-dark.css?v=1.1.0" rel="stylesheet">
+
+<link href="//cdn.jsdelivr.net/npm/animate.css@4.1.0/animate.min.css" rel="stylesheet">
+
+<script src="//cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+<script src="/js/titleTip.js?v=1.1.0" ></script>
+
+<script src="//cdn.jsdelivr.net/npm/highlightjs@9.16.2/highlight.pack.min.js"></script>
+<script>
+    hljs.initHighlightingOnLoad();
+</script>
+
+<script src="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js"></script>
+
+
+
+<script src="//cdn.jsdelivr.net/npm/jquery.cookie@1.4.1/jquery.cookie.min.js" ></script>
+
+<script src="/js/iconfont.js?v=1.1.0" ></script>
+<script src="/js/custom-iconfont.js?v=1.1.0" ></script>
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<div style="display: none">
+  <input class="theme_disqus_on" value="false">
+  <input class="theme_preload_comment" value="">
+  <input class="theme_blog_path" value="">
+  <input id="theme_shortcut" value="true" />
+  <input id="theme_highlight_on" value="true" />
+  <input id="theme_code_copy" value="true" />
+</div>
+
+
+
+<body>
+<aside class="nav">
+    <div class="nav-left">
+        <a href="/"
+   class="avatar_target">
+    <img class="avatar"
+         src="/img/avatar.jpg"/>
+</a>
+<div class="author">
+    <span>YZWDDSG</span>
+</div>
+
+<div class="icon">
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+</div>
+
+
+
+
+
+<ul>
+    <li>
+        <div class="all active" data-rel="All">All
+            
+                <small>(28)</small>
+            
+        </div>
+    </li>
+    
+        
+            
+                
+    <li>
+        <div data-rel="硬件">
+            
+            硬件
+            <small>(4)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="调度">
+            
+            调度
+            <small>(2)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="内存">
+            
+            内存
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="存储">
+            
+            存储
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="网络">
+            
+            网络
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="文件系统">
+            
+            文件系统
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="虚拟化">
+            
+            虚拟化
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="power">
+            
+            power
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="OS">
+            
+            OS
+            <small>(3)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="故障排查">
+            
+            故障排查
+            <small>(8)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="其他">
+            
+            其他
+            <small>(2)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="个人">
+            
+            个人
+            <small>(3)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+</ul>
+<div class="left-bottom">
+    <div class="menus">
+        
+            
+            
+            
+    </div>
+    <div>
+        
+            <a class="about  site_url"
+               
+               href="/about">About</a>
+        
+        
+    </div>
+</div>
+<input type="hidden" id="yelog_site_posts_number" value="28">
+<input type="hidden" id="yelog_site_word_count" value="65.1k">
+<div style="display: none">
+    <span id="busuanzi_value_site_uv"></span>
+    <span id="busuanzi_value_site_pv"></span>
+</div>
+
+    </div>
+    <div class="nav-right">
+        <div class="friends-area">
+    <div class="friends-title">
+        Links
+        <i class="iconfont icon-left"></i>
+    </div>
+    <div class="friends-content">
+        <ul>
+            
+            <li><a target="_blank" href="http://yelog.org/">叶落阁</a></li>
+            
+        </ul>
+    </div>
+</div>
+        <div class="title-list">
+    <div class="right-top">
+        <div id="default-panel">
+            <i class="iconfont icon-search" data-title="search shortcut key i"></i>
+            <div class="right-title">All</div>
+            <i class="iconfont icon-file-tree" data-title="switch to outline view shortcut key w"></i>
+        </div>
+        <div id="search-panel">
+            <i class="iconfont icon-left" data-title="return"></i>
+            <input id="local-search-input" autocomplete="off"/>
+            <label class="border-line" for="input"></label>
+            <i class="iconfont icon-case-sensitive" data-title="case sensitive"></i>
+            <i class="iconfont icon-tag" data-title="label"></i>
+        </div>
+        <div id="outline-panel" style="display: none">
+            <div class="right-title">outline</div>
+            <i class="iconfont icon-list" data-title="switch to article list"></i>
+        </div>
+    </div>
+
+    <div class="tags-list">
+    <input id="tag-search" />
+    <div class="tag-wrapper">
+        
+    </div>
+
+</div>
+
+    
+    <nav id="title-list-nav">
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/07/04/kdump%E5%A4%B1%E8%B4%A5%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="kdump失败问题排查">kdump失败问题排查</span>
+            <span class="post-date" title="2025-07-04 23:03:39">2025/07/04</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/06/13/%E8%AE%B0%E4%B8%80%E5%8F%AA%E6%B5%81%E6%B5%AA%E6%96%91%E7%82%B9%E7%8B%97/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="记一只流浪斑点狗">记一只流浪斑点狗</span>
+            <span class="post-date" title="2025-06-13 21:39:16">2025/06/13</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/05/28/AMD-ERAPS/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="AMD ERAPS">AMD ERAPS</span>
+            <span class="post-date" title="2025-05-28 21:52:56">2025/05/28</span>
+        </a>
+        
+        
+        <a  class="All 其他 "
+           href="/2025/04/26/popen%E5%AF%BC%E8%87%B4%E7%9A%84%E9%97%AE%E9%A2%98%E5%8F%8A%E5%88%86%E6%9E%90/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="popen导致的问题及分析">popen导致的问题及分析</span>
+            <span class="post-date" title="2025-04-26 23:15:08">2025/04/26</span>
+        </a>
+        
+        
+        <a  class="All 存储 "
+           href="/2025/04/20/nbd%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%AE%9E%E7%8E%B0/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="nbd驱动的实现">nbd驱动的实现</span>
+            <span class="post-date" title="2025-04-20 16:41:42">2025/04/20</span>
+        </a>
+        
+        
+        <a  class="All 内存 "
+           href="/2025/04/11/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3meminfo%E4%B8%AD%E7%9A%84MemAvailable%E5%92%8CMemFree/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="如何理解meminfo中的MemAvailable和MemFree">如何理解meminfo中的MemAvailable和MemFree</span>
+            <span class="post-date" title="2025-04-11 19:43:19">2025/04/11</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/04/09/%E6%89%A7%E8%A1%8Crpm%E5%91%BD%E4%BB%A4%E5%8D%A1%E6%AD%BB%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="执行rpm命令卡死排查">执行rpm命令卡死排查</span>
+            <span class="post-date" title="2025-04-09 22:11:15">2025/04/09</span>
+        </a>
+        
+        
+        <a  class="All 调度 "
+           href="/2025/04/07/CPU%E5%88%A9%E7%94%A8%E7%8E%87%E4%B8%8D%E5%9D%87%E8%A1%A1%E9%97%AE%E9%A2%98-sched-domain%E5%AD%A6%E4%B9%A0/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="CPU利用率不均衡问题-sched_domain学习">CPU利用率不均衡问题-sched_domain学习</span>
+            <span class="post-date" title="2025-04-07 22:04:47">2025/04/07</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/04/05/PCIE%E8%AE%BE%E5%A4%87%E7%83%AD%E6%8F%92%E6%8B%94/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="PCIE设备热插拔">PCIE设备热插拔</span>
+            <span class="post-date" title="2025-04-05 22:00:12">2025/04/05</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/04/03/%E6%88%91%E5%92%8C%E6%88%91%E7%9A%84%E7%8B%97%E5%AD%90%E4%BB%AC/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="我和我的狗子们">我和我的狗子们</span>
+            <span class="post-date" title="2025-04-03 22:18:32">2025/04/03</span>
+        </a>
+        
+        
+        <a  class="All 调度 "
+           href="/2025/03/31/%E4%BF%AE%E6%94%B9%E8%BF%9B%E7%A8%8B%E4%BF%A1%E6%81%AF%E7%9A%84%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改进程信息的内核模块">修改进程信息的内核模块</span>
+            <span class="post-date" title="2025-03-31 21:53:34">2025/03/31</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/30/%E4%B8%80%E6%AC%A1%E4%B8%A2%E5%8C%85%E7%9A%84%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="一次丢包的排查">一次丢包的排查</span>
+            <span class="post-date" title="2025-03-30 12:56:05">2025/03/30</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/29/systemd-resolved%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="systemd-resolved服务异常">systemd-resolved服务异常</span>
+            <span class="post-date" title="2025-03-29 22:28:32">2025/03/29</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/22/rt%E8%B0%83%E5%BA%A6%E5%99%A8bug%E5%AF%BC%E8%87%B4%E5%AE%95%E6%9C%BA%E7%9A%84%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="rt调度器bug导致宕机的排查">rt调度器bug导致宕机的排查</span>
+            <span class="post-date" title="2025-03-22 21:08:39">2025/03/22</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/21/%E4%BF%AE%E6%94%B9debian%E5%86%85%E6%A0%B8%E6%BA%90%E7%A0%81%E5%B9%B6%E6%89%93%E5%8C%85/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改debian内核源码并打包">修改debian内核源码并打包</span>
+            <span class="post-date" title="2025-03-21 21:53:56">2025/03/21</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/17/%E8%AE%B0%E4%B8%80%E6%AC%A1%E4%BA%91%E7%9B%98%E7%83%AD%E6%8B%94%E5%A4%B1%E8%B4%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="记一次云盘热拔失败">记一次云盘热拔失败</span>
+            <span class="post-date" title="2025-03-17 22:02:52">2025/03/17</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/03/13/MMX%E3%80%81FMA%E3%80%81SSE%E4%B8%8EAVX/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="MMX、FMA、SSE与AVX">MMX、FMA、SSE与AVX</span>
+            <span class="post-date" title="2025-03-13 21:37:54">2025/03/13</span>
+        </a>
+        
+        
+        <a  class="All 文件系统 "
+           href="/2025/03/12/proc%E3%80%81sysctl%E5%92%8Csysfs/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="proc、sysctl和sysfs">proc、sysctl和sysfs</span>
+            <span class="post-date" title="2025-03-12 22:00:23">2025/03/12</span>
+        </a>
+        
+        
+        <a  class="All 其他 "
+           href="/2025/03/11/%E4%BF%AE%E6%94%B9bios%E9%85%8D%E7%BD%AE/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改bios配置">修改bios配置</span>
+            <span class="post-date" title="2025-03-11 21:49:28">2025/03/11</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/10/%E4%BF%AE%E6%94%B9%E5%85%AC%E7%89%88%E5%86%85%E6%A0%B8/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改公版内核">修改公版内核</span>
+            <span class="post-date" title="2025-03-10 22:13:00">2025/03/10</span>
+        </a>
+        
+        
+        <a  class="All power "
+           href="/2025/03/09/proc-cpuinfo%E6%98%BE%E7%A4%BA%E9%A2%91%E7%8E%87%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="/proc/cpuinfo显示频率原理">/proc/cpuinfo显示频率原理</span>
+            <span class="post-date" title="2025-03-09 22:00:49">2025/03/09</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/07/rsyslog%E9%85%8D%E7%BD%AE/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="rsyslog配置">rsyslog配置</span>
+            <span class="post-date" title="2025-03-07 22:36:29">2025/03/07</span>
+        </a>
+        
+        
+        <a  class="All 虚拟化 "
+           href="/2025/03/06/qemu-kvm%E6%B7%BB%E5%8A%A0%E6%96%B0feature%E8%99%9A%E6%8B%9F%E5%8C%96/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="qemu kvm添加新feature虚拟化">qemu kvm添加新feature虚拟化</span>
+            <span class="post-date" title="2025-03-06 00:13:34">2025/03/06</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/02/27/hung-task%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="hung task原理">hung task原理</span>
+            <span class="post-date" title="2025-02-27 22:54:58">2025/02/27</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/02/26/netconsole/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="netconsole">netconsole</span>
+            <span class="post-date" title="2025-02-26 23:01:56">2025/02/26</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/02/26/%E8%88%92%E6%B4%BB%E8%88%92%E6%B4%BB%E7%AD%8B%E9%AA%A8%EF%BC%8C%E6%8A%96%E6%93%9E%E6%8A%96%E6%93%9E%E7%B2%BE%E7%A5%9E/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="舒活舒活筋骨，抖擞抖擞精神">舒活舒活筋骨，抖擞抖擞精神</span>
+            <span class="post-date" title="2025-02-26 00:05:33">2025/02/26</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/02/25/softlockup%E4%B8%8Ehardlockup/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="softlockup与hardlockup">softlockup与hardlockup</span>
+            <span class="post-date" title="2025-02-25 22:13:35">2025/02/25</span>
+        </a>
+        
+        
+        <a  class="All 网络 "
+           href="/2025/02/24/netpoll%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="netpoll原理">netpoll原理</span>
+            <span class="post-date" title="2025-02-24 21:36:30">2025/02/24</span>
+        </a>
+        
+        <div id="no-item-tips">
+
+        </div>
+    </nav>
+    <div id="outline-list">
+    </div>
+</div>
+
+    </div>
+    <div class="hide-list">
+        <div class="semicircle" data-title="Toggle full screen shortcut key s">
+            <div class="brackets first"><</div>
+            <div class="brackets">&gt;</div>
+        </div>
+    </div>
+</aside>
+<div id="post">
+    <div class="pjax">
+        <article id="post-MMX、FMA、SSE与AVX" class="article article-type-post" itemscope itemprop="blogPost">
+    
+        <h1 class="article-title">MMX、FMA、SSE与AVX</h1>
+    
+    <div class="article-meta">
+        
+        
+        
+        <span class="book">
+            <i class="iconfont icon-category"></i>
+            
+            
+            <a  data-rel="硬件">硬件</a>
+            
+        </span>
+        
+        
+    </div>
+    <div class="article-meta">
+        
+            Created At : <time class="date" title='Updated At: 2025-03-13 22:02:30'>2025-03-13 21:37</time>
+        
+    </div>
+    <div class="article-meta">
+        
+        <span>Count:4k</span>
+        
+        
+        
+        <span class="top-comment" title="Jump to comment area">
+            <a href="#comments">
+                Comment:<span class="count-comment">
+                    <span class="spinner">
+                      <div class="cube1"></div>
+                      <div class="cube2"></div>
+                    </span>
+                </span>
+            </a>
+        </span>
+        
+    </div>
+    
+    <div class="toc-ref">
+    
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0"><span class="toc-text">学习</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%89%8D%E4%B8%96%E4%BB%8A%E7%94%9F"><span class="toc-text">前世今生</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#SISD"><span class="toc-text">SISD</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#SIMD%E4%B8%8EMMX"><span class="toc-text">SIMD与MMX</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#SSE"><span class="toc-text">SSE</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#SSE2"><span class="toc-text">SSE2</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#SSE3"><span class="toc-text">SSE3</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#SSE4"><span class="toc-text">SSE4</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#AVX%EF%BC%88advanced-vector-extensions%EF%BC%89"><span class="toc-text">AVX（advanced vector extensions）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#AVX2%E5%92%8CFMA"><span class="toc-text">AVX2和FMA</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#AVX512"><span class="toc-text">AVX512</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B3%B0%E5%80%BC%E8%AE%A1%E7%AE%97"><span class="toc-text">峰值计算</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%99%8D%E9%A2%91%E5%8E%9F%E5%9B%A0"><span class="toc-text">降频原因</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%9B%91%E6%8E%A7"><span class="toc-text">监控</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95"><span class="toc-text">测试</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-text">参考</span></a></li></ol>
+    
+<style>
+    .left-col .switch-btn,
+    .left-col .switch-area {
+        display: none;
+    }
+    .toc-level-3 i,
+    .toc-level-3 ol {
+        display: none !important;
+    }
+</style>
+</div>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="学习"><a href="#学习" class="headerlink" title="学习"></a><center>学习</center></h3><h4 id="前世今生"><a href="#前世今生" class="headerlink" title="前世今生"></a>前世今生</h4><h5 id="SISD"><a href="#SISD" class="headerlink" title="SISD"></a>SISD</h5><p>远古时期，CPU是是<font color="red">SISD</font>（单指令，单数据）</p>
+<blockquote>
+<p>Such CPUs were also <em>scalar</em> and <em>integer</em> in nature – but what exactly does this mean? Scalar is where any math operation takes place on just single data values: it’s typically described as being <em>SISD</em> (single instruction, single data).</p>
+</blockquote>
+<p>标量是什么意思呢？就是<font color="red">一个指令处理一条数据</font>。比如，有一个32元素的数组a，然后你想给这个数组中的每个元素都加1，那怎么写呢，那就得发出32次加指令，然后去计算a[i] + 1。</p>
+<pre><code>for (int i = 0; i &lt; 32; ++i)
+    a[i] += 1;
+</code></pre>
+<p>整数又是什么意思？字面意思，就是只能处理整数，以前要是想处理浮点数的话，需要另外的单独的处理器以及单独的指令集（x87）。这个历史过程是这样的：</p>
+<p>最开始就是主板上需要安装两个处理器，一个专门处理整型，一个专门处理浮点型，叫协处理器</p>
+<p>后来，intel 80486发布了，是第一款把那这俩东西集成到一起的芯片，处理浮点数的器件叫FPU，封装在一个芯片里就提高了运算速度嘛，通讯更快</p>
+<p>再后来，intel推出了具有MMX技术的奔腾cpu</p>
+<h5 id="SIMD与MMX"><a href="#SIMD与MMX" class="headerlink" title="SIMD与MMX"></a>SIMD与MMX</h5><p>MMX的出现改变了什么呢？能支持向量运算了，也就是支持<font color="red">SIMD（单指令，多数据）</font>了。怎么支持的呢？上面提到的FPU中的寄存器是64位的，所以可以同时存放和计算2个32位&#x2F;4个16位&#x2F;8个8位，然后系统就可以在一条指令中同时处理这些内容了。（但是这时候功能还是有限的，<font color="red">第一，支持向量还是只适用于整数计算，第二，因为是使用了FPU中的寄存器进行计算的，所以使用MMX指令的时候不能同时进行浮点运算</font>）</p>
+<blockquote>
+<p>这块其实有个疑问来的，那当时的32位系统下，通用的32位寄存器理论上不也能实现SIMD嘛？32位寄存器理论上是可以同时支持2个16位&#x2F;4个8位运行的吧？确实，我们手动操作可以实现这样的效果，但是比较麻烦，比如要在一个32位通用寄存器上进行2个16位加法，就需要通过移位之类的操作先把两个数放进一个寄存器中，然后运算完之后，还需要把两个数字提取分离出来。</p>
+<p>那其实SIMD依赖的是什么呢？是人家的<font color="red">硬件支持</font>加<font color="red">扩展的指令集</font>。使用相关的指令可以直接进行SIMD的操作。</p>
+</blockquote>
+<h5 id="SSE"><a href="#SSE" class="headerlink" title="SSE"></a>SSE</h5><p>再后来啊，就又出现了SSE。SSE又有哪些改变呢？这一次它不再依赖FPU中的64位寄存器来实现向量运算了，而是单独扩展处理8个128位寄存器，还扩展了一些能处理浮点数的指令。</p>
+<p>但这时候还有一些限制：SSE这时候还只支持32位的浮点数，4个32位浮点数，不支持整数运算；而且呢，这时候的SSE支持的128位寄存器虽然与FPU的寄存器分开了，但是SSE指令和FPU指令其实还是不能同时运行的，因为可能涉及到某些硬件资源的共享吧。</p>
+<h5 id="SSE2"><a href="#SSE2" class="headerlink" title="SSE2"></a>SSE2</h5><p>后来又升级了SSE2，这时候支持的数据类型就更多了。four 32-bit or two 64-bit floats, as well as sixteen 8-bit, eight 16-bit, four 32-bit, or two 64-bit integers.</p>
+<p>MMX寄存器还保留在cpu中，但是所有的MMX和SSE操作都可以使用单独的128位SSE寄存器进行存储。什么意思呢？就是其实128位的SSE寄存器也可以用来进行MMX的操作？</p>
+<h5 id="SSE3"><a href="#SSE3" class="headerlink" title="SSE3"></a>SSE3</h5><p>The MMX registers remained in the processor, but all MMX and SSE operations could be made to place using the separate 128-bit SSE registers.</p>
+<h5 id="SSE4"><a href="#SSE4" class="headerlink" title="SSE4"></a>SSE4</h5><p>这个版本中，寄存器没有修改，但是增加了更多指令能处理更多可能的数学运算之类的，也就是扩展了指令集</p>
+<h5 id="AVX（advanced-vector-extensions）"><a href="#AVX（advanced-vector-extensions）" class="headerlink" title="AVX（advanced vector extensions）"></a>AVX（advanced vector extensions）</h5><p>重大更新，把向量寄存器的数量扩展了一倍，大小扩展了一倍。之前<font color="red">SSE时代是8个128位寄存器，现在AVX时代已经扩展成了16个256个寄存器。</font></p>
+<p>但这时候的数据格式方面还不如已经发展了很久的SSE4，现在AVX只能支持8个32位浮点&#x2F;4个64位浮点</p>
+<p>相对于SSE，AVX还有个改变，就是提供了一次处理三个值的能力：在SSE中，比如执行将两个数相加的操作，那相加的结果其实是放到存放这两个加数中的寄存器的其中一个上面的，也就是会把某个原始的加数覆盖。而AVX会保护原始值的安全，把运算结果存储到单独的寄存器中。（<font color="red">其实这块我有个疑问，不知道他这个指令集是怎么实现的，如果把结果存储到别的单独寄存器中，是不是需要对那个寄存器中的原始的值进行保存和恢复呢？这样的话是不是执行一条指令的时间和复杂度要比SSE高？</font>）</p>
+<blockquote>
+<p>Part of the problem of using AVX was that the load on the chip was so high that Intel had them automatically decrease the clocks in this mode, by around 20%, to keep the power consumption and heat levels down</p>
+<p>这时候降频问题已经初现端倪了，因为寄存器位数要比一般的32位或者64位大很多，所以在运算时可能调用更多的晶体管，因此功耗也更大，耗电多，所以需要降频</p>
+</blockquote>
+<h5 id="AVX2和FMA"><a href="#AVX2和FMA" class="headerlink" title="AVX2和FMA"></a>AVX2和FMA</h5><p>加了新的扩展，FMA(fused multiply-accumulate)，但是注意这是一个独立于AVX的功能。</p>
+<p>FMA是什么？允许将加法和乘法合并成一条指令，比如FMA指令可以在一条指令中发出如下操作:FMA instruction(a, b, c) &#x3D; a * b + c，这个操作在一条指令中完成。</p>
+<blockquote>
+<p>这块的实现上，intel和amd还有点不同呢：</p>
+<p>INTEL：使用三个单独的操作数，可以是2个源操作数和一个答案，或者三个源操作数，然后将得到的答案覆盖其中一个源操作数所在的寄存器</p>
+<p>AMD：使用了四个操作数，因此不会把答案覆盖掉其中一个存源操作数的寄存器</p>
+</blockquote>
+<h5 id="AVX512"><a href="#AVX512" class="headerlink" title="AVX512"></a>AVX512</h5><p>寄存器数量和位宽再次加倍</p>
+<blockquote>
+<p>And given that the use of AVX, in any form, results in the clocks being automatically decreased, the use of AVX-512 on such platforms would almost certainly be worse than using any of its predecessors, as it’s even more demanding of power when running.</p>
+<p>功耗和降频问题也更凸显出来</p>
+</blockquote>
+<h4 id="峰值计算"><a href="#峰值计算" class="headerlink" title="峰值计算"></a>峰值计算</h4><p>按照AVX512来说，理论峰值的计算公式应该是：<font color="red">理论峰值 FLOPS&#x3D;核心数×基频×32</font></p>
+<p>核心数和基频容易理解，看看这个32是怎么来的？AVX512的寄存器宽度是512位，也就是同时能处理16个32为浮点数和8个64位浮点数，那人家计算肯定用多的计算，所以用16来算，一次处理16个32位浮点数，然后一个时钟周期是可以执行两条FMA指令，所以也就是一个时钟周期可以执行2*16个32位浮点数操作</p>
+<blockquote>
+<p>AMD也搞了AVX512，但是在genoa上还不是完整的AVX512，他是使用2个256位来模拟的AVX512。所以其实他的峰值计算公式应该是理论峰值 FLOPS&#x3D;核心数×基频×16，因为它一个时钟周期内只能完成16个浮点数操作</p>
+<p>但是呢，也有个好处，就是他的降频可能不如完整的AVX512多，另外还有就是节省了CPU芯片上的一些空间。。。实在编不下去了</p>
+<p>不过，人家从Turin开始也是支持完整的AVX512了，理论峰值的计算也就X32了，不过降频问题可能就更明显了</p>
+</blockquote>
+<h4 id="降频原因"><a href="#降频原因" class="headerlink" title="降频原因"></a>降频原因</h4><p>其实我不太清楚的一点是，这个降频是怎么搞的？是因为识别到了执行AVX指令然后驱动进行调节的呢？还是说因为执行这个指令导致耗电上去了然后物理上的频率上不去了？</p>
+<p>另外，这个降频是单个cpu下的？会不会影响其他cpu的频率？</p>
+<blockquote>
+<p>看一下这篇论文：Analysis and Optimization ofDynamic Voltage and Frequency Scaling for AVX Workloads Using a Software-Based Reimplementation，正好也能加深学习一下频率方面的知识</p>
+<p>为AVX AVX512这些feature设计的unit需要在芯片中特别小的空间里完成相对普通的32位64位寄存器更多的位宽的处理，所以硬件上会增加很多数据处理路径之类的东西，那在执行这种指令时就需要降频处理以保证其稳定性，要保证功耗保持在在TDP（Thermal Design Power）限制内。而在执行AVX代码时降频就意味着在同一个core上执行的其他指令也会降频，而且，当前的intel cpu就是在执行完最后一条AVX指令后也不会马上恢复频率，而是保持这个频率运行一些时间（类似halt poll这种搞一个一个窗口期的感觉？防止下一条AVX指令过来时还得重新降频处理？），有人使用nginx实验时，AVX512的吞吐甚至还不如SSE4.</p>
+<p>Now, the performance reduction observed when enabling AVX originates from the fact that the other part of the program is slowed down due to the attained frequency reduction after AVX instructions were executed。所以，拖累性能的原因是什么呢？不是因为使用AVX触发了降频？而是因为触发了降频的CPU还要去执行其他的非AVX指令。所以，可想而知如果某个程序大部分都是avx指令的话性能增长应该还是</p>
+<p> 在Intel上支持了HWP之后，就不再内核层面来调节频率了，而是通过硬件本身检测负载调节频率。</p>
+<p> 有些大佬的做法是把线程和core分成avx和非avx的，然后分开处理指令。但是这样我感觉有个问题呀，非avx的core上，那些寄存器岂不是就用不到了</p>
+<p>另外，降频是core粒度的还是什么粒度的，会不会影响其他cpu呢？从文档的只言片语中推测可能是单个core上的？因为说是avx所在的core降频会影响该core上其他非avx指令，没说其他core的情况。</p>
+<p>看一下intel的官方文档，如下图所示，可见一斑，在icelake删是有三个freq 级别的。当运行普通的标量指令、AVX、SSE和轻量的AVX2肯定就最大全核睿频，heavy AVX2或者light AVX 512全核睿频频率就下降一个等级，运行heavy AVX512全核睿频频率就再降一级。</p>
+<p>所以这些是硬件自动调节的？因为现在的cpu都支持HWP了，所以pstate驱动中所做的事情就不多了，调频这些事都由硬件来管了</p>
+<p>当然，如果想让驱动来管理调频也不是没办法，cmdline中加上intel_pstat&#x3D;no_hwp就行了，这个大佬的论文中就需要用，因为他需要修改intel_pstate的驱动，在驱动层调控cpu频率，，再后面的先不看了就，完成工作要紧</p>
+</blockquote>
+<p><img src="/img/8.png" alt="这是一张图片"></p>
+<h5 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h5><p>那有办法监控到上面说的降频嘛？有三种freq level</p>
+<p>perf list |grep -i avx能看到有相关的event</p>
+<pre><code>  core_power.lvl0_turbo_license
+       [Core cycles where the core was running in a manner where Turbo may be
+        clipped to the Non-AVX turbo schedule]
+  core_power.lvl1_turbo_license
+       [Core cycles where the core was running in a manner where Turbo may be
+        clipped to the AVX2 turbo schedule]
+  core_power.lvl2_turbo_license
+       [Core cycles where the core was running in a manner where Turbo may be
+        clipped to the AVX512 turbo schedule]
+</code></pre>
+<p>没看到amd的相关文档，</p>
+<h5 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h5><p>intel上测试一下看看能不能观察到level license呢？步骤如下：</p>
+<ul>
+<li>把机器上的gcc升级一下，换个新点的，资料说是6.0以上</li>
+<li>让deepseek帮忙写了个使用avx512的程序</li>
+</ul>
+<p>主要就是使用immintrin库来支持avx操作</p>
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;immintrin.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;time.h&gt;
+
+#define ARRAY_SIZE 1024 * 1024 * 16
+
+int main() &#123;
+    float *a = (float *)_mm_malloc(ARRAY_SIZE * sizeof(float), 64);
+    float *b = (float *)_mm_malloc(ARRAY_SIZE * sizeof(float), 64);
+    float *c = (float *)_mm_malloc(ARRAY_SIZE * sizeof(float), 64);
+
+    for (int i = 0; i &lt; ARRAY_SIZE; i++) &#123;
+        a[i] = (float)rand() / RAND_MAX;
+        b[i] = (float)rand() / RAND_MAX;
+    &#125;
+
+    clock_t start = clock();
+
+    int num_iterations = 1000;
+    for (int iter = 0; iter &lt; num_iterations; iter++) &#123;
+        for (int i = 0; i &lt; ARRAY_SIZE; i += 16) &#123;
+            __m512 va = _mm512_load_ps(&amp;a[i]);
+            __m512 vb = _mm512_load_ps(&amp;b[i]);
+            __m512 vc = _mm512_add_ps(_mm512_mul_ps(va, vb), _mm512_set1_ps(1.0f));
+            _mm512_store_ps(&amp;c[i], vc);
+        &#125;
+    &#125;
+
+    clock_t end = clock();
+    double elapsed_time = (double)(end - start) / CLOCKS_PER_SEC;
+
+    printf(&quot;AVX-512 计算完成！\n&quot;);
+    printf(&quot;耗时: %.6f 秒\n&quot;, elapsed_time);
+
+    _mm_free(a);
+    _mm_free(b);
+    _mm_free(c);
+
+    return 0;
+&#125;
+</code></pre>
+<ul>
+<li>编译程序</li>
+</ul>
+<p>要加上-mavx512f启用avx512指令集</p>
+<pre><code>gcc -O3 -mavx512f -o a a.c
+</code></pre>
+<ul>
+<li>检测freq levels</li>
+</ul>
+<p>使用以下命令</p>
+<pre><code>perf stat -e core_power.lvl2_turbo_license,core_power.lvl1_turbo_license,core_power.lvl0_turbo_license
+</code></pre>
+<p>当我不运行上面的程序时结果如下</p>
+<pre><code>Performance counter stats for &#39;system wide&#39;:
+
+                 0      core_power.lvl2_turbo_license
+                 0      core_power.lvl1_turbo_license
+     2,420,631,212      core_power.lvl0_turbo_license
+
+       3.318109819 seconds time elapsed
+</code></pre>
+<p>当我运行上面的程序再抓perf时，结果如下：可以看到，<font color="red">intel上执行avx512的时候，确实会触发降频</font></p>
+<pre><code> Performance counter stats for &#39;system wide&#39;:
+
+    18,176,437,873      core_power.lvl2_turbo_license
+                 0      core_power.lvl1_turbo_license
+     2,076,976,157      core_power.lvl0_turbo_license
+
+       3.255332255 seconds time elapsed
+</code></pre>
+<ul>
+<li>检测频率</li>
+</ul>
+<p>还是有那个疑问，这个影响是core粒度的嘛？</p>
+<p>当前我的机器是全核睿频3.1Ghz，在什么都不运行的情况下，cpupower monitor看到全部核心的频率都维持在3.1Ghz左右</p>
+<p>然后我绑核测试taskset -c 127 .&#x2F;a，截取部分结果如下，127和63号cpu都降频了，这个正常因为是一个core上的两个HT。但同时还发现一个现象，其他的cpu上好像有一部分的频率超过了3.1Ghz，甚至有几个睿频到4Ghz以上，即使是另一个numa上。这能说明什么呢？<font color="red">avx降频确实是core粒度的？但是会牵连影响到其他cpu？一个core上频率下降了其他core上频率会出现或多或少的提升？这就应该不是和avx相关的了吧，是睿频调节策略导致的？</font></p>
+<pre><code>   1|  22| 118|  0.00|  0.00|  0.00|  0.00||  0.02| 99.98|  3213||  0.00| 99.95
+   1|  23|  55|  0.00|  0.00|  0.00|  0.00||  0.00|100.00|  3631||  0.00| 100.0
+   1|  23| 119|  0.00|  0.00|  0.00|  0.00||  0.67| 99.33|  3091||  0.00| 99.42
+   1|  24|  56|  0.00|  0.00|  0.00|  0.00||  0.01| 99.99|  3431||  0.00| 100.0
+   1|  24| 120|  0.00|  0.00|  0.00|  0.00||  0.00|100.00|  3219||  0.00|100.00
+   1|  25|  57|  0.00|  0.00|  0.00|  0.00||  0.01| 99.99|  3196||  0.00| 100.0
+   1|  25| 121|  0.00|  0.00|  0.00|  0.00||  0.15| 99.85|  3092||  0.00| 99.77
+   1|  26|  58|  0.00|  0.00|  0.00|  0.00||  0.00|100.00|  3545||  0.00| 100.0
+   1|  26| 122|  0.00|  0.00|  0.00|  0.00||  0.01| 99.99|  3119||  0.00| 100.1
+   1|  27|  59|  0.00|  0.00|  0.00|  0.00||  0.00|100.00|  3584||  0.00| 100.0
+   1|  27| 123|  0.00|  0.00|  0.00|  0.00||  0.00|100.00|  3132||  0.00|100.00
+   1|  28|  60|  0.00|  0.00|  0.00|  0.00||  0.01| 99.99|  3442||  0.00| 100.0
+   1|  28| 124|  0.00|  0.00|  0.00|  0.00||  0.00|100.00|  3161||  0.00|100.00
+   1|  29|  61|  0.00|  0.00|  0.00|  0.00||  0.01| 99.99|  3357||  0.00| 100.0
+   1|  29| 125|  0.00|  0.00|  0.00|  0.00||  0.03| 99.97|  3097||  0.00| 99.98
+   1|  30|  62|  0.00|  0.00|  0.00|  0.00||  0.01| 99.99|  3231||  0.00| 100.0
+   1|  30| 126|  0.00|  0.00|  0.00|  0.00||  0.28| 99.72|  3093||  0.00| 99.82
+   1|  31|  63|  0.00|  0.00|  0.00|  0.00||  1.04| 98.96|  2805||  0.00| 99.01
+   1|  31| 127|  0.00|  0.00|  0.00|  0.00|| 99.78|  0.22|  2794||  0.00|  0.00
+</code></pre>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a><center>参考</center></h3><p> <a target="_blank" rel="noopener" href="https://www.techspot.com/article/2166-mmx-sse-avx-explained/">https://www.techspot.com/article/2166-mmx-sse-avx-explained/</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/678584638">https://zhuanlan.zhihu.com/p/678584638</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.cloudflare.com/on-the-dangers-of-intels-frequency-scaling/">https://blog.cloudflare.com/on-the-dangers-of-intels-frequency-scaling/</a></p>
+<p>论文：Analysis and Optimization ofDynamic Voltage and Frequency Scaling for AVX Workloads Using a Software-Based Reimplementation（<a href="https://link.zhihu.com/?target=https://os.itec.kit.edu/downloads/2019_BA_Khalil_AVX_DFVS_Software_Reimplementation.pdf%EF%BC%89">https://link.zhihu.com/?target=https%3A//os.itec.kit.edu/downloads/2019_BA_Khalil_AVX_DFVS_Software_Reimplementation.pdf）</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.intel.com/content/www/us/en/content-details/671488/intel-64-and-ia-32-architectures-optimization-reference-manual-volume-1.html">https://www.intel.com/content/www/us/en/content-details/671488/intel-64-and-ia-32-architectures-optimization-reference-manual-volume-1.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://travisdowns.github.io/blog/2020/01/17/avxfreq1.html">https://travisdowns.github.io/blog/2020/01/17/avxfreq1.html</a></p>
+
+      
+       <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
+    </div>
+</article>
+
+
+
+
+
+    <div id="comments"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+<script type="text/javascript">
+    $.getScript('/js/gitalk.js', function () {
+        var gitalk = new Gitalk({
+            clientID: 'Ov23lihTjDF3jklWOX9b',
+            clientSecret: '1304f65e90138886cd32255710839a4ba192f266',
+            repo: 'yzwddsg-plus.github.io',
+            owner: 'yzwddsg-plus',
+            admin: ['yzwddsg-plus'],
+            id: decodeURI(location.pathname),
+            distractionFreeMode: 'true',
+            language: 'zh-CN',
+            perPage: parseInt('10',10)
+        })
+        gitalk.render('comments')
+    })
+</script>
+
+
+
+
+
+
+
+    </div>
+    <div class="copyright">
+        <p class="footer-entry">
+    YZWDDSG
+</p>
+<p class="footer-entry">Built with <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/yelog/hexo-theme-3-hexo" target="_blank">3-hexo</a> theme</p>
+
+    </div>
+    <div class="full-toc">
+        <button class="full" data-title="Toggle full screen shortcut key s"><span class="min "></span></button>
+<a class="" id="rocket" ></a>
+
+    </div>
+</div>
+
+</body>
+<script src="/js/jquery.pjax.js?v=1.1.0" ></script>
+
+<script src="/js/script.js?v=1.1.0" ></script>
+<script>
+    var img_resize = 'default';
+    function initArticle() {
+        /*渲染对应的表格样式*/
+        
+
+        /*渲染打赏样式*/
+        
+
+        /*高亮代码块行号*/
+        
+
+        /*访问数量*/
+        
+
+        /*代码高亮，行号对齐*/
+        $('.pre-numbering').css('line-height',$('.has-numbering').css('line-height'));
+
+        
+        
+    }
+
+    /*打赏页面隐藏与展示*/
+    
+
+</script>
+
+<!--加入行号的高亮代码块样式-->
+
+<!--自定义样式设置-->
+<style>
+    
+    
+    .nav-right .title-list nav a .post-title, .nav-right .title-list #local-search-result a .post-title {
+        color: #383636;
+    }
+    
+    
+    .nav-right .title-list nav a .post-date, .nav-right .title-list #local-search-result a .post-date {
+        color: #5e5e5f;
+    }
+    
+    
+    .nav-right nav a.hover, #local-search-result a.hover{
+        background-color: #e2e0e0;
+    }
+    
+    
+
+    /*列表样式*/
+    
+
+    /* 背景图样式 */
+    
+    
+
+
+    /*引用块样式*/
+    
+
+    /*文章列表背景图*/
+    
+    .nav-right:before {
+        content: ' ';
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.3;
+        background: url("https://i.loli.net/2019/07/22/5d3521411f3f169375.png");
+        background-repeat: no-repeat;
+        background-position: 50% 0;
+        -ms-background-size: cover;
+        -o-background-size: cover;
+        -moz-background-size: cover;
+        -webkit-background-size: cover;
+        background-size: cover;
+    }
+    
+
+    
+    #post .pjax article :not(pre) > code {
+        color: #24292e;
+        font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,Courier,monospace;
+        background-color: rgba(27,31,35,.05);
+        border-radius: 3px;
+        font-size: 85%;
+        margin: 0;
+        padding: .2em .4em;
+    }
+    
+</style>
+
+
+
+
+
+
+
+</html>

@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>qemu kvm添加新feature虚拟化 | YZWDDSG</title>
+  <meta name="keywords" content="">
+  <meta name="description" content="qemu kvm添加新feature虚拟化 | YZWDDSG">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
+<meta property="og:type" content="website">
+<meta property="og:title" content="categories">
+<meta property="og:url" content="http://example.com/categories/index.html">
+<meta property="og:site_name" content="YZWDDSG">
+<meta property="og:locale">
+<meta property="article:published_time" content="2025-02-23T15:43:05.000Z">
+<meta property="article:modified_time" content="2025-02-23T15:43:53.864Z">
+<meta property="article:author" content="YZWDDSG">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="icon" href="/img/avatar.jpg">
+
+<link href="/css/style.css?v=1.1.0" rel="stylesheet">
+
+<link href="/css/hl_theme/atom-dark.css?v=1.1.0" rel="stylesheet">
+
+<link href="//cdn.jsdelivr.net/npm/animate.css@4.1.0/animate.min.css" rel="stylesheet">
+
+<script src="//cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+<script src="/js/titleTip.js?v=1.1.0" ></script>
+
+<script src="//cdn.jsdelivr.net/npm/highlightjs@9.16.2/highlight.pack.min.js"></script>
+<script>
+    hljs.initHighlightingOnLoad();
+</script>
+
+<script src="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js"></script>
+
+
+
+<script src="//cdn.jsdelivr.net/npm/jquery.cookie@1.4.1/jquery.cookie.min.js" ></script>
+
+<script src="/js/iconfont.js?v=1.1.0" ></script>
+<script src="/js/custom-iconfont.js?v=1.1.0" ></script>
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<div style="display: none">
+  <input class="theme_disqus_on" value="false">
+  <input class="theme_preload_comment" value="">
+  <input class="theme_blog_path" value="">
+  <input id="theme_shortcut" value="true" />
+  <input id="theme_highlight_on" value="true" />
+  <input id="theme_code_copy" value="true" />
+</div>
+
+
+
+<body>
+<aside class="nav">
+    <div class="nav-left">
+        <a href="/"
+   class="avatar_target">
+    <img class="avatar"
+         src="/img/avatar.jpg"/>
+</a>
+<div class="author">
+    <span>YZWDDSG</span>
+</div>
+
+<div class="icon">
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+</div>
+
+
+
+
+
+<ul>
+    <li>
+        <div class="all active" data-rel="All">All
+            
+                <small>(28)</small>
+            
+        </div>
+    </li>
+    
+        
+            
+                
+    <li>
+        <div data-rel="硬件">
+            
+            硬件
+            <small>(4)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="调度">
+            
+            调度
+            <small>(2)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="内存">
+            
+            内存
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="存储">
+            
+            存储
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="网络">
+            
+            网络
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="文件系统">
+            
+            文件系统
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="虚拟化">
+            
+            虚拟化
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="power">
+            
+            power
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="OS">
+            
+            OS
+            <small>(3)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="故障排查">
+            
+            故障排查
+            <small>(8)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="其他">
+            
+            其他
+            <small>(2)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="个人">
+            
+            个人
+            <small>(3)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+</ul>
+<div class="left-bottom">
+    <div class="menus">
+        
+            
+            
+            
+    </div>
+    <div>
+        
+            <a class="about  site_url"
+               
+               href="/about">About</a>
+        
+        
+    </div>
+</div>
+<input type="hidden" id="yelog_site_posts_number" value="28">
+<input type="hidden" id="yelog_site_word_count" value="65.1k">
+<div style="display: none">
+    <span id="busuanzi_value_site_uv"></span>
+    <span id="busuanzi_value_site_pv"></span>
+</div>
+
+    </div>
+    <div class="nav-right">
+        <div class="friends-area">
+    <div class="friends-title">
+        Links
+        <i class="iconfont icon-left"></i>
+    </div>
+    <div class="friends-content">
+        <ul>
+            
+            <li><a target="_blank" href="http://yelog.org/">叶落阁</a></li>
+            
+        </ul>
+    </div>
+</div>
+        <div class="title-list">
+    <div class="right-top">
+        <div id="default-panel">
+            <i class="iconfont icon-search" data-title="search shortcut key i"></i>
+            <div class="right-title">All</div>
+            <i class="iconfont icon-file-tree" data-title="switch to outline view shortcut key w"></i>
+        </div>
+        <div id="search-panel">
+            <i class="iconfont icon-left" data-title="return"></i>
+            <input id="local-search-input" autocomplete="off"/>
+            <label class="border-line" for="input"></label>
+            <i class="iconfont icon-case-sensitive" data-title="case sensitive"></i>
+            <i class="iconfont icon-tag" data-title="label"></i>
+        </div>
+        <div id="outline-panel" style="display: none">
+            <div class="right-title">outline</div>
+            <i class="iconfont icon-list" data-title="switch to article list"></i>
+        </div>
+    </div>
+
+    <div class="tags-list">
+    <input id="tag-search" />
+    <div class="tag-wrapper">
+        
+    </div>
+
+</div>
+
+    
+    <nav id="title-list-nav">
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/07/04/kdump%E5%A4%B1%E8%B4%A5%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="kdump失败问题排查">kdump失败问题排查</span>
+            <span class="post-date" title="2025-07-04 23:03:39">2025/07/04</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/06/13/%E8%AE%B0%E4%B8%80%E5%8F%AA%E6%B5%81%E6%B5%AA%E6%96%91%E7%82%B9%E7%8B%97/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="记一只流浪斑点狗">记一只流浪斑点狗</span>
+            <span class="post-date" title="2025-06-13 21:39:16">2025/06/13</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/05/28/AMD-ERAPS/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="AMD ERAPS">AMD ERAPS</span>
+            <span class="post-date" title="2025-05-28 21:52:56">2025/05/28</span>
+        </a>
+        
+        
+        <a  class="All 其他 "
+           href="/2025/04/26/popen%E5%AF%BC%E8%87%B4%E7%9A%84%E9%97%AE%E9%A2%98%E5%8F%8A%E5%88%86%E6%9E%90/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="popen导致的问题及分析">popen导致的问题及分析</span>
+            <span class="post-date" title="2025-04-26 23:15:08">2025/04/26</span>
+        </a>
+        
+        
+        <a  class="All 存储 "
+           href="/2025/04/20/nbd%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%AE%9E%E7%8E%B0/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="nbd驱动的实现">nbd驱动的实现</span>
+            <span class="post-date" title="2025-04-20 16:41:42">2025/04/20</span>
+        </a>
+        
+        
+        <a  class="All 内存 "
+           href="/2025/04/11/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3meminfo%E4%B8%AD%E7%9A%84MemAvailable%E5%92%8CMemFree/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="如何理解meminfo中的MemAvailable和MemFree">如何理解meminfo中的MemAvailable和MemFree</span>
+            <span class="post-date" title="2025-04-11 19:43:19">2025/04/11</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/04/09/%E6%89%A7%E8%A1%8Crpm%E5%91%BD%E4%BB%A4%E5%8D%A1%E6%AD%BB%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="执行rpm命令卡死排查">执行rpm命令卡死排查</span>
+            <span class="post-date" title="2025-04-09 22:11:15">2025/04/09</span>
+        </a>
+        
+        
+        <a  class="All 调度 "
+           href="/2025/04/07/CPU%E5%88%A9%E7%94%A8%E7%8E%87%E4%B8%8D%E5%9D%87%E8%A1%A1%E9%97%AE%E9%A2%98-sched-domain%E5%AD%A6%E4%B9%A0/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="CPU利用率不均衡问题-sched_domain学习">CPU利用率不均衡问题-sched_domain学习</span>
+            <span class="post-date" title="2025-04-07 22:04:47">2025/04/07</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/04/05/PCIE%E8%AE%BE%E5%A4%87%E7%83%AD%E6%8F%92%E6%8B%94/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="PCIE设备热插拔">PCIE设备热插拔</span>
+            <span class="post-date" title="2025-04-05 22:00:12">2025/04/05</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/04/03/%E6%88%91%E5%92%8C%E6%88%91%E7%9A%84%E7%8B%97%E5%AD%90%E4%BB%AC/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="我和我的狗子们">我和我的狗子们</span>
+            <span class="post-date" title="2025-04-03 22:18:32">2025/04/03</span>
+        </a>
+        
+        
+        <a  class="All 调度 "
+           href="/2025/03/31/%E4%BF%AE%E6%94%B9%E8%BF%9B%E7%A8%8B%E4%BF%A1%E6%81%AF%E7%9A%84%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改进程信息的内核模块">修改进程信息的内核模块</span>
+            <span class="post-date" title="2025-03-31 21:53:34">2025/03/31</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/30/%E4%B8%80%E6%AC%A1%E4%B8%A2%E5%8C%85%E7%9A%84%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="一次丢包的排查">一次丢包的排查</span>
+            <span class="post-date" title="2025-03-30 12:56:05">2025/03/30</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/29/systemd-resolved%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="systemd-resolved服务异常">systemd-resolved服务异常</span>
+            <span class="post-date" title="2025-03-29 22:28:32">2025/03/29</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/22/rt%E8%B0%83%E5%BA%A6%E5%99%A8bug%E5%AF%BC%E8%87%B4%E5%AE%95%E6%9C%BA%E7%9A%84%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="rt调度器bug导致宕机的排查">rt调度器bug导致宕机的排查</span>
+            <span class="post-date" title="2025-03-22 21:08:39">2025/03/22</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/21/%E4%BF%AE%E6%94%B9debian%E5%86%85%E6%A0%B8%E6%BA%90%E7%A0%81%E5%B9%B6%E6%89%93%E5%8C%85/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改debian内核源码并打包">修改debian内核源码并打包</span>
+            <span class="post-date" title="2025-03-21 21:53:56">2025/03/21</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/17/%E8%AE%B0%E4%B8%80%E6%AC%A1%E4%BA%91%E7%9B%98%E7%83%AD%E6%8B%94%E5%A4%B1%E8%B4%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="记一次云盘热拔失败">记一次云盘热拔失败</span>
+            <span class="post-date" title="2025-03-17 22:02:52">2025/03/17</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/03/13/MMX%E3%80%81FMA%E3%80%81SSE%E4%B8%8EAVX/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="MMX、FMA、SSE与AVX">MMX、FMA、SSE与AVX</span>
+            <span class="post-date" title="2025-03-13 21:37:54">2025/03/13</span>
+        </a>
+        
+        
+        <a  class="All 文件系统 "
+           href="/2025/03/12/proc%E3%80%81sysctl%E5%92%8Csysfs/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="proc、sysctl和sysfs">proc、sysctl和sysfs</span>
+            <span class="post-date" title="2025-03-12 22:00:23">2025/03/12</span>
+        </a>
+        
+        
+        <a  class="All 其他 "
+           href="/2025/03/11/%E4%BF%AE%E6%94%B9bios%E9%85%8D%E7%BD%AE/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改bios配置">修改bios配置</span>
+            <span class="post-date" title="2025-03-11 21:49:28">2025/03/11</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/10/%E4%BF%AE%E6%94%B9%E5%85%AC%E7%89%88%E5%86%85%E6%A0%B8/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改公版内核">修改公版内核</span>
+            <span class="post-date" title="2025-03-10 22:13:00">2025/03/10</span>
+        </a>
+        
+        
+        <a  class="All power "
+           href="/2025/03/09/proc-cpuinfo%E6%98%BE%E7%A4%BA%E9%A2%91%E7%8E%87%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="/proc/cpuinfo显示频率原理">/proc/cpuinfo显示频率原理</span>
+            <span class="post-date" title="2025-03-09 22:00:49">2025/03/09</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/07/rsyslog%E9%85%8D%E7%BD%AE/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="rsyslog配置">rsyslog配置</span>
+            <span class="post-date" title="2025-03-07 22:36:29">2025/03/07</span>
+        </a>
+        
+        
+        <a  class="All 虚拟化 "
+           href="/2025/03/06/qemu-kvm%E6%B7%BB%E5%8A%A0%E6%96%B0feature%E8%99%9A%E6%8B%9F%E5%8C%96/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="qemu kvm添加新feature虚拟化">qemu kvm添加新feature虚拟化</span>
+            <span class="post-date" title="2025-03-06 00:13:34">2025/03/06</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/02/27/hung-task%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="hung task原理">hung task原理</span>
+            <span class="post-date" title="2025-02-27 22:54:58">2025/02/27</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/02/26/netconsole/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="netconsole">netconsole</span>
+            <span class="post-date" title="2025-02-26 23:01:56">2025/02/26</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/02/26/%E8%88%92%E6%B4%BB%E8%88%92%E6%B4%BB%E7%AD%8B%E9%AA%A8%EF%BC%8C%E6%8A%96%E6%93%9E%E6%8A%96%E6%93%9E%E7%B2%BE%E7%A5%9E/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="舒活舒活筋骨，抖擞抖擞精神">舒活舒活筋骨，抖擞抖擞精神</span>
+            <span class="post-date" title="2025-02-26 00:05:33">2025/02/26</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/02/25/softlockup%E4%B8%8Ehardlockup/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="softlockup与hardlockup">softlockup与hardlockup</span>
+            <span class="post-date" title="2025-02-25 22:13:35">2025/02/25</span>
+        </a>
+        
+        
+        <a  class="All 网络 "
+           href="/2025/02/24/netpoll%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="netpoll原理">netpoll原理</span>
+            <span class="post-date" title="2025-02-24 21:36:30">2025/02/24</span>
+        </a>
+        
+        <div id="no-item-tips">
+
+        </div>
+    </nav>
+    <div id="outline-list">
+    </div>
+</div>
+
+    </div>
+    <div class="hide-list">
+        <div class="semicircle" data-title="Toggle full screen shortcut key s">
+            <div class="brackets first"><</div>
+            <div class="brackets">&gt;</div>
+        </div>
+    </div>
+</aside>
+<div id="post">
+    <div class="pjax">
+        <article id="post-qemu-kvm添加新feature虚拟化" class="article article-type-post" itemscope itemprop="blogPost">
+    
+        <h1 class="article-title">qemu kvm添加新feature虚拟化</h1>
+    
+    <div class="article-meta">
+        
+        
+        
+        <span class="book">
+            <i class="iconfont icon-category"></i>
+            
+            
+            <a  data-rel="虚拟化">虚拟化</a>
+            
+        </span>
+        
+        
+    </div>
+    <div class="article-meta">
+        
+            Created At : <time class="date" title='Updated At: 2025-03-07 22:35:48'>2025-03-06 00:13</time>
+        
+    </div>
+    <div class="article-meta">
+        
+        <span>Count:1.8k</span>
+        
+        
+        
+        <span class="top-comment" title="Jump to comment area">
+            <a href="#comments">
+                Comment:<span class="count-comment">
+                    <span class="spinner">
+                      <div class="cube1"></div>
+                      <div class="cube2"></div>
+                    </span>
+                </span>
+            </a>
+        </span>
+        
+    </div>
+    
+    <div class="toc-ref">
+    
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0"><span class="toc-text">学习</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C"><span class="toc-text">实验</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E8%AE%B0"><span class="toc-text">后记</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-text">参考</span></a></li></ol>
+    
+<style>
+    .left-col .switch-btn,
+    .left-col .switch-area {
+        display: none;
+    }
+    .toc-level-3 i,
+    .toc-level-3 ol {
+        display: none !important;
+    }
+</style>
+</div>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>不太严谨了，应该算是添加新cap的虚拟化</p>
+<h3 id="学习"><a href="#学习" class="headerlink" title="学习"></a><center>学习</center></h3><p>先找一个当前已经存在的feature看一下这个过程，比如KVM_CAP_S390_IRQCHIP这个cap。内核commit为(“KVM: s390: irq routing for adapter interrupts.”)</p>
+<p><strong>libvirt侧：virsh start</strong></p>
+<pre><code>##virsh start启动一个虚机
+cmdStart
+  ---&gt;virDomainCreateWithFlags	##去调用具体驱动的create domian，一般是qemu
+    ---&gt;qemuDomainCreateWithFlags
+      ---&gt;qemuProcessBeginJob
+        ---&gt;qemuDomainObjStart
+          ---&gt;qemuProcessStart
+            ---&gt;qemuProcessLaunch
+              ---&gt;qemuBuildCommandLine	##构建qemu命令
+              ---&gt;virCommandRun
+                ---&gt;virCommandRunAsync
+                  ---&gt;virExec
+</code></pre>
+<p><strong>qemu侧：开始创建虚机</strong></p>
+<pre><code>main			##softmmu/main.,这主要就三条，qemu_init,qemu_main_loop,qemu_cleanup
+  ---&gt;qemu_init			##这里会parse传入的参数，然后根据参数调用对应的函数
+    ---&gt;configure_accelerators		##配置加速器，其实一般也就是kvm
+      ---&gt;do_configure_accelerator
+        ---&gt;accel_init_machine		##这里会调用acc-&gt;init_machine(ms);，kvm的话，也就是kvm_init
+          ---&gt;kvm_init
+            ---&gt;kvm_irqchip_create
+              ---&gt;kvm_check_extension(s, KVM_CAP_S390_IRQCHIP)			##检测是否存在这个feture（实际上是一个发一个KVM_CHECK_EXTENSION的ioctl），也就是实际上是检查kvm是否支持这个feature
+              ---&gt;kvm_vm_enable_cap(s, KVM_CAP_S390_IRQCHIP, 0);		##如果存在的话就enable
+
+#########看一下kvm_vm_enable_cap函数
+##其实是个宏，大致看上去就是初始化一个kvm_enable_cap结构体，其中cap是KVM_CAP_S390_IRQCHIP，flag是0
+##然后初始化一个临时数组把后面的可变参数复制过来
+##然后获取args_tmp和cap.args长度的最小值，应该是怕如果传入的可变参数太多导致cap.args溢出
+##然后把可变参数的args_tmp数组内容copy到cap.args
+##最后去调用kvm_vm_ioctl
+
+#define kvm_vm_enable_cap(s, capability, cap_flags, ...)             \
+    (&#123;                                                               \
+        struct kvm_enable_cap cap = &#123;                                \
+            .cap = capability,                                       \
+            .flags = cap_flags,                                      \
+        &#125;;                                                           \
+        uint64_t args_tmp[] = &#123; __VA_ARGS__ &#125;;                       \
+        size_t n = MIN(ARRAY_SIZE(args_tmp), ARRAY_SIZE(cap.args));  \
+        memcpy(cap.args, args_tmp, n * sizeof(cap.args[0]));         \
+        kvm_vm_ioctl(s, KVM_ENABLE_CAP, &amp;cap);                       \
+    &#125;)
+
+
+int kvm_vm_ioctl(KVMState *s, int type, ...)
+&#123;
+    int ret;
+    void *arg;
+    ##这块其实是对可变参数的处理，这是一个可变参数的列表
+    va_list ap;
+
+    ##初始化ap，指向type后的第一个参数
+    va_start(ap, type);
+    ##从ap中提取一个void *类型的参数
+    arg = va_arg(ap, void *);
+    va_end(ap);
+
+    trace_kvm_vm_ioctl(type, arg);
+    accel_ioctl_begin();
+    ret = ioctl(s-&gt;vmfd, type, arg);
+    accel_ioctl_end();
+    if (ret == -1) &#123;
+        ret = -errno;
+    &#125;
+    return ret;
+&#125;
+</code></pre>
+<p>可以看到其实跟KVM_CAP_S390_IRQCHIP相关的就是初始化过程中通过KVM_CHECK_EXTENSION类型的ioctl去查kvm是否支持该feature，如果支持的话，就发KVM_ENABLE_CAP类型的ioctl去enable它</p>
+<p><strong>kernel侧：</strong></p>
+<pre><code>##首先它在include/uapi/linux/kvm.h中定义了这个宏
+#define KVM_CAP_S390_IRQCHIP 99
+
+##然后看接收KVM_CHECK_EXTENSION ioctl的处理
+kvm_vm_ioctl
+  ---&gt;kvm_vm_ioctl_check_extension_generic
+    ---&gt;kvm_vm_ioctl_check_extension		##这里直接返回了1,所以qemu的ioctl收到1就认为kvm支持这个feature
+
+##在qemu的流程中，这里KVM_CHECK_EXTENSION的ioctl查到kvm支持这个feature了，就发KVM_ENABLE_CAP的ioctl去enable了
+/* for KVM_ENABLE_CAP */
+struct kvm_enable_cap &#123;
+	/* in */
+	__u32 cap;
+	__u32 flags;
+	__u64 args[4];
+	__u8  pad[64];
+&#125;;
+
+kvm_vm_ioctl
+  ---&gt;copy_from_user		##从userspace把kvm_enable_cap结构体的内容copy过来
+  ---&gt;kvm_vm_ioctl_enable_cap_generic
+    ---&gt;kvm_vm_ioctl_enable_cap			##然后这里检查cap中的一些内容，然后打开进行enable的相关操作
+</code></pre>
+<p><font color="red">另外，需要注意下，如果要对一些msr进行虚拟化或透传的话，如果是只有读操作还好，如果会往msr中进行写操作，就需要考虑很多事情了，比如：是否需要考虑虚机和宿主机侧修改msr数据不一致导致问题，是否需要补偿？vcpu从cpu间进行迁移的话需要怎么做？多个vcpu运行在一个cpu上需要怎么做？</font></p>
+<h3 id="实验"><a href="#实验" class="headerlink" title="实验"></a><center>实验</center></h3><p>有一个MSR_PPIN msr，这个在虚机中肯定是没有虚拟化的，将它虚拟化试试看。添加一个新cap，协商cap并允许虚机访问这个msr</p>
+<p>首先先看一下我的宿主机上这个msr的内容（左图）是可以读到的，然后看一下我的虚机中，是读不到的</p>
+<p><img src="/img/1.png" alt="这是一张图片"></p>
+<p>开搞！！！</p>
+<ul>
+<li><strong>修改</strong></li>
+</ul>
+<p><strong>qemu侧修改：</strong></p>
+<pre><code>diff --git a/accel/kvm/kvm-all.c b/accel/kvm/kvm-all.c
+index be2a7adba7..2a37beaac9 100644
+--- a/accel/kvm/kvm-all.c
++++ b/accel/kvm/kvm-all.c
+@@ -2661,6 +2661,10 @@ static int kvm_init(MachineState *ms)
+         &#125;
+     &#125;
+
++    if(kvm_vm_check_extension(s, KVM_CAP_PPIN)) &#123;
++        kvm_vm_enable_cap(s, KVM_CAP_PPIN, 0);
++    &#125;
++
+ #ifdef KVM_CAP_VCPU_EVENTS
+     s-&gt;vcpu_events = kvm_check_extension(s, KVM_CAP_VCPU_EVENTS);
+ #endif
+diff --git a/linux-headers/linux/kvm.h b/linux-headers/linux/kvm.h
+index 20a3755fa5..28f70cf1f9 100644
+--- a/linux-headers/linux/kvm.h
++++ b/linux-headers/linux/kvm.h
+@@ -1114,6 +1114,7 @@ struct kvm_ppc_resize_hpt &#123;
+ #define KVM_CAP_ARM_MTE 205
+ #define KVM_CAP_XSAVE2 208
+ #define KVM_CAP_SYS_ATTRIBUTES 209
++#define KVM_CAP_PPIN 250
+
+ #define KVM_CAP_APERFMPERF 500
+ #define KVM_CAP_APERFMPERF2 501
+</code></pre>
+<p>这块其实主要就是在linux-headers&#x2F;linux&#x2F;kvm.h新定义一个KVM_CAP_PPIN cap号；然后通过kvm_vm_check_extension和kvm_vm_enable_cap查询和开启这个cap</p>
+<p><strong>kernel侧修改：</strong></p>
+<pre><code>diff --git a/arch/x86/include/asm/kvm_host.h b/arch/x86/include/asm/kvm_host.h
+index 97c9363700ef..b3355fa61149 100644
+--- a/arch/x86/include/asm/kvm_host.h
++++ b/arch/x86/include/asm/kvm_host.h
+@@ -958,6 +958,7 @@ struct kvm_vcpu_arch &#123;
+ #if IS_ENABLED(CONFIG_HYPERV)
+        hpa_t hv_root_tdp;
+ #endif
++       u64 ppin;
+ &#125;;
+
+ struct kvm_lpage_info &#123;
+diff --git a/arch/x86/kvm/x86.c b/arch/x86/kvm/x86.c
+index 50841b390a2b..45db5ff78505 100644
+--- a/arch/x86/kvm/x86.c
++++ b/arch/x86/kvm/x86.c
+@@ -4149,6 +4149,9 @@ int kvm_get_msr_common(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
+                msr_info-&gt;data = vcpu-&gt;arch.guest_fpu.xfd_err;
+                break;
++       case MSR_PPIN:
++               msr_info-&gt;data = vcpu-&gt;arch.ppin;
++               break;
+ #endif
+        default:
+                if (kvm_pmu_is_valid_msr(vcpu, msr_info-&gt;index))
+@@ -4327,6 +4330,7 @@ int kvm_vm_ioctl_check_extension(struct kvm *kvm, long ext)
+        case KVM_CAP_VAPIC:
+        case KVM_CAP_ENABLE_CAP:
+        case KVM_CAP_VM_DISABLE_NX_HUGE_PAGES:
++       case KVM_CAP_PPIN:
+                r = 1;
+                break;
+        case KVM_CAP_EXIT_HYPERCALL:
+@@ -6366,6 +6370,9 @@ split_irqchip_unlock:
+                &#125;
+                mutex_unlock(&amp;kvm-&gt;lock);
+                break;
++       case KVM_CAP_PPIN:
++               r = 0;
++               break;
+        default:
+                r = -EINVAL;
+                break;
+diff --git a/include/uapi/linux/kvm.h b/include/uapi/linux/kvm.h
+index 85365bd8ec8d..2f5959fea170 100644
+--- a/include/uapi/linux/kvm.h
++++ b/include/uapi/linux/kvm.h
+@@ -1184,6 +1184,7 @@ struct kvm_ppc_resize_hpt &#123;
+ #define KVM_CAP_S390_ZPCI_OP 221
+ #define KVM_CAP_S390_CPU_TOPOLOGY 222
+ #define KVM_CAP_DIRTY_LOG_RING_ACQ_REL 223
++#define KVM_CAP_PPIN 250
+ #define KVM_CAP_APERFMPERF 500
+ #define KVM_CAP_APERFMPERF2 501
+</code></pre>
+<p>这块的主要修改有：新定义一个KVM_CAP_PPIN cap号，和qemu中相同；在kvm_vm_ioctl_check_extension和kvm_vm_ioctl_enable_cap中分别提供该cap的查询和enable；在kvm_vcpu_arch定义一个新的ppin变量，主要用于虚机访问msr时 导致vm exit退出时返回的msr的值；kvm_get_msr_common中处理MSR_PPIN，给msr_info-&gt;data赋值，也就是刚才的ppin</p>
+<p><font color="red">这里说明一下，这个并不是一个完整的例子，只是简单测试走一下流程。实际上一般来说，在enable这个cap的时候还需要做一些操作，比如设置一些标志之类，然后在create vcpu的时候根据标志进行处理；然后并没有给ppin进行赋值，实际上应该在vcpu_enter_guest中在vm enter和vm exit的时候对ppin进行赋值，这样在虚机中访问的时候得到的就是和宿主机上相同的值了。在在我上面的例子中，虚机中输出的应该是0，因为并没有给ppin赋值。</font></p>
+<ul>
+<li><strong>结果</strong></li>
+</ul>
+<p>此时虚机侧已经可以看到</p>
+<p><img src="/img/2.png" alt="这是一张图片"></p>
+<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a><center>后记</center></h3><ul>
+<li><p><strong>读msr的方法</strong></p>
+</li>
+<li><ul>
+<li><strong>msr-tools</strong></li>
+</ul>
+</li>
+</ul>
+<p>然后rdmsr 0x0000004f这样就可以读，比如</p>
+<p><img src="/img/3.png" alt="这是一张图片"></p>
+<p>ps：但是我的虚机没有网，没法安装msr-tools</p>
+<ul>
+<li><ul>
+<li><strong>内核模块</strong></li>
+</ul>
+</li>
+</ul>
+<p>可以写内核模块，使用内核rdmsr系列函数</p>
+<p>ps：但是我的宿主机和虚机内核不是同一个内核，还得重编内核或者安装devel包，也有点麻烦</p>
+<ul>
+<li><ul>
+<li><strong>自己编写c程序</strong></li>
+</ul>
+</li>
+</ul>
+<p>strace msr-tools的rdmsr过程可以看到，其实这个是通过读&#x2F;dev&#x2F;cpu&#x2F;X&#x2F;msr来实现的</p>
+<p>那同样我们也可以读这个设备文件来实现，类似下面这样</p>
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;fcntl.h&gt;
+
+#define MSR_PPIN    0x0000004f
+int main()
+&#123;
+    uint64_t val;
+    int fd = open(&quot;/dev/cpu/0/msr&quot;, O_RDONLY);
+    if (fd &lt; 0) &#123;
+        printf(&quot;open msr failed\n&quot;);
+        return -1;
+    &#125;
+
+    if(pread(fd, &amp;val, sizeof(val), MSR_PPIN) != sizeof(val)) &#123;
+        printf(&quot;read msr failed\n&quot;);
+        close(fd);
+        return -1;
+    &#125;
+
+    printf(&quot;MSR_PPIN val is %lx\n&quot;, val);
+    return 0;
+&#125;
+</code></pre>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a><center>参考</center></h3><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/hanyonglu/archive/2011/05/07/2039916.html">https://www.cnblogs.com/hanyonglu/archive/2011/05/07/2039916.html</a></p>
+
+      
+       <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
+    </div>
+</article>
+
+
+
+
+
+    <div id="comments"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+<script type="text/javascript">
+    $.getScript('/js/gitalk.js', function () {
+        var gitalk = new Gitalk({
+            clientID: 'Ov23lihTjDF3jklWOX9b',
+            clientSecret: '1304f65e90138886cd32255710839a4ba192f266',
+            repo: 'yzwddsg-plus.github.io',
+            owner: 'yzwddsg-plus',
+            admin: ['yzwddsg-plus'],
+            id: decodeURI(location.pathname),
+            distractionFreeMode: 'true',
+            language: 'zh-CN',
+            perPage: parseInt('10',10)
+        })
+        gitalk.render('comments')
+    })
+</script>
+
+
+
+
+
+
+
+    </div>
+    <div class="copyright">
+        <p class="footer-entry">
+    YZWDDSG
+</p>
+<p class="footer-entry">Built with <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/yelog/hexo-theme-3-hexo" target="_blank">3-hexo</a> theme</p>
+
+    </div>
+    <div class="full-toc">
+        <button class="full" data-title="Toggle full screen shortcut key s"><span class="min "></span></button>
+<a class="" id="rocket" ></a>
+
+    </div>
+</div>
+
+</body>
+<script src="/js/jquery.pjax.js?v=1.1.0" ></script>
+
+<script src="/js/script.js?v=1.1.0" ></script>
+<script>
+    var img_resize = 'default';
+    function initArticle() {
+        /*渲染对应的表格样式*/
+        
+
+        /*渲染打赏样式*/
+        
+
+        /*高亮代码块行号*/
+        
+
+        /*访问数量*/
+        
+
+        /*代码高亮，行号对齐*/
+        $('.pre-numbering').css('line-height',$('.has-numbering').css('line-height'));
+
+        
+        
+    }
+
+    /*打赏页面隐藏与展示*/
+    
+
+</script>
+
+<!--加入行号的高亮代码块样式-->
+
+<!--自定义样式设置-->
+<style>
+    
+    
+    .nav-right .title-list nav a .post-title, .nav-right .title-list #local-search-result a .post-title {
+        color: #383636;
+    }
+    
+    
+    .nav-right .title-list nav a .post-date, .nav-right .title-list #local-search-result a .post-date {
+        color: #5e5e5f;
+    }
+    
+    
+    .nav-right nav a.hover, #local-search-result a.hover{
+        background-color: #e2e0e0;
+    }
+    
+    
+
+    /*列表样式*/
+    
+
+    /* 背景图样式 */
+    
+    
+
+
+    /*引用块样式*/
+    
+
+    /*文章列表背景图*/
+    
+    .nav-right:before {
+        content: ' ';
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.3;
+        background: url("https://i.loli.net/2019/07/22/5d3521411f3f169375.png");
+        background-repeat: no-repeat;
+        background-position: 50% 0;
+        -ms-background-size: cover;
+        -o-background-size: cover;
+        -moz-background-size: cover;
+        -webkit-background-size: cover;
+        background-size: cover;
+    }
+    
+
+    
+    #post .pjax article :not(pre) > code {
+        color: #24292e;
+        font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,Courier,monospace;
+        background-color: rgba(27,31,35,.05);
+        border-radius: 3px;
+        font-size: 85%;
+        margin: 0;
+        padding: .2em .4em;
+    }
+    
+</style>
+
+
+
+
+
+
+
+</html>

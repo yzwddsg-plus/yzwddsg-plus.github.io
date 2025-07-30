@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>CPU利用率不均衡问题-sched_domain学习 | YZWDDSG</title>
+  <meta name="keywords" content="">
+  <meta name="description" content="CPU利用率不均衡问题-sched_domain学习 | YZWDDSG">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
+<meta property="og:type" content="website">
+<meta property="og:title" content="categories">
+<meta property="og:url" content="http://example.com/categories/index.html">
+<meta property="og:site_name" content="YZWDDSG">
+<meta property="og:locale">
+<meta property="article:published_time" content="2025-02-23T15:43:05.000Z">
+<meta property="article:modified_time" content="2025-02-23T15:43:53.864Z">
+<meta property="article:author" content="YZWDDSG">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="icon" href="/img/avatar.jpg">
+
+<link href="/css/style.css?v=1.1.0" rel="stylesheet">
+
+<link href="/css/hl_theme/atom-dark.css?v=1.1.0" rel="stylesheet">
+
+<link href="//cdn.jsdelivr.net/npm/animate.css@4.1.0/animate.min.css" rel="stylesheet">
+
+<script src="//cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+<script src="/js/titleTip.js?v=1.1.0" ></script>
+
+<script src="//cdn.jsdelivr.net/npm/highlightjs@9.16.2/highlight.pack.min.js"></script>
+<script>
+    hljs.initHighlightingOnLoad();
+</script>
+
+<script src="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js"></script>
+
+
+
+<script src="//cdn.jsdelivr.net/npm/jquery.cookie@1.4.1/jquery.cookie.min.js" ></script>
+
+<script src="/js/iconfont.js?v=1.1.0" ></script>
+<script src="/js/custom-iconfont.js?v=1.1.0" ></script>
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<div style="display: none">
+  <input class="theme_disqus_on" value="false">
+  <input class="theme_preload_comment" value="">
+  <input class="theme_blog_path" value="">
+  <input id="theme_shortcut" value="true" />
+  <input id="theme_highlight_on" value="true" />
+  <input id="theme_code_copy" value="true" />
+</div>
+
+
+
+<body>
+<aside class="nav">
+    <div class="nav-left">
+        <a href="/"
+   class="avatar_target">
+    <img class="avatar"
+         src="/img/avatar.jpg"/>
+</a>
+<div class="author">
+    <span>YZWDDSG</span>
+</div>
+
+<div class="icon">
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+</div>
+
+
+
+
+
+<ul>
+    <li>
+        <div class="all active" data-rel="All">All
+            
+                <small>(28)</small>
+            
+        </div>
+    </li>
+    
+        
+            
+                
+    <li>
+        <div data-rel="硬件">
+            
+            硬件
+            <small>(4)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="调度">
+            
+            调度
+            <small>(2)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="内存">
+            
+            内存
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="存储">
+            
+            存储
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="网络">
+            
+            网络
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="文件系统">
+            
+            文件系统
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="虚拟化">
+            
+            虚拟化
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="power">
+            
+            power
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="OS">
+            
+            OS
+            <small>(3)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="故障排查">
+            
+            故障排查
+            <small>(8)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="其他">
+            
+            其他
+            <small>(2)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="个人">
+            
+            个人
+            <small>(3)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+</ul>
+<div class="left-bottom">
+    <div class="menus">
+        
+            
+            
+            
+    </div>
+    <div>
+        
+            <a class="about  site_url"
+               
+               href="/about">About</a>
+        
+        
+    </div>
+</div>
+<input type="hidden" id="yelog_site_posts_number" value="28">
+<input type="hidden" id="yelog_site_word_count" value="65.1k">
+<div style="display: none">
+    <span id="busuanzi_value_site_uv"></span>
+    <span id="busuanzi_value_site_pv"></span>
+</div>
+
+    </div>
+    <div class="nav-right">
+        <div class="friends-area">
+    <div class="friends-title">
+        Links
+        <i class="iconfont icon-left"></i>
+    </div>
+    <div class="friends-content">
+        <ul>
+            
+            <li><a target="_blank" href="http://yelog.org/">叶落阁</a></li>
+            
+        </ul>
+    </div>
+</div>
+        <div class="title-list">
+    <div class="right-top">
+        <div id="default-panel">
+            <i class="iconfont icon-search" data-title="search shortcut key i"></i>
+            <div class="right-title">All</div>
+            <i class="iconfont icon-file-tree" data-title="switch to outline view shortcut key w"></i>
+        </div>
+        <div id="search-panel">
+            <i class="iconfont icon-left" data-title="return"></i>
+            <input id="local-search-input" autocomplete="off"/>
+            <label class="border-line" for="input"></label>
+            <i class="iconfont icon-case-sensitive" data-title="case sensitive"></i>
+            <i class="iconfont icon-tag" data-title="label"></i>
+        </div>
+        <div id="outline-panel" style="display: none">
+            <div class="right-title">outline</div>
+            <i class="iconfont icon-list" data-title="switch to article list"></i>
+        </div>
+    </div>
+
+    <div class="tags-list">
+    <input id="tag-search" />
+    <div class="tag-wrapper">
+        
+    </div>
+
+</div>
+
+    
+    <nav id="title-list-nav">
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/07/04/kdump%E5%A4%B1%E8%B4%A5%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="kdump失败问题排查">kdump失败问题排查</span>
+            <span class="post-date" title="2025-07-04 23:03:39">2025/07/04</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/06/13/%E8%AE%B0%E4%B8%80%E5%8F%AA%E6%B5%81%E6%B5%AA%E6%96%91%E7%82%B9%E7%8B%97/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="记一只流浪斑点狗">记一只流浪斑点狗</span>
+            <span class="post-date" title="2025-06-13 21:39:16">2025/06/13</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/05/28/AMD-ERAPS/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="AMD ERAPS">AMD ERAPS</span>
+            <span class="post-date" title="2025-05-28 21:52:56">2025/05/28</span>
+        </a>
+        
+        
+        <a  class="All 其他 "
+           href="/2025/04/26/popen%E5%AF%BC%E8%87%B4%E7%9A%84%E9%97%AE%E9%A2%98%E5%8F%8A%E5%88%86%E6%9E%90/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="popen导致的问题及分析">popen导致的问题及分析</span>
+            <span class="post-date" title="2025-04-26 23:15:08">2025/04/26</span>
+        </a>
+        
+        
+        <a  class="All 存储 "
+           href="/2025/04/20/nbd%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%AE%9E%E7%8E%B0/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="nbd驱动的实现">nbd驱动的实现</span>
+            <span class="post-date" title="2025-04-20 16:41:42">2025/04/20</span>
+        </a>
+        
+        
+        <a  class="All 内存 "
+           href="/2025/04/11/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3meminfo%E4%B8%AD%E7%9A%84MemAvailable%E5%92%8CMemFree/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="如何理解meminfo中的MemAvailable和MemFree">如何理解meminfo中的MemAvailable和MemFree</span>
+            <span class="post-date" title="2025-04-11 19:43:19">2025/04/11</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/04/09/%E6%89%A7%E8%A1%8Crpm%E5%91%BD%E4%BB%A4%E5%8D%A1%E6%AD%BB%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="执行rpm命令卡死排查">执行rpm命令卡死排查</span>
+            <span class="post-date" title="2025-04-09 22:11:15">2025/04/09</span>
+        </a>
+        
+        
+        <a  class="All 调度 "
+           href="/2025/04/07/CPU%E5%88%A9%E7%94%A8%E7%8E%87%E4%B8%8D%E5%9D%87%E8%A1%A1%E9%97%AE%E9%A2%98-sched-domain%E5%AD%A6%E4%B9%A0/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="CPU利用率不均衡问题-sched_domain学习">CPU利用率不均衡问题-sched_domain学习</span>
+            <span class="post-date" title="2025-04-07 22:04:47">2025/04/07</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/04/05/PCIE%E8%AE%BE%E5%A4%87%E7%83%AD%E6%8F%92%E6%8B%94/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="PCIE设备热插拔">PCIE设备热插拔</span>
+            <span class="post-date" title="2025-04-05 22:00:12">2025/04/05</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/04/03/%E6%88%91%E5%92%8C%E6%88%91%E7%9A%84%E7%8B%97%E5%AD%90%E4%BB%AC/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="我和我的狗子们">我和我的狗子们</span>
+            <span class="post-date" title="2025-04-03 22:18:32">2025/04/03</span>
+        </a>
+        
+        
+        <a  class="All 调度 "
+           href="/2025/03/31/%E4%BF%AE%E6%94%B9%E8%BF%9B%E7%A8%8B%E4%BF%A1%E6%81%AF%E7%9A%84%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改进程信息的内核模块">修改进程信息的内核模块</span>
+            <span class="post-date" title="2025-03-31 21:53:34">2025/03/31</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/30/%E4%B8%80%E6%AC%A1%E4%B8%A2%E5%8C%85%E7%9A%84%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="一次丢包的排查">一次丢包的排查</span>
+            <span class="post-date" title="2025-03-30 12:56:05">2025/03/30</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/29/systemd-resolved%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="systemd-resolved服务异常">systemd-resolved服务异常</span>
+            <span class="post-date" title="2025-03-29 22:28:32">2025/03/29</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/22/rt%E8%B0%83%E5%BA%A6%E5%99%A8bug%E5%AF%BC%E8%87%B4%E5%AE%95%E6%9C%BA%E7%9A%84%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="rt调度器bug导致宕机的排查">rt调度器bug导致宕机的排查</span>
+            <span class="post-date" title="2025-03-22 21:08:39">2025/03/22</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/21/%E4%BF%AE%E6%94%B9debian%E5%86%85%E6%A0%B8%E6%BA%90%E7%A0%81%E5%B9%B6%E6%89%93%E5%8C%85/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改debian内核源码并打包">修改debian内核源码并打包</span>
+            <span class="post-date" title="2025-03-21 21:53:56">2025/03/21</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/17/%E8%AE%B0%E4%B8%80%E6%AC%A1%E4%BA%91%E7%9B%98%E7%83%AD%E6%8B%94%E5%A4%B1%E8%B4%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="记一次云盘热拔失败">记一次云盘热拔失败</span>
+            <span class="post-date" title="2025-03-17 22:02:52">2025/03/17</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/03/13/MMX%E3%80%81FMA%E3%80%81SSE%E4%B8%8EAVX/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="MMX、FMA、SSE与AVX">MMX、FMA、SSE与AVX</span>
+            <span class="post-date" title="2025-03-13 21:37:54">2025/03/13</span>
+        </a>
+        
+        
+        <a  class="All 文件系统 "
+           href="/2025/03/12/proc%E3%80%81sysctl%E5%92%8Csysfs/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="proc、sysctl和sysfs">proc、sysctl和sysfs</span>
+            <span class="post-date" title="2025-03-12 22:00:23">2025/03/12</span>
+        </a>
+        
+        
+        <a  class="All 其他 "
+           href="/2025/03/11/%E4%BF%AE%E6%94%B9bios%E9%85%8D%E7%BD%AE/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改bios配置">修改bios配置</span>
+            <span class="post-date" title="2025-03-11 21:49:28">2025/03/11</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/10/%E4%BF%AE%E6%94%B9%E5%85%AC%E7%89%88%E5%86%85%E6%A0%B8/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改公版内核">修改公版内核</span>
+            <span class="post-date" title="2025-03-10 22:13:00">2025/03/10</span>
+        </a>
+        
+        
+        <a  class="All power "
+           href="/2025/03/09/proc-cpuinfo%E6%98%BE%E7%A4%BA%E9%A2%91%E7%8E%87%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="/proc/cpuinfo显示频率原理">/proc/cpuinfo显示频率原理</span>
+            <span class="post-date" title="2025-03-09 22:00:49">2025/03/09</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/07/rsyslog%E9%85%8D%E7%BD%AE/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="rsyslog配置">rsyslog配置</span>
+            <span class="post-date" title="2025-03-07 22:36:29">2025/03/07</span>
+        </a>
+        
+        
+        <a  class="All 虚拟化 "
+           href="/2025/03/06/qemu-kvm%E6%B7%BB%E5%8A%A0%E6%96%B0feature%E8%99%9A%E6%8B%9F%E5%8C%96/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="qemu kvm添加新feature虚拟化">qemu kvm添加新feature虚拟化</span>
+            <span class="post-date" title="2025-03-06 00:13:34">2025/03/06</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/02/27/hung-task%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="hung task原理">hung task原理</span>
+            <span class="post-date" title="2025-02-27 22:54:58">2025/02/27</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/02/26/netconsole/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="netconsole">netconsole</span>
+            <span class="post-date" title="2025-02-26 23:01:56">2025/02/26</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/02/26/%E8%88%92%E6%B4%BB%E8%88%92%E6%B4%BB%E7%AD%8B%E9%AA%A8%EF%BC%8C%E6%8A%96%E6%93%9E%E6%8A%96%E6%93%9E%E7%B2%BE%E7%A5%9E/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="舒活舒活筋骨，抖擞抖擞精神">舒活舒活筋骨，抖擞抖擞精神</span>
+            <span class="post-date" title="2025-02-26 00:05:33">2025/02/26</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/02/25/softlockup%E4%B8%8Ehardlockup/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="softlockup与hardlockup">softlockup与hardlockup</span>
+            <span class="post-date" title="2025-02-25 22:13:35">2025/02/25</span>
+        </a>
+        
+        
+        <a  class="All 网络 "
+           href="/2025/02/24/netpoll%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="netpoll原理">netpoll原理</span>
+            <span class="post-date" title="2025-02-24 21:36:30">2025/02/24</span>
+        </a>
+        
+        <div id="no-item-tips">
+
+        </div>
+    </nav>
+    <div id="outline-list">
+    </div>
+</div>
+
+    </div>
+    <div class="hide-list">
+        <div class="semicircle" data-title="Toggle full screen shortcut key s">
+            <div class="brackets first"><</div>
+            <div class="brackets">&gt;</div>
+        </div>
+    </div>
+</aside>
+<div id="post">
+    <div class="pjax">
+        <article id="post-CPU利用率不均衡问题-sched-domain学习" class="article article-type-post" itemscope itemprop="blogPost">
+    
+        <h1 class="article-title">CPU利用率不均衡问题-sched_domain学习</h1>
+    
+    <div class="article-meta">
+        
+        
+        
+        <span class="book">
+            <i class="iconfont icon-category"></i>
+            
+            
+            <a  data-rel="调度">调度</a>
+            
+        </span>
+        
+        
+    </div>
+    <div class="article-meta">
+        
+            Created At : <time class="date" title='Updated At: 2025-04-07 23:35:54'>2025-04-07 22:04</time>
+        
+    </div>
+    <div class="article-meta">
+        
+        <span>Count:6.5k</span>
+        
+        
+        
+        <span class="top-comment" title="Jump to comment area">
+            <a href="#comments">
+                Comment:<span class="count-comment">
+                    <span class="spinner">
+                      <div class="cube1"></div>
+                      <div class="cube2"></div>
+                    </span>
+                </span>
+            </a>
+        </span>
+        
+    </div>
+    
+    <div class="toc-ref">
+    
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%92%E6%9F%A5"><span class="toc-text">排查</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0"><span class="toc-text">学习</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E7%BB%93%E6%9E%84%E4%BD%93"><span class="toc-text">相关结构体</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-text">初始化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B0%83%E5%BA%A6"><span class="toc-text">调度</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%80%E4%BB%A5%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E5%87%BA%E7%8E%B0cpu%E5%88%A9%E7%94%A8%E7%8E%87%E5%88%86%E5%B1%82%E7%9A%84%E7%8E%B0%E8%B1%A1%EF%BC%9F"><span class="toc-text">所以为什么会出现cpu利用率分层的现象？</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C"><span class="toc-text">实验</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E8%AE%B0"><span class="toc-text">后记</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-text">参考</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E5%90%8E%E8%AE%B0"><span class="toc-text">后后记</span></a></li></ol>
+    
+<style>
+    .left-col .switch-btn,
+    .left-col .switch-area {
+        display: none;
+    }
+    .toc-level-3 i,
+    .toc-level-3 ol {
+        display: none !important;
+    }
+</style>
+</div>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h3><p>有时候，会发现虚机中的偶数核的cpu利用率比奇数核要高</p>
+<h3 id="排查"><a href="#排查" class="headerlink" title="排查"></a><center>排查</center></h3><p>这里的排查过程就省略了，主要就是怀疑中断绑核核RPS XPS的问题，不过经过排查，不是这些问题</p>
+<p>这时候就该想到cfs调度器本身的问题上了</p>
+<p>学习一下sched_domain相关的内容</p>
+<h3 id="学习"><a href="#学习" class="headerlink" title="学习"></a><center>学习</center></h3><p>首先sched_domain与什么有关呢？负载均衡。为什么出现sched_domain？也是因为负载均衡的需要，因为现在的CPU拓扑是有些复杂的，可能涉及numa socket die HT等内容，而一个任务往其他cpu上调度的cost与性能影响也与拓扑有关，比如任务从一个cpu迁移到同core中的CPU上（也就是一个core中的另一个HT）肯定要比迁移到不同numa的cpu上更快，因为一个core上的两个HT从L1 cache开始就是共享的。所以为了应对这些拓扑结构，出现了sched_domain。</p>
+<h4 id="相关结构体"><a href="#相关结构体" class="headerlink" title="相关结构体"></a>相关结构体</h4><pre><code class="language-c">struct sched_domain &#123;
+	##父domain，如果当前是顶级domain的话，父domain是空
+	struct sched_domain __rcu *parent;	/* top domain must be null terminated */
+  #子domain，如果当前是最低层domain的话，子domain是空，有多个子domain怎么挂？
+	struct sched_domain __rcu *child;	/* bottom domain must be null terminated */
+  #sched_group,sched_domain主要是再调度层级上进行划分，sched_group表示在这个层级内cpu该怎么均衡？
+  #同一sched_domain中的sched_group形成的是一个环形链表
+	struct sched_group *groups;	/* the balancing groups of the domain */
+  #负载均衡的最小和最大时间间隔
+	unsigned long min_interval;	/* Minimum balance interval ms */
+	unsigned long max_interval;	/* Maximum balance interval ms */
+  #如果busy的话减少balance
+	unsigned int busy_factor;	/* less balancing by factor if busy */
+  #超过水线才balance？
+	unsigned int imbalance_pct;	/* No balance until over watermark */
+	unsigned int cache_nice_tries;	/* Leave cache hot tasks for # tries */
+  #允许numa不均衡的任务数量，应该是为了防止numa间频繁迁移任务，所以允许numa间有一点不均衡
+	unsigned int imb_numa_nr;	/* Nr running tasks that allows a NUMA imbalance */
+
+	int nohz_idle;			/* NOHZ IDLE status */
+  #见下面的SD_FLAG相关定义
+	int flags;			/* See SD_* */
+  #domain的level，最底层的level是0，向上依次加1
+	int level;
+
+	/* Runtime fields. */
+	unsigned long last_balance;	/* init to jiffies. units in jiffies */
+	unsigned int balance_interval;	/* initialise to 1. units in ms. */
+	unsigned int nr_balance_failed; /* initialise to 0 */
+
+	/* idle_balance() stats */
+	u64 max_newidle_lb_cost;
+	unsigned long last_decay_max_lb_cost;
+
+	u64 avg_scan_cost;		/* select_idle_sibling */
+
+......
+	union &#123;
+		void *private;		/* used during construction */
+		struct rcu_head rcu;	/* used during destruction */
+	&#125;;
+	struct sched_domain_shared *shared;
+  #本sched_domain中cpu的数量
+	unsigned int span_weight;
+  #cpumask？为什么不直接使用spumask指针？
+	unsigned long span[];
+&#125;;
+
+
+struct sched_group &#123;
+  #下一个sched_group,这些了必须是一个环
+	struct sched_group	*next;			/* Must be a circular list */
+	atomic_t		ref;
+
+	unsigned int		group_weight;
+	struct sched_group_capacity *sgc;
+	int			asym_prefer_cpu;	/* CPU of highest priority in group */
+	int			flags;
+
+	unsigned long		cpumask[];
+&#125;;
+
+
+
+#切到idle的时候balance
+SD_FLAG(SD_BALANCE_NEWIDLE, SDF_SHARED_CHILD | SDF_NEEDS_GROUPS)
+#exec的时候balance
+SD_FLAG(SD_BALANCE_EXEC, SDF_SHARED_CHILD | SDF_NEEDS_GROUPS)
+#fork、clone的时候balance
+SD_FLAG(SD_BALANCE_FORK, SDF_SHARED_CHILD | SDF_NEEDS_GROUPS)
+#wakeup的时候balance
+SD_FLAG(SD_BALANCE_WAKE, SDF_SHARED_CHILD | SDF_NEEDS_GROUPS)
+#wake affine的时候balance，waker唤醒wake
+SD_FLAG(SD_WAKE_AFFINE, SDF_SHARED_CHILD)
+#cpu算力有差异
+SD_FLAG(SD_ASYM_CPUCAPACITY, SDF_SHARED_PARENT | SDF_NEEDS_GROUPS)
+SD_FLAG(SD_ASYM_CPUCAPACITY_FULL, SDF_SHARED_PARENT | SDF_NEEDS_GROUPS)
+#共享算力，smt会设置？
+SD_FLAG(SD_SHARE_CPUCAPACITY, SDF_SHARED_CHILD | SDF_NEEDS_GROUPS)
+#共享package资源，比如cache
+SD_FLAG(SD_SHARE_PKG_RESOURCES, SDF_SHARED_CHILD | SDF_NEEDS_GROUPS)
+#只有一个balance实例？什么意思
+SD_FLAG(SD_SERIALIZE, SDF_SHARED_PARENT | SDF_NEEDS_GROUPS)
+SD_FLAG(SD_ASYM_PACKING, SDF_NEEDS_GROUPS)
+#倾向于调度到同等级的兄弟sched_domain
+SD_FLAG(SD_PREFER_SIBLING, SDF_NEEDS_GROUPS)
+SD_FLAG(SD_OVERLAP, SDF_SHARED_PARENT | SDF_NEEDS_GROUPS)
+#跨numa调度
+SD_FLAG(SD_NUMA, SDF_SHARED_PARENT | SDF_NEEDS_GROUPS)
+
+#意思是如果一个domain有这个flag的话，他的所有children都有相同的flag set
+#define SDF_SHARED_CHILD       0x1
+#同上
+#define SDF_SHARED_PARENT      0x2
+#只有sched_domain中有超过一个sched_group才有效？
+#define SDF_NEEDS_GROUPS       0x4
+
+
+#先通过这个宏生成一个enum
+#然后通过下面的宏生成flag bit
+/* Generate SD flag indexes */
+#define SD_FLAG(name, mflags) __##name,
+enum &#123;
+	#include &lt;linux/sched/sd_flags.h&gt;
+	__SD_FLAG_CNT,
+&#125;;
+#undef SD_FLAG
+/* Generate SD flag bits */
+#define SD_FLAG(name, mflags) name = 1 &lt;&lt; __##name,
+enum &#123;
+	#include &lt;linux/sched/sd_flags.h&gt;
+&#125;;
+#undef SD_FLAG
+
+#这个是生成flag，把SD_FLAG展开 !!是使用两个非相当于把(mflags) &amp; SDF_NEEDS_GROUPS)转换成0/1
+#这一整个宏展开之后就是 (SD_BALANCE_NEWIDLE*1) | (SD_BALANCE_EXEC*1) |...| 0;
+#define SD_FLAG(name, mflags) (name * !!((mflags) &amp; SDF_NEEDS_GROUPS)) |
+static const unsigned int SD_DEGENERATE_GROUPS_MASK =
+#include &lt;linux/sched/sd_flags.h&gt;
+0;
+#undef SD_FLAG
+</code></pre>
+<h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><pre><code class="language-c">start_kernel
+  -&gt;sched_init
+    -&gt;init_defrootdomain
+      -&gt;init_rootdomain	#初始化一个root_domain,这时候的cpumask是全部的cpu
+    -&gt;rq_attach_root(rq, &amp;def_root_domain)	#遍历每个cpu初始化rq 各种调度器 smp内容之后，每个rq关联到def_root_domain 
+  -&gt;arch_call_rest_init	#rest init
+    -&gt;rest_init
+      -&gt;user_mode_thread(kernel_init, NULL, CLONE_FS)	#这里创建了第一个用户进程
+        -&gt;kernel_init_freeable
+          -&gt;sched_init_smp	#在smp_init之后
+            -&gt;sched_init_domains
+              -&gt;build_sched_domains
+
+
+#看一下build_sched_domains的主要流程
+#这里的cpu_map追了一下来源，应该是去掉了housekeeping的cpumask
+build_sched_domains(const struct cpumask *cpu_map, struct sched_domain_attr *attr)
+&#123;
+	enum s_alloc alloc_state = sa_none;
+	struct sched_domain *sd;
+	struct s_data d;
+	struct rq *rq = NULL;
+	int i, ret = -ENOMEM;
+	bool has_asym = false;
+  #如果是空的，没必要继续了
+	if (WARN_ON(cpumask_empty(cpu_map)))
+		goto error;
+
+	alloc_state = __visit_domain_allocation_hell(&amp;d, cpu_map);
+	if (alloc_state != sa_rootdomain)
+		goto error;
+
+	/* Set up domains for CPUs specified by the cpu_map: */
+  #真正的用给出的cpu_map去创建sched_domain
+  #遍历所有cpu_map中的所有cpu
+	for_each_cpu(i, cpu_map) &#123;
+		struct sched_domain_topology_level *tl;
+
+		sd = NULL;
+    #遍历所有的sd_topology
+		for_each_sd_topology(tl) &#123;
+
+			if (WARN_ON(!topology_span_sane(tl, cpu_map, i)))
+				goto error;
+      #创建sched_domain
+      #这个函数先调用sd_init初始化sched_domain
+      #然后如果有child，就继续处理level parent等相关内容
+      #所以实际上sd_init才是真正去创建这个sched_domain的
+      #sd_init是去完整的初始化sched_domain结构体
+			sd = build_sched_domain(tl, cpu_map, attr, sd, i);
+
+			has_asym |= sd-&gt;flags &amp; SD_ASYM_CPUCAPACITY;
+
+			if (tl == sched_domain_topology)
+				*per_cpu_ptr(d.sd, i) = sd;
+			if (tl-&gt;flags &amp; SDTL_OVERLAP)
+				sd-&gt;flags |= SD_OVERLAP;
+			if (cpumask_equal(cpu_map, sched_domain_span(sd)))
+				break;
+		&#125;
+	&#125;
+
+  #创建sched_groups
+	#遍历cpu_map中的每个cpu
+	for_each_cpu(i, cpu_map) &#123;
+    #从最底层sched_domain向上遍历，也就是从最底层向上构建
+		for (sd = *per_cpu_ptr(d.sd, i); sd; sd = sd-&gt;parent) &#123;
+			sd-&gt;span_weight = cpumask_weight(sched_domain_span(sd));
+			if (sd-&gt;flags &amp; SD_OVERLAP) &#123;
+				if (build_overlap_sched_groups(sd, i))
+					goto error;
+			&#125; else &#123;
+        #真正的去构建sched_group
+        #这里遍历sched_domain span中的所有cpu
+        #然后获取该cpu所属的group，看上去就是一些cpumask运算，如果没有child，则组内就当前一个cpu，如果有child，就把child的cpumask也算上
+        #最后给next这些赋值，构成环链
+        #注意这里没有span的话，也就是sd_init中的sched_domain没有计算出交集的话，就不会去构建sched_group
+				if (build_sched_groups(sd, i))
+					goto error;
+			&#125;
+		&#125;
+	&#125;
+
+	/*
+	 * Calculate an allowed NUMA imbalance such that LLCs do not get
+	 * imbalanced.
+	 */
+......
+	/* Calculate CPU capacity for physical packages and nodes */
+......
+
+	/* Attach the domains */
+  #把domain加到rq上
+	rcu_read_lock();
+  #遍历每个cpu
+	for_each_cpu(i, cpu_map) &#123;
+		rq = cpu_rq(i);
+		sd = *per_cpu_ptr(d.sd, i);
+
+		/* Use READ_ONCE()/WRITE_ONCE() to avoid load/store tearing: */
+		if (rq-&gt;cpu_capacity_orig &gt; READ_ONCE(d.rd-&gt;max_cpu_capacity))
+			WRITE_ONCE(d.rd-&gt;max_cpu_capacity, rq-&gt;cpu_capacity_orig);
+    #真正的去attach domain
+    #这里会去从base sd向上一直遍历判断，如果有parent和child决策是一样的，就把parent移除，直接让child继承祖父
+    #做完这些，把sd挂在rq上
+		cpu_attach_domain(sd, d.rd, i);
+	&#125;
+	rcu_read_unlock();
+
+......
+	ret = 0;
+error:
+	__free_domain_allocs(&amp;d, alloc_state, cpu_map);
+
+	return ret;
+&#125;
+</code></pre>
+<p>所以这里可以大概总结下：简单来说，就是<font color="red">构建sched_domain-&gt;构建sched_group-&gt;把sched_domain加到rq上</font>。关于构建sched_domain和sched_group的具体细节可以看对应的build_sched_domain和build_sched_groups函数。</p>
+<blockquote>
+<p>注：</p>
+<p>1.构建sched_group，为什么自下到上？很妙，一层一层向上构建的时候能够直接根据child sched_domain的span和当前cpu来计算group有哪些cpu，借注释中的一个图可以看的比较明显，如下，smt的两个group可能就是cpu0 cpu1，然后再向上构建的时候，也就是构建mc的时候，因为mc有child，所以就去找他的child的span（注意不是找child的sched_group,而是找child的sched_domain），有两个child，把两个child的sched_domain的span直接拿过来 就是[0 1] [2 3]两个group了</p>
+</blockquote>
+<pre><code class="language-c"> * Take for instance a 2 threaded, 2 core, 2 cache cluster part:
+ *
+ * CPU   0   1   2   3   4   5   6   7
+ *
+ * DIE  [                             ]
+ * MC   [             ] [             ]
+ * SMT  [     ] [     ] [     ] [     ]
+ *
+ *  - or -
+ *
+ * DIE  0-7 0-7 0-7 0-7 0-7 0-7 0-7 0-7
+ * MC	  0-3 0-3 0-3 0-3 4-7 4-7 4-7 4-7
+ * SMT  0-1 0-1 2-3 2-3 4-5 4-5 6-7 6-7
+ *
+ * CPU   0   1   2   3   4   5   6   7
+</code></pre>
+<pre><code class="language-c">#for_each_sd_topology这个遍历的所有拓扑是在哪建立的呢?
+kernel_init_freeable
+  -&gt;smp_init
+    -&gt;smp_cpus_done
+      -&gt;native_smp_cpus_done
+        -&gt;build_sched_topology
+
+
+#看一下build_sched_topology这个函数
+#可以看到，只要开启了相关的配置选项，就会往x86_topology中添加并初始化相关的sched_domain结构体
+static struct sched_domain_topology_level x86_topology[6];
+static void __init build_sched_topology(void)
+&#123;
+	int i = 0;
+#ifdef CONFIG_SCHED_SMT
+	x86_topology[i++] = (struct sched_domain_topology_level)&#123;
+		cpu_smt_mask, x86_smt_flags, SD_INIT_NAME(SMT)
+	&#125;;
+#endif
+#ifdef CONFIG_SCHED_CLUSTER
+	/*
+	 * For now, skip the cluster domain on Hybrid.
+	 */
+	if (!cpu_feature_enabled(X86_FEATURE_HYBRID_CPU)) &#123;
+		x86_topology[i++] = (struct sched_domain_topology_level)&#123;
+			cpu_clustergroup_mask, x86_cluster_flags, SD_INIT_NAME(CLS)
+		&#125;;
+	&#125;
+#endif
+#ifdef CONFIG_SCHED_MC
+	x86_topology[i++] = (struct sched_domain_topology_level)&#123;
+		cpu_coregroup_mask, x86_core_flags, SD_INIT_NAME(MC)
+	&#125;;
+#endif
+	/*
+	 * When there is NUMA topology inside the package skip the DIE domain
+	 * since the NUMA domains will auto-magically create the right spanning
+	 * domains based on the SLIT.
+	 */
+	if (!x86_has_numa_in_package) &#123;
+		x86_topology[i++] = (struct sched_domain_topology_level)&#123;
+			cpu_cpu_mask, SD_INIT_NAME(DIE)
+		&#125;;
+	&#125;
+	/*
+	 * There must be one trailing NULL entry left.
+	 */
+	BUG_ON(i &gt;= ARRAY_SIZE(x86_topology)-1);
+	set_sched_topology(x86_topology);
+&#125;
+</code></pre>
+<blockquote>
+<p>注：</p>
+<p>1.for_each_sd_topology这个遍历是遍历的sched_domain_topology指针指向的sched_domain_topology_level，它本来有一个默认的default_topology，但是我们x86架构执行了上面的build_sched_topology函数后，在最后会执行set_sched_topology，把sched_domain_topology指针指向的内容换成x86_topology，这样遍历的时候就是去遍历x86_topology结构体了</p>
+<p>2.有没有注意到，怎么没看见numa的sched_domain呢？其实它在sched_init_smp-&gt;sched_init_numa函数中，在这里会创建numa sched_domain的相关信息添加到set_sched_topology中。</p>
+<p>3.build_sched_topology中可以看到，只要配置选项中打开了相应的配置，那就会创建对应的sched_domain，那如果实际上不支持该内容怎么办呢？比如实际上没有开启smt，那是怎么跳过smt sched_domain的构建的呢？哭了，这个找了很久。在sd_init那个函数那里，也就是去真正初始化sched_domain的时候，有以下几句，sd_span &#x3D; sched_domain_span(sd);cpumask_and(sd_span, cpu_map, tl-&gt;mask(cpu));sd_id &#x3D; cpumask_first(sd_span);，意思就是获取当前sched_domain的cpumask（这个其实就是去调用当前sched_domain的mask函数，这个其实在build_sched_topology中可以找到，就是那些cpu_smt_mask、cpu_clustergroup_mask，这些大概就是以当前cpu做参数去调用架构相关的函数，获取同smt llc之类的cpu的mask），然后和当前的cpu_map取交集。很明显，如果没开启smt的话，取回的cpumask_and肯定是空，这样的话sd_id就肯定是空。然后后面构建sched_group的时候也不在构建，然后在后面的cpu_attach_domain中会判断parent是不是没用，如果没用的话就把他删掉。其实有个小疑问，为什么这么麻烦，构建了没用的sched_domain然后往rq挂的时候再去判断，再把没用的给dettach然后destroy掉，为什么不直接在构建sched_domain sched_group的时候不去构建？？</p>
+</blockquote>
+<p>以上，是相关sched_domain、sched_group等内容的初始化过程：<font color="red">在系统启动时就会根据配置选项来创建一些sched_domain_topology_level结构体，这里就可能包含smt mc die numa(不过numa不是和前面的同时创建的)这些内容。然后就遍历每个cpu（housekeeping除外）去初始化sched_domain,然后再去初始化sched_group，最后把sched_domain挂到每个cpu对应的rq上（在这之前，还会把没用的sched_domain destroy掉，精简结构）</font></p>
+<h4 id="调度"><a href="#调度" class="headerlink" title="调度"></a>调度</h4><p>有三种情况需要为task选择rq，也就是选择cpu，分别是fork exec和wakeup的时候，最终都会去调用select_task_rq，对于cfs来说，就是select_task_rq_fair</p>
+<pre><code class="language-c">select_task_rq_fair(struct task_struct *p, int prev_cpu, int wake_flags)
+&#123;
+	int sync = (wake_flags &amp; WF_SYNC) &amp;&amp; !(current-&gt;flags &amp; PF_EXITING);
+	struct sched_domain *tmp, *sd = NULL;
+	int cpu = smp_processor_id();
+	int new_cpu = prev_cpu;
+	int want_affine = 0;
+	/* SD_flags and WF_flags share the first nibble */
+	int sd_flag = wake_flags &amp; 0xF;
+
+	lockdep_assert_held(&amp;p-&gt;pi_lock);
+  #如果传入的flag有WF_TTWU bit
+	if (wake_flags &amp; WF_TTWU) &#123;
+    #记录下当前被唤醒的task
+		record_wakee(p);
+    #能效调度相关
+		if (sched_energy_enabled()) &#123;
+			new_cpu = find_energy_efficient_cpu(p, prev_cpu);
+			if (new_cpu &gt;= 0)
+				return new_cpu;
+			new_cpu = prev_cpu;
+		&#125;
+    #确定是不是wake_wide，也就是频繁互相唤醒
+    ##以及确定目标cpu是否在可以运行task的cpumask中
+		want_affine = !wake_wide(p) &amp;&amp; cpumask_test_cpu(cpu, p-&gt;cpus_ptr);
+	&#125;
+
+	rcu_read_lock();
+  #遍历sched_domain,从当前cpu所处的sd开始，向parent遍历
+	for_each_domain(cpu, tmp) &#123;
+		#如果want_affine且sched_domain的flag中有SD_WAKE_AFFINE且sched_domain中的span中包含prev_cpu
+		if (want_affine &amp;&amp; (tmp-&gt;flags &amp; SD_WAKE_AFFINE) &amp;&amp;
+		    cpumask_test_cpu(prev_cpu, sched_domain_span(tmp))) &#123;
+			if (cpu != prev_cpu)
+        #cpu不等于prev_cpu时，wake_affine
+				new_cpu = wake_affine(tmp, p, cpu, prev_cpu, sync);
+
+			sd = NULL; /* Prefer wake_affine over balance flags */
+			break;
+		&#125;
+
+		/*
+		 * Usually only true for WF_EXEC and WF_FORK, as sched_domains
+		 * usually do not have SD_BALANCE_WAKE set. That means wakeup
+		 * will usually go to the fast path.
+		 */
+     #这里写了一般只有WF_EXEC and WF_FORK的情况下是true，wakeup一般是false，所以总是走快速路径
+		if (tmp-&gt;flags &amp; sd_flag)
+			sd = tmp;
+		else if (!want_affine)
+			break;
+	&#125;
+
+  #如果sd不空，走慢路径
+	if (unlikely(sd)) &#123;
+		/* Slow path */
+		new_cpu = find_idlest_cpu(sd, p, cpu, prev_cpu, sd_flag);
+	&#125; else if (wake_flags &amp; WF_TTWU) &#123; /* XXX always ? */
+  #否则，有WF_TTWU的话，走快路径
+		/* Fast path */
+		new_cpu = select_idle_sibling(p, prev_cpu, new_cpu);
+	&#125;
+	rcu_read_unlock();
+
+	return new_cpu;
+&#125;
+
+#以下常用的几个WF_FLAG
+#define WF_EXEC     0x02 /* Wakeup after exec; maps to SD_BALANCE_EXEC */
+#define WF_FORK     0x04 /* Wakeup after fork; maps to SD_BALANCE_FORK */
+#define WF_TTWU     0x08 /* Wakeup;            maps to SD_BALANCE_WAKE */
+</code></pre>
+<p>这块总结一下：</p>
+<ul>
+<li><ul>
+<li><font color="red">需要唤醒进程的时候，走到select_task_rq_fair函数，去选择要在哪个rq上唤醒进程。其中wake_flags传入的一般是WF_EXEC、WF_FORK、WF_TTWU三种，分别表示exec后唤醒，映射到SD_BALANCE_EXEC；fork后唤醒，映射到SD_BALANCE_FORK；普通wakeup，映射到SD_BALANCE_WAKE</font></li>
+<li><font color="red">如过传入的wake_flags中有WF_TTWU，确定是不是想要affine</font></li>
+<li><font color="red">从当前cpu（注意这里时waker所在的cpu）的sched_domain向上遍历，如果want_affine且遍历的sched_domain中有SD_WAKE_AFFINE且遍历的sched_domain的span中有prev_cpu（也就是被唤醒的wakee进程上一次运行时的cpu），然后waker所在的cpu和wakee上一次运行的cpu不是同一个cpu，那么使用wake_affine函数选择一个cpu来作为target（后面进入快速路径去选择）。如果不满足上面的条件，继续向上遍历，如果sched_domain的flags中没有sd_flag相关的bit的话（一般只有WF_EXEC and WF_FORK的情况下是true，wakeup一般是false），就不继续遍历了，因为没什么必要了。</font></li>
+<li><font color="red">如果sd不空，走find_idlest_cpu去选一个运行wakee的cpu；否则走select_idle_sibling快速路径去选一个运行wakee的cpu。（能走到这里，除了第一个break前把sd设置为null，可能会走快路径了；第二个break或者正常遍历完sched_domain走过来，sd不为空）</font></li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-c">#wake_affine实现
+static int wake_affine(struct sched_domain *sd, struct task_struct *p,
+		       int this_cpu, int prev_cpu, int sync)
+&#123;
+	int target = nr_cpumask_bits;
+
+	if (sched_feat(WA_IDLE))
+    #如果有idle的cpu，从prev和this选一个idle的cpu出来，都idle的话优先选prev
+		target = wake_affine_idle(this_cpu, prev_cpu, sync);
+
+	if (sched_feat(WA_WEIGHT) &amp;&amp; target == nr_cpumask_bits)
+    #计算this和prev的weight来选择负载清的cpu
+		target = wake_affine_weight(sd, p, this_cpu, prev_cpu, sync);
+
+	schedstat_inc(p-&gt;stats.nr_wakeups_affine_attempts);
+	if (target != this_cpu)
+		return prev_cpu;
+
+	schedstat_inc(sd-&gt;ttwu_move_affine);
+	schedstat_inc(p-&gt;stats.nr_wakeups_affine);
+	return target;
+&#125;
+
+
+
+#慢路径
+static inline int find_idlest_cpu(struct sched_domain *sd, struct task_struct *p,
+				  int cpu, int prev_cpu, int sd_flag)
+&#123;
+  #先设置为waker的cpu
+	int new_cpu = cpu;
+
+  #如果wakee的cpumask与sched_domain的
+	if (!cpumask_intersects(sched_domain_span(sd), p-&gt;cpus_ptr))
+		return prev_cpu;
+
+	/*
+	 * We need task&#39;s util for cpu_util_without, sync it up to
+	 * prev_cpu&#39;s last_update_time.
+	 */
+   #同步负载？
+	if (!(sd_flag &amp; SD_BALANCE_FORK))
+		sync_entity_load_avg(&amp;p-&gt;se);
+
+  #遍历sd,从高到低
+	while (sd) &#123;
+		struct sched_group *group;
+		struct sched_domain *tmp;
+		int weight;
+    #flags不支持的话，到child
+		if (!(sd-&gt;flags &amp; sd_flag)) &#123;
+			sd = sd-&gt;child;
+			continue;
+		&#125;
+    #找最空闲的sched_group,从当前的sched_domain
+    #有一个group_type的enum可以描述当前sched_group的空闲状态
+		group = find_idlest_group(sd, p, cpu);
+		if (!group) &#123;
+			sd = sd-&gt;child;
+			continue;
+		&#125;
+    #找最空闲的cpu，从当前sched_group
+    #遍历该sched_group中的cpu
+		new_cpu = find_idlest_group_cpu(group, p, cpu);
+    #如果这个找到的cpu就是waker的cpu，继续向下走
+		if (new_cpu == cpu) &#123;
+			/* Now try balancing at a lower domain level of &#39;cpu&#39;: */
+			sd = sd-&gt;child;
+			continue;
+		&#125;
+
+		/* Now try balancing at a lower domain level of &#39;new_cpu&#39;: */
+		cpu = new_cpu;
+		weight = sd-&gt;span_weight;
+		sd = NULL;
+    #需要在更低等级的sched_domain去搜
+    #比如当前找到的是numa层的new_cpu，需要继续向下，再去mc smt这些去找
+		for_each_domain(cpu, tmp) &#123;
+			if (weight &lt;= tmp-&gt;span_weight)
+				break;
+			if (tmp-&gt;flags &amp; sd_flag)
+				sd = tmp;
+		&#125;
+	&#125;
+
+	return new_cpu;
+&#125;
+
+
+
+
+#快路径
+static int select_idle_sibling(struct task_struct *p, int prev, int target)
+&#123;
+	bool has_idle_core = false;
+	struct sched_domain *sd;
+	unsigned long task_util, util_min, util_max;
+	int i, recent_used_cpu;
+
+	/*
+	 * On asymmetric system, update task utilization because we will check
+	 * that the task fits with cpu&#39;s capacity.
+	 */
+	if (sched_asym_cpucap_active()) &#123;
+		sync_entity_load_avg(&amp;p-&gt;se);
+		task_util = task_util_est(p);
+		util_min = uclamp_eff_value(p, UCLAMP_MIN);
+		util_max = uclamp_eff_value(p, UCLAMP_MAX);
+	&#125;
+
+	/*
+	 * per-cpu select_rq_mask usage
+	 */
+	lockdep_assert_irqs_disabled();
+  #如果target idle，就直接选taget
+	if ((available_idle_cpu(target) || sched_idle_cpu(target)) &amp;&amp;
+	    asym_fits_cpu(task_util, util_min, util_max, target))
+		return target;
+
+	/*
+	 * If the previous CPU is cache affine and idle, don&#39;t be stupid:
+	 */
+   #如果prev与target共享缓存，且prev idle，返回prev
+	if (prev != target &amp;&amp; cpus_share_cache(prev, target) &amp;&amp;
+	    (available_idle_cpu(prev) || sched_idle_cpu(prev)) &amp;&amp;
+	    asym_fits_cpu(task_util, util_min, util_max, prev))
+		return prev;
+
+	#如果waker是per cpu的内核线程，且正在运行的就是这个内核线程，且prev就是当前cpu且当前cpu几乎空闲，直接返回prev
+	if (is_per_cpu_kthread(current) &amp;&amp;
+	    in_task() &amp;&amp;
+	    prev == smp_processor_id() &amp;&amp;
+	    this_rq()-&gt;nr_running &lt;= 1 &amp;&amp;
+	    asym_fits_cpu(task_util, util_min, util_max, prev)) &#123;
+		return prev;
+	&#125;
+
+	/* Check a recently used CPU as a potential idle candidate: */
+  #如果task的recent_used_cpu不与prev target相同且它与target共享cache且该cpu几乎空闲，直接返回
+	recent_used_cpu = p-&gt;recent_used_cpu;
+	p-&gt;recent_used_cpu = prev;
+	if (recent_used_cpu != prev &amp;&amp;
+	    recent_used_cpu != target &amp;&amp;
+	    cpus_share_cache(recent_used_cpu, target) &amp;&amp;
+	    (available_idle_cpu(recent_used_cpu) || sched_idle_cpu(recent_used_cpu)) &amp;&amp;
+	    cpumask_test_cpu(recent_used_cpu, p-&gt;cpus_ptr) &amp;&amp;
+	    asym_fits_cpu(task_util, util_min, util_max, recent_used_cpu)) &#123;
+		return recent_used_cpu;
+	&#125;
+
+	/*
+	 * For asymmetric CPU capacity systems, our domain of interest is
+	 * sd_asym_cpucapacity rather than sd_llc.
+	 */
+   #异构相关，先忽略
+	if (sched_asym_cpucap_active()) &#123;
+		sd = rcu_dereference(per_cpu(sd_asym_cpucapacity, target));
+		/*
+		 * On an asymmetric CPU capacity system where an exclusive
+		 * cpuset defines a symmetric island (i.e. one unique
+		 * capacity_orig value through the cpuset), the key will be set
+		 * but the CPUs within that cpuset will not have a domain with
+		 * SD_ASYM_CPUCAPACITY. These should follow the usual symmetric
+		 * capacity path.
+		 */
+		if (sd) &#123;
+			i = select_idle_capacity(p, sd, target);
+			return ((unsigned)i &lt; nr_cpumask_bits) ? i : target;
+		&#125;
+	&#125;
+  #获取target共享llc的sched_domain
+	sd = rcu_dereference(per_cpu(sd_llc, target));
+	if (!sd)
+		return target;
+
+  #如果开着smt
+  #查找是否有idle的core，如果没有在smt中找空闲的
+	if (sched_smt_active()) &#123;
+		has_idle_core = test_idle_cores(target);
+
+		if (!has_idle_core &amp;&amp; cpus_share_cache(prev, target)) &#123;
+			i = select_idle_smt(p, prev);
+			if ((unsigned int)i &lt; nr_cpumask_bits)
+				return i;
+		&#125;
+	&#125;
+
+  #在共享llc的sched_domain中搜索
+	i = select_idle_cpu(p, sd, has_idle_core, target);
+	if ((unsigned)i &lt; nr_cpumask_bits)
+		return i;
+
+	return target;
+&#125;
+</code></pre>
+<p>以上：</p>
+<ul>
+<li>wake_affine是从waker和wakee的cpu中选择一个出来，并不直接用，还得到快速路径中去确定</li>
+<li>find_idlest_cpu慢路径，从高到低遍历sched_domain，找到最空闲的sched_gtoup中最空闲的cpu</li>
+<li>select_idle_sibling：检查target能否直接返回；检查prev能否直接返回；特殊场景，如果是内核线程wakeup wakee的场景以及满足一些其他条件，直接返回prev；检查能够直接返回wakee最近使用的cpu recent_used_cpu；如果以上都不满足，在共享llc的sched_domain中搜索，查找target cpu共享llc的物理核中有没有idle的物理核，有则返回，没有继续查找有没有空闲的smt，有则直接返回（这里有先找idle的物理核，找不到再退而求其次找idle的逻辑核），如果还没有，就select_idle_cpu全局搜索。</li>
+</ul>
+<blockquote>
+<p>注：</p>
+<p>1.当前WA_IDLE和WA_WEIGHT应该都是开着的，WA_IDLE是指任务唤醒时优先选择idle cpu，WA_WEIGHT是指在唤醒时，根据cpu负载权重选择cpu</p>
+</blockquote>
+<h4 id="所以为什么会出现cpu利用率分层的现象？"><a href="#所以为什么会出现cpu利用率分层的现象？" class="headerlink" title="所以为什么会出现cpu利用率分层的现象？"></a>所以为什么会出现cpu利用率分层的现象？</h4><p><font color="red">首先，进程是普通的被唤醒的情况（非fork核exec），那么这时候传入的wake_flags就是WF_TTWU，那么它们被唤醒的时候选核逻辑就是走wake_affine和select_idle_sibling。wake_affine会根据idle等情况从waker所在的cpu和上次运行wakee的cpu中选择一个cpu作为target，然后走select_idle_sibling，在这里，如果target、prev、recent_used_cpu等前面这些逻辑都不满足，如上面所说，就会去找与target共享llc的sched_domain中去找空闲的物理核，找到空闲物理核后需要再选择一个cpu，在select_idle_cpu中，走到select_idle_core函数，select_idle_core会判断如果该core是空闲的（smt上的两个cpu都idle）就直接返回了。在当前的smt 顺序拓扑结构中，就总是优先遍历偶数核。</font></p>
+<p>因此，看上去就是出现cpu利用率分层了。</p>
+<p>社区大佬们认为这不算问题，是正常的</p>
+<h3 id="实验"><a href="#实验" class="headerlink" title="实验"></a><center>实验</center></h3><ul>
+<li><strong>如上所说，出现cpu利用率分层主要是因为wakeup的进程走快速路径去选核，所以可能出现这种情况。那如果我手动把sd_flag都调成支持SD_BALANCE_WAKE呢？</strong></li>
+</ul>
+<p>我搞了一个16c的机器，cpu拓扑如下,可以看到0 1是在一个core上的</p>
+<pre><code class="language-c"># CPU,Core,Socket,Node,,L1d,L1i,L2,L3
+0,0,0,0,,0,0,0,0
+1,0,0,0,,0,0,0,0
+2,1,0,0,,1,1,1,0
+3,1,0,0,,1,1,1,0
+4,2,0,0,,2,2,2,0
+5,2,0,0,,2,2,2,0
+6,3,0,0,,3,3,3,0
+7,3,0,0,,3,3,3,0
+8,4,0,0,,4,4,4,0
+9,4,0,0,,4,4,4,0
+10,5,0,0,,5,5,5,0
+11,5,0,0,,5,5,5,0
+12,6,0,0,,6,6,6,0
+13,6,0,0,,6,6,6,0
+14,7,0,0,,7,7,7,0
+15,7,0,0,,7,7,7,0
+</code></pre>
+<p>我起了三个stress-ng -c 8 –cpu-load&#x3D;40，可以看到，同一个core上的偶数cpu利用率比奇数要高一些，或者直接起一个stress-ng -c 24 –cpu-load&#x3D;40就可以复现</p>
+<p><img src="/img/24.png" alt="这是一张图片"></p>
+<p>当前我的&#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;sched_domain&#x2F;X&#x2F;domain0&#x2F;flags是4783，domain1&#x2F;flags是4655，现在分别把他们都加上</p>
+<p>cd &#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;sched_domain&#x2F;</p>
+<p>for i in <code>ls</code>;do echo 4799 &gt; $i&#x2F;domain0&#x2F;flags &amp;&amp; echo 4671 &gt; $i&#x2F;domain1&#x2F;flags;done</p>
+<p>echo 1 &gt; &#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;sched_autogroup_enabled</p>
+<p>发现没有用，为什么？</p>
+<p>通过ftrace可以看到都是try_to_wake_up唤醒，也就是传入的都是WF_TTWU没问题</p>
+<pre><code> 5)    &lt;idle&gt;-0    =&gt;  stress--2461
+ ------------------------------------------
+
+  5)               |  select_task_rq_fair() &#123;
+  5)   0.080 us    |    available_idle_cpu();
+  5)   0.060 us    |    available_idle_cpu();
+  5)   0.091 us    |    available_idle_cpu();
+  5)   0.122 us    |    available_idle_cpu();
+  5)   0.102 us    |    available_idle_cpu();
+  5)   0.097 us    |    available_idle_cpu();
+  5)   0.096 us    |    available_idle_cpu();
+  5)   0.100 us    |    available_idle_cpu();
+  5)   0.159 us    |    available_idle_cpu();
+  5)   0.161 us    |    available_idle_cpu();
+  5)   7.256 us    |  &#125;
+  7)               |  select_task_rq_fair() &#123;
+  7)   0.062 us    |    available_idle_cpu();
+  7)   0.535 us    |  &#125;
+  7)               |  select_task_rq_fair() &#123;
+  7)   0.061 us    |    available_idle_cpu();
+  7)   0.495 us    |  &#125;
+  4)               |  select_task_rq_fair() &#123;
+  4)   0.081 us    |    available_idle_cpu();
+  4)   0.216 us    |    available_idle_cpu();
+  4)   0.057 us    |    available_idle_cpu();
+  4)   1.752 us    |  &#125;
+</code></pre>
+<p>如上，可以看到执行了很多available_idle_cpu，但是仅凭这个还不足以知道到底走没走慢路径，因为快慢路径都会执行这个，唉这里面好多static 好多inline的函数，不好找</p>
+<p>噢 不用，其实看一下select_task_rq_fair函数的执行过程可以发现，如果want_affine为假，那么第一次进入遍历sched_domain的循环就会跳出，去走快速路径；如果want_affine为真，在当前单numa且所有任务不设置绑核的情况下，应该是肯定能走到第一个break哪里的，那里把sd设置为null了，所以跳出之后，也是会去走快速路径，所以，把SD_BALANCE_WAKE加到sched_domain的flags中应该是没用的。</p>
+<p>那为什么没有idle core的情况下还是会出现cpu利用率分层的情况？</p>
+<p>watch -n 2 ‘grep “nr_running” &#x2F;proc&#x2F;sched_debug’看一下</p>
+<pre><code class="language-c">Every 2.0s: grep &quot;nr_running&quot; /proc/sched_debug                           bd-gz-live-comet-01: Mon Apr  7 14:05:43 2025
+
+  .nr_running                    : 0
+  .nr_running                    : 0
+  .nr_running                    : 0
+  .nr_running                    : 0
+  .nr_running                    : 0
+  .rt_nr_running                 : 0
+  .dl_nr_running                 : 0
+  .nr_running                    : 0
+  .nr_running                    : 0
+  .nr_running                    : 0
+  .nr_running                    : 0
+  .nr_running                    : 0
+  .rt_nr_running                 : 0
+  .dl_nr_running                 : 0
+  .nr_running                    : 0
+  .nr_running                    : 0
+  .nr_running                    : 0
+  .nr_running                    : 0
+  .nr_running                    : 0
+  .rt_nr_running                 : 0
+  .dl_nr_running                 : 0
+  .nr_running                    : 1
+  .nr_running                    : 0
+  .nr_running                    : 1
+  .nr_running                    : 0
+  .nr_running                    : 1
+  .rt_nr_running                 : 0
+  .dl_nr_running                 : 0
+  .nr_running                    : 1
+  .nr_running                    : 0
+</code></pre>
+<p>其实可以看到，在负载不是那么高的情况下，可能在走快路径选择cpu的时候，判断到有些core就是idle的，然后可以复用上面的逻辑，从for_each_cpu(cpu, cpu_smt_mask(core))去遍历的话，就是从偶数cpu去开始的，所以可能也会出现这个问题。</p>
+<p>所以 我就算修改了sched_domain的flags，wakeup唤醒的进程其实还是会走快路径的</p>
+<ul>
+<li><strong>最开始看到，set sched_domain的时候是把housekeeping的cpu去掉了，那么这种cpu上还有没有sd呢？比较好奇</strong></li>
+</ul>
+<pre><code class="language-c">crash&gt; runq -c 0,1
+CPU 0 RUNQUEUE: ffff889fff2331c0
+  CURRENT: PID: 0      TASK: ffffffffb560a340  COMMAND: &quot;swapper/0&quot;
+  RT PRIO_ARRAY: ffff889fff233440
+     [no tasks queued]
+  CFS RB_ROOT: ffff889fff233280
+     [no tasks queued]
+
+CPU 1 RUNQUEUE: ffff889fff2731c0
+  CURRENT: PID: 0      TASK: ffff8881030f8000  COMMAND: &quot;swapper/1&quot;
+  RT PRIO_ARRAY: ffff889fff273440
+     [no tasks queued]
+  CFS RB_ROOT: ffff889fff273280
+     [no tasks queued]
+crash&gt; rq ffff889fff2331c0 |grep sd
+  nohz_csd = &#123;
+    func = 0xffffffffb36f29a0 &lt;nohz_csd_func&gt;,
+    throttled_csd_list = &#123;
+  sd = 0xffff888106469000,
+  hrtick_csd = &#123;
+  cfsb_csd = &#123;
+    func = 0xffffffffb3711ad0 &lt;__cfsb_csd_unthrottle&gt;,
+  cfsb_csd_list = &#123;
+crash&gt; rq ffff889fff2731c0 |grep sd
+  nohz_csd = &#123;
+    func = 0xffffffffb36f29a0 &lt;nohz_csd_func&gt;,
+    throttled_csd_list = &#123;
+  sd = 0x0,
+  hrtick_csd = &#123;
+  cfsb_csd = &#123;
+    func = 0xffffffffb3711ad0 &lt;__cfsb_csd_unthrottle&gt;,
+  cfsb_csd_list = &#123;
+crash&gt;
+</code></pre>
+<p>如上，我搞了个机器，其中cpu 0是非isolated的，cpu 1是isolated，可以看到cpu1的rq中果然没有sd</p>
+<p>符合上面的housekeeping的cpu不构建sd的逻辑。，因为housekeeping的cpu就不参与cfs调度了</p>
+<p>为什么虚机cpu拓扑换了就没问题了？</p>
+<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a><center>后记</center></h3><ul>
+<li>关于balance是怎么做的，后面还得再看</li>
+<li>看这块的时候看待fair class要比rt dl这些提前很多初始化，为什么？</li>
+</ul>
+<p>这块ds老师给的理由是：cfs是默认的普通进程调度类，负责大多数非实时任务的公平调度。它需要在内核启动早期就可用；实时调度类的优先级高于 CFS，但其任务通常在内核启动后期（如设备驱动初始化阶段）才创建，因此延迟初始化不影响系统启动流程</p>
+<ul>
+<li><p><font color="red">为什么是smt是[0 1] [2 3] [4 5] [6 7]这种拓扑才会出问题，[0 4] [1 5] [2 6] [3 7]这种不会出问题？</font></p>
+<p>这个要追到快路径中,如果前面target prev recent_used_cpu不满足，就去与target共享llc的sched_domain中去，在select_idle_cpu中，有这样一段</p>
+<pre><code class="language-c">static int select_idle_cpu(struct task_struct *p, struct sched_domain *sd, bool has_idle_core, int target)
+&#123;
+......
+    for_each_cpu_wrap(cpu, cpus, target + 1) &#123;
+        if (has_idle_core) &#123;
+            i = select_idle_core(p, cpu, cpus, &amp;idle_cpu);
+            if ((unsigned int)i &lt; nr_cpumask_bits)
+                return i;
+
+        &#125; else &#123;
+            if (!--nr)
+                return -1;
+            idle_cpu = __select_idle_cpu(cpu, p);
+            if ((unsigned int)idle_cpu &lt; nr_cpumask_bits)
+                break;
+        &#125;
+    &#125;
+    
+    
+static int select_idle_core(struct task_struct *p, int core, struct cpumask *cpus, int *idle_cpu)
+&#123;
+    bool idle = true;
+    int cpu;
+
+    for_each_cpu(cpu, cpu_smt_mask(core)) &#123;
+        if (!available_idle_cpu(cpu)) &#123;
+            idle = false;
+            if (*idle_cpu == -1) &#123;
+                if (sched_idle_cpu(cpu) &amp;&amp; cpumask_test_cpu(cpu, p-&gt;cpus_ptr)) &#123;
+                    *idle_cpu = cpu;
+                    break;
+                &#125;
+                continue;
+            &#125;
+            break;
+        &#125;
+        if (*idle_cpu == -1 &amp;&amp; cpumask_test_cpu(cpu, p-&gt;cpus_ptr))
+            *idle_cpu = cpu;
+    &#125;
+
+    if (idle)
+        return core;
+
+    cpumask_andnot(cpus, cpus, cpu_smt_mask(core));
+    return -1;
+&#125;
+</code></pre>
+<p>其实这个就非常明显了，快路径中走到select_idle_cpu去选择idle的cpu的话，首先它是这样循环的for_each_cpu_wrap(cpu, cpus, target + 1)，也就是从target+1的位置开始，去调用select_idle_core，select_idle_core会判断如果该core是空闲的（smt上的两个cpu都idle）就直接返回了。</p>
+<p>这在[0 4] [1 5] [2 6] [3 7]这种对称的拓扑上没有问题，cpu从target+1开始遍历的时候，如果target+1在前一半cpu(0-3)那么就优先检查core内比较小的cpu号，如果target+1在后一半cpu(4-7)，那么优先检查的就是core内比较大的cpu号。因此，这个遍历只和target的位置有关，只要target是随机的，那么选择的cpu应该也是随机的。</p>
+<p>但是在[0 1] [2 3] [4 5] [6 7]这种顺序拓扑中，检查core是否idle的时候总是会先遍历到偶数核。因此，在target+1是奇数核且target+1 cpu不是idle core的情况下，几乎总是去选择偶数核。</p>
+</li>
+</ul>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a><center>参考</center></h3><p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2411277">https://cloud.tencent.com/developer/article/2411277</a></p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1939933">https://cloud.tencent.com/developer/article/193993</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/banshanjushi/p/18599570">https://www.cnblogs.com/banshanjushi/p/18599570</a></p>
+<p><a target="_blank" rel="noopener" href="https://lore.kernel.org/lkml/BYAPR21MB1688FE804787663C425C2202D753A@BYAPR21MB1688.namprd21.prod.outlook.com/">https://lore.kernel.org/lkml/BYAPR21MB1688FE804787663C425C2202D753A@BYAPR21MB1688.namprd21.prod.outlook.com/</a></p>
+<p><a target="_blank" rel="noopener" href="https://lore.kernel.org/lkml/1689842053-5291-1-git-send-email-Kenan.Liu@linux.alibaba.com/">https://lore.kernel.org/lkml/1689842053-5291-1-git-send-email-Kenan.Liu@linux.alibaba.com/</a></p>
+<h3 id="后后记"><a href="#后后记" class="headerlink" title="后后记"></a><center>后后记</center></h3><p>又是一整天，清明假期的最后一天就这么过去了，噗</p>
+
+      
+       <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
+    </div>
+</article>
+
+
+
+
+
+    <div id="comments"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+<script type="text/javascript">
+    $.getScript('/js/gitalk.js', function () {
+        var gitalk = new Gitalk({
+            clientID: 'Ov23lihTjDF3jklWOX9b',
+            clientSecret: '1304f65e90138886cd32255710839a4ba192f266',
+            repo: 'yzwddsg-plus.github.io',
+            owner: 'yzwddsg-plus',
+            admin: ['yzwddsg-plus'],
+            id: decodeURI(location.pathname),
+            distractionFreeMode: 'true',
+            language: 'zh-CN',
+            perPage: parseInt('10',10)
+        })
+        gitalk.render('comments')
+    })
+</script>
+
+
+
+
+
+
+
+    </div>
+    <div class="copyright">
+        <p class="footer-entry">
+    YZWDDSG
+</p>
+<p class="footer-entry">Built with <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/yelog/hexo-theme-3-hexo" target="_blank">3-hexo</a> theme</p>
+
+    </div>
+    <div class="full-toc">
+        <button class="full" data-title="Toggle full screen shortcut key s"><span class="min "></span></button>
+<a class="" id="rocket" ></a>
+
+    </div>
+</div>
+
+</body>
+<script src="/js/jquery.pjax.js?v=1.1.0" ></script>
+
+<script src="/js/script.js?v=1.1.0" ></script>
+<script>
+    var img_resize = 'default';
+    function initArticle() {
+        /*渲染对应的表格样式*/
+        
+
+        /*渲染打赏样式*/
+        
+
+        /*高亮代码块行号*/
+        
+
+        /*访问数量*/
+        
+
+        /*代码高亮，行号对齐*/
+        $('.pre-numbering').css('line-height',$('.has-numbering').css('line-height'));
+
+        
+        
+    }
+
+    /*打赏页面隐藏与展示*/
+    
+
+</script>
+
+<!--加入行号的高亮代码块样式-->
+
+<!--自定义样式设置-->
+<style>
+    
+    
+    .nav-right .title-list nav a .post-title, .nav-right .title-list #local-search-result a .post-title {
+        color: #383636;
+    }
+    
+    
+    .nav-right .title-list nav a .post-date, .nav-right .title-list #local-search-result a .post-date {
+        color: #5e5e5f;
+    }
+    
+    
+    .nav-right nav a.hover, #local-search-result a.hover{
+        background-color: #e2e0e0;
+    }
+    
+    
+
+    /*列表样式*/
+    
+
+    /* 背景图样式 */
+    
+    
+
+
+    /*引用块样式*/
+    
+
+    /*文章列表背景图*/
+    
+    .nav-right:before {
+        content: ' ';
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.3;
+        background: url("https://i.loli.net/2019/07/22/5d3521411f3f169375.png");
+        background-repeat: no-repeat;
+        background-position: 50% 0;
+        -ms-background-size: cover;
+        -o-background-size: cover;
+        -moz-background-size: cover;
+        -webkit-background-size: cover;
+        background-size: cover;
+    }
+    
+
+    
+    #post .pjax article :not(pre) > code {
+        color: #24292e;
+        font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,Courier,monospace;
+        background-color: rgba(27,31,35,.05);
+        border-radius: 3px;
+        font-size: 85%;
+        margin: 0;
+        padding: .2em .4em;
+    }
+    
+</style>
+
+
+
+
+
+
+
+</html>
