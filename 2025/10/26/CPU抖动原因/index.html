@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>/proc/cpuinfo显示频率原理 | YZWDDSG</title>
+  <title>CPU抖动原因 | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="/proc/cpuinfo显示频率原理 | YZWDDSG">
+  <meta name="description" content="CPU抖动原因 | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta name="description" content="邮箱：857879363@qq.com bilibili：https:&#x2F;&#x2F;space.bilibili.com&#x2F;346090747 知乎：https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;zhong-ai-83-43 公众号： 本模板链接：3-hexo 本模板原作者：yelog">
@@ -670,9 +670,9 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="post-proc-cpuinfo显示频率原理" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-CPU抖动原因" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">/proc/cpuinfo显示频率原理</h1>
+        <h1 class="article-title">CPU抖动原因</h1>
     
     <div class="article-meta">
         
@@ -682,7 +682,7 @@
             <i class="iconfont icon-category"></i>
             
             
-            <a  data-rel="power">power</a>
+            <a  data-rel="故障排查">故障排查</a>
             
         </span>
         
@@ -690,12 +690,12 @@
     </div>
     <div class="article-meta">
         
-            发布时间 : <time class="date" title='最后更新: 2025-03-09 22:05:12'>2025-03-09 22:00</time>
+            发布时间 : <time class="date" title='最后更新: 2025-10-26 23:38:51'>2025-10-26 23:34</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:1.7k</span>
+        <span>字数:2.9k</span>
         
         
         
@@ -714,7 +714,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0"><span class="toc-text">学习</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%E9%A2%91%E7%8E%87%E5%8E%9F%E7%90%86"><span class="toc-text">计算频率原理</span></a></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7"><span class="toc-text">工具</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#cyclictest%E5%B7%A5%E5%85%B7"><span class="toc-text">cyclictest工具</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#rtla%E5%B7%A5%E5%85%B7"><span class="toc-text">rtla工具</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E6%96%B9%E6%B3%95"><span class="toc-text">其他方法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E5%8E%9F%E5%9B%A0"><span class="toc-text">常见原因</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -730,120 +730,180 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h3><p>众所周知，现在&#x2F;proc&#x2F;cpuinfo可以显示cpu的运行频率，而虚机中&#x2F;proc&#x2F;cpuinfo显示的cpu频率一直是一个固定的值</p>
-<h3 id="学习"><a href="#学习" class="headerlink" title="学习"></a><center>学习</center></h3><h4 id="计算频率原理"><a href="#计算频率原理" class="headerlink" title="计算频率原理"></a>计算频率原理</h4><p>先不管虚拟化那一套，就先看看内核是怎么计算cpu频率的呢？</p>
-<p>先了解一下相关背景：</p>
-<blockquote>
-<p>APERF：是一个MSR寄存器，它总是以当前的CPU的实际工作频率按比例增加数值，每个cpu上都有一个。比如一个CPU主频2.6GHz，然后睿频到了3.4GHz，那APERF就按照3.4GHz的比例去增加数值。</p>
-<p>MPERF：也是一个MSR寄存器，也是每个CPU都有一个。这个是按照最大CPU频率按比例增加，一般也就是CPU的主频，也就是标称频率，也就是p0状态下的频率。比如一颗cpu的主频是2.6GHz，那它就是去按照2.6GHz的比例去增加。</p>
-</blockquote>
-<blockquote>
-<p>到这差不多就能猜到了，就是通过这俩msr去计算cpu运行频率的。当然，其实频率这块还涉及到别的msr，以及怎么设置调节频率这块，还和驱动有关系，有些麻烦，到时候再细看一下再单开一篇，现在只看这俩msr足够。</p>
-</blockquote>
-<p>再看一下是怎么计算cpu频率的，以&#x2F;proc&#x2F;cpuinfo为例，现在的&#x2F;proc&#x2F;cpuinfo已经支持显示实时cpu频率了（有时候不会，后面会说到）</p>
-<pre><code>##cat /proc/cpuinfo时，会调到show_cpuinfo，直接来看显示cpu频率的部分
-##其实就在这，如果开了tsc的话，就对freq格式化输出，那freq其实就是频率咯
-##freq是arch_freq_get_on_cpu返回的，看一下这个函数
-if (cpu_has(c, X86_FEATURE_TSC)) &#123;
-    unsigned int freq = arch_freq_get_on_cpu(cpu);
-    seq_printf(m, &quot;cpu MHz\t\t: %u.%03u\n&quot;, freq / 1000, (freq % 1000));
-&#125;
-
-##看一下怎么返回cpu频率的
-unsigned int arch_freq_get_on_cpu(int cpu)
-&#123;
-    ##这个cpu_samples就是一个percpu的aperfmperf结构体
-    ##里面主要有acnt mcnt aperf mperf
-	struct aperfmperf *s = per_cpu_ptr(&amp;cpu_samples, cpu);
-	unsigned int seq, freq;
-	unsigned long last;
-	u64 acnt, mcnt;
-
-    ##如果没有aperfmperf这个feature就跳到fallback了，这个后面还会提到
-	if (!cpu_feature_enabled(X86_FEATURE_APERFMPERF))
-		goto fallback;
-
-    ##这里就是一些赋值acnt mcnt last_update，这些作用后面说
-	do &#123;
-		seq = raw_read_seqcount_begin(&amp;s-&gt;seq);
-		last = s-&gt;last_update;
-		acnt = s-&gt;acnt;
-		mcnt = s-&gt;mcnt;
-	&#125; while (read_seqcount_retry(&amp;s-&gt;seq, seq));
-
-	/*
-	 * Bail on invalid count and when the last update was too long ago,
-	 * which covers idle and NOHZ full CPUs.
-	 */
-    ##如果mcnt为0或jiffies-last大于MAX_SAMPLE_AGE也去fallback
-    ##到这就知道了，last_update也就是last其实就是上次更新时的jiffies
-    ##而MAX_SAMPLE_AGE时HZ/50，一般内核默认时250HZ，也就是MAX_SAMPLE_AGE时20ms
-    ##也就是如果这次采样和上次采样间隔超过20ms，就不继续计算了，去fallback了
-	if (!mcnt || (jiffies - last) &gt; MAX_SAMPLE_AGE)
-		goto fallback;
-
-    ##最后走到这是真正的计算频率，其实就是cpu_khz*acnt/mcnt
-    ##cpu_khz其实一般就是cpu主频了，也是tsc的频率
-    ##acnt mcnt是什么呢？先说答案，其实就是两次采样间隔中aperf mperf的差值，后面还会看到
-    ##所以频率计算公式是什么？主频*(Δaperf)/(Δmperf),联系之前说的aperf mperf的作用就很好理解了
-    ##也许有人会有疑问，为什么直接不是返回mperf就好了，还得乘主频再除aperf呢？aperf不就是按主频增长的嘛？
-    ##原因在于aperf和mperf并不是按照频率增长，而是和频率成一个倍数关系的增长
-    ##所以aperf mperf只能反应一个倍数关系，而不能反应真实的频率，所以最后还要乘tsc，因为tsc一直是按照主频增长的
-	return div64_u64((cpu_khz * acnt), mcnt);
-
-fallback:
-    ##这里就是没有成功计算频率，但是最要返回一个值
-    ##先尝试去cpufreq_quick_get获取，貌似要走驱动那块来着，有些忘了，写下一篇时再看
-	freq = cpufreq_quick_get(cpu);
-    ##如果quick也没获取到，那就只能返回cpu_khz了，一般也就是主频值了
-	return freq ? freq : cpu_khz;
-&#125;
-
-
-##到这基本就完全知道是怎么计算频率的了，但是还有个问题没有解释清楚
-##acmt mcnt是谁更新的？什么时候更新的？其实就在下面这个函数
-void arch_scale_freq_tick(void)
-&#123;
-	struct aperfmperf *s = this_cpu_ptr(&amp;cpu_samples);
-	u64 acnt, mcnt, aperf, mperf;
-    ##还是必须要支持X86_FEATURE_APERFMPERF才行
-	if (!cpu_feature_enabled(X86_FEATURE_APERFMPERF))
-		return;
-
-    ##读MSR_IA32_APERF的值到aperf中
-	rdmsrl(MSR_IA32_APERF, aperf);
-    ##读MSR_IA32_MPERF到mperf中
-	rdmsrl(MSR_IA32_MPERF, mperf);
-    ##这就出来啦，下面四条连起来看
-    ##acnt和mcnt就是当前采样的aperf和mperf的值和上次采样的值的差
-    ##然后把cpu_samples中的aperf mperf重新赋值成当前采样的值
-	acnt = aperf - s-&gt;aperf;
-	mcnt = mperf - s-&gt;mperf;
-
-	s-&gt;aperf = aperf;
-	s-&gt;mperf = mperf;
-    ##然后更新last_update为当前jiffies，更新acnt和mcnt
-	raw_write_seqcount_begin(&amp;s-&gt;seq);
-	s-&gt;last_update = jiffies;
-	s-&gt;acnt = acnt;
-	s-&gt;mcnt = mcnt;
-	raw_write_seqcount_end(&amp;s-&gt;seq);
-
-	scale_freq_tick(acnt, mcnt);
-&#125;
-
-##那这个arch_scale_freq_tick函数什么时候会调用到呢？搜一下就看到了
-scheduler_tick
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><center>前言</center></h3><p>在机器上跑一些任务&#x2F;业务的时候，可能经常会遇到cpu”抖”一下的情况，具体可能表现为该任务的cpu利用率突然降下去然后又拉回来、网络流量&#x2F;磁盘IO等突然降下去又拉回来这样子。而在云虚拟化的场景下，物理机上的qemu进程如果发生抖动，将直接影响云上虚机的稳定性。</p>
+<p>造成cpu抖动的常见原因基本就是进程抢占、中断抢占、硬件故障等。</p>
+<p>那么，怎么发现抖动，以及发现抖动后怎么去确认抖动原因呢？</p>
+<h3 id="工具"><a href="#工具" class="headerlink" title="工具"></a><center>工具</center></h3><p>什么时候应该去查cpu抖动并定位原因呢？一般有两个时间点：业务监控发现关键指标抖动时、业务上线前。</p>
+<p>如果业务已经上线了，业务监控显示指标抖动，这时候就根据具体抖动指标去抽丝剥茧层层分析就好了。当然，我们肯定不希望已经上线的业务发生抖动影响客户（收益），所以，最好能够在业务上线前检测定位并消除抖动。</p>
+<h4 id="cyclictest工具"><a href="#cyclictest工具" class="headerlink" title="cyclictest工具"></a><center>cyclictest工具</center></h4><ul>
+<li>介绍</li>
+</ul>
+<p>cyclictest工具来自rc-test工具包，详见<a target="_blank" rel="noopener" href="https://wiki.linuxfoundation.org/realtime/documentation/howto/tools/cyclictest/start">https://wiki.linuxfoundation.org/realtime/documentation/howto/tools/cyclictest/start</a></p>
+<p>这个工具检测抖动的原理也不复杂，就是起nr_cpu个线程并绑核，每个线程起一个timer定时器，然后设置根据传入的唤醒时间设置timer，当线程唤醒时根据设定的唤醒时间和真实的唤醒时间进行比较，从而得出抖动时间。</p>
+<ul>
+<li>编译及使用</li>
+</ul>
+<p>编译过程不在此说，按照<a target="_blank" rel="noopener" href="https://github.com/vianpl/rt-tests%E7%BC%96%E8%AF%91%E5%87%BA%E4%B8%80%E4%B8%AAbinary%E5%8D%B3%E5%8F%AF%E3%80%82">https://github.com/vianpl/rt-tests编译出一个binary即可。</a></p>
+<p>使用方法呢，cyclictest –help也能看到具体参数，一个典型的输出结果如下所示，比如P99后面的数字就是在测量期间99分位的延迟是几十微秒，最后的max就是在测量期间最大延迟是几百微秒。最上面两行，则是cyclictest检测到某个线程的延迟过大的时候，就把该信息打印出来。</p>
+<pre><code class="language-c">[CPU #100] too large latency 23132 us, now=8235.417495401, next=8235.394362653, delta_tsc=71859581
+[CPU #125] too large latency 22815 us, now=8475.691815355, next=8475.668999397, delta_tsc=70884631
+T:  0 C: 878266 Median:  22 P99:   39 P99.9:    46 P99.99:     54 P99.999:     68 Max:     188
+T:  1 C: 878266 Median:  16 P99:   29 P99.9:    38 P99.99:     48 P99.999:     60 Max:     279
+T:  2 C: 878266 Median:  31 P99:   50 P99.9:    56 P99.99:     62 P99.999:     68 Max:     265
+T:  3 C: 878265 Median:  23 P99:   37 P99.9:    44 P99.99:     52 P99.999:     66 Max:     247
+T:  4 C: 878264 Median:  26 P99:   41 P99.9:    48 P99.99:     55 P99.999:     62 Max:     228
+T:  5 C: 878262 Median:  20 P99:   37 P99.9:    47 P99.99:     55 P99.999:     63 Max:     205
+T:  6 C: 878261 Median:  25 P99:   43 P99.9:    52 P99.99:     59 P99.999:     67 Max:     268
+T:  7 C: 878257 Median:  15 P99:   32 P99.9:    39 P99.99:     45 P99.999:     53 Max:     416
+T:  8 C: 878260 Median:  16 P99:   33 P99.9:    43 P99.99:     54 P99.999:     62 Max:     229
+T:  9 C: 878259 Median:  23 P99:   43 P99.9:    50 P99.99:     57 P99.999:     65 Max:     239
+T: 10 C: 878258 Median:  25 P99:   48 P99.9:    56 P99.99:     61 P99.999:     67 Max:     182
+T: 11 C: 878256 Median:  27 P99:   47 P99.9:    53 P99.99:     58 P99.999:     64 Max:     221
+T: 12 C: 878256 Median:  24 P99:   41 P99.9:    47 P99.99:     54 P99.999:     62 Max:     192
+T: 13 C: 878254 Median:  20 P99:   40 P99.9:    51 P99.99:     61 P99.999:     69 Max:     236
+T: 14 C: 878253 Median:  22 P99:   43 P99.9:    52 P99.99:     60 P99.999:     68 Max:     248
+T: 15 C: 878252 Median:  15 P99:   32 P99.9:    45 P99.99:     56 P99.999:     63 Max:     219
 </code></pre>
-<p><font color="red">所以这块应该就可以恍然大明白了，假如一个默认启动的内核时250HZ的，那每隔4ms就会发起一次tick，就会调到scheduler_tick，然后scheduler_tick里就会调到arch_scale_freq_tick去采样，然后更新acnt mcnt，当用户执行cat &#x2F;proc&#x2F;cpuinfo的时候就自然直接利用acnt和mcnt计算出当前频率了</font></p>
-<p>但是，其实还有两个问题存在：1.有些cpu上并不显示实时频率，为什么？2.虚拟化情况下为什么只返回主频？</p>
-<p><strong>1.有些cpu上并不显示实时频率，为什么？</strong></p>
-<p>实测发现，有些cpu上cat &#x2F;prco&#x2F;cpuinfo的话并不会显示实时的cpu频率，而是一个固定的值</p>
-<p>其实arch_freq_get_on_cpu函数中也说明了，如果设置了nohz或者nohz_full或者cpu一直在idle的话就可能因为采样间隔太大跳到fallback去了</p>
-<p>其实还是没有负载搞得，只要你把cpu的负载稍微打上去一点，就能显示了</p>
-<p><strong>2.虚拟化情况下为什么只返回主频？</strong></p>
-<p>其实这个就更好理解了，可以看一下lscpu是不是没有aperfmperf这个feature，因为没有这个feature，也就是不支持X86_FEATURE_APERFMPERF，那也就不能去读aperf mperf去计算cpu频率了，所以只能返回固定的值了，也就是cpu主频</p>
-<p>这其实又能引申出一个问题，虚拟化情况下不能访问apermperf的话，怎么估算cpu频率呢？其实应该可以使用perf之类的工具，比如使用perf state sleep 1会得到cycles和task-clock，cycles就是这一秒cpu运行了多少个周期，task-clock就是实际运行了多少时间。比如我得到了cycles是800000，task-clock是1ms。那么就可以计算800000&#x2F;1*1000&#x2F;10^9&#x3D;0.8GHz，后面两个是换算单位，*1000是换算成秒，&#x2F;10^9是换算成GHz</p>
+<p>这里说一下常用的抓最大延迟的两个参数（–breaktrace和–tracemark），搭配ftrace一起使用，定位max超标的情况。</p>
+<p>看一下这两个参数</p>
+<pre><code class="language-c">-b USEC  --breaktrace=USEC send break trace command when latency &gt; USEC
+--tracemark       write a trace mark when -b latency is exceeded
+</code></pre>
+<p>-b XXX就是当cyclictest检测到某个线程的调度延迟超过设定的XXX微秒的时候，就停止cyclictest的运行。</p>
+<p>–tracemark这是当上面设置的-b XXX触发的时候，向&#x2F;sys&#x2F;kernel&#x2F;debug&#x2F;tracing&#x2F;tracing_on写0停止trace</p>
+<p>所以，在排查max抖动超标的时候，可以先打开ftrace的功能，然后使用cyclictets的时候设定-b XXX –tracemark参数。这样，当某个线程出现抖动的时候，cyclictest将停止运行，同时停止ftrace，这时候再根据cyclictest的break trace的输出信息查看哪个cpu上的cyclictest线程出现了抖动，再去&#x2F;sys&#x2F;kernel&#x2F;debug&#x2F;tracing中查看该cpu的trace结果去分析即可。</p>
+<p>（当然，使用这种方法，可能会使原本的抖动变得更大，因为开启ftrace之后本身就会带来额外的开销，造成抖动）</p>
+<ul>
+<li>注意</li>
+</ul>
+<p>使用该工具检测到抖动的时候，需要先排除是否是该工具本身的问题。</p>
+<p>比如，我之前遇到个问题，我们在使用cyclictest的–smp参数时，发现抖动很大，经过排查才发现原来cyclictest在每个cpu上都起了两个线程，这俩线程之间肯定是有抢占和竞争的关系的。原因是我们的机器offline了一部分核，而老版本（23年以前）的cyclictest中，获取应起的线程数量是通过numactl工具包中的一个库的numa_num_task_cpus函数实现的，这个函数其实就是去获取了&#x2F;proc&#x2F;self中的Cpus_allowed去判断起的cyclictest线程的数量，而Cpus_allowed是不感知offline cpu的。所以才出现当前有X个cpu却起了Y个线程的情况。新版本的cyclictest已经修复了这个问题，使用最新的代码即可。</p>
+<h4 id="rtla工具"><a href="#rtla工具" class="headerlink" title="rtla工具"></a><center>rtla工具</center></h4><ul>
+<li>介绍</li>
+</ul>
+<p>rtla其实是基于osnoise和timerlat来搞的，这两者都是由内核config控制是否开启的。两者的原理其实和上面的cyclictest类似的，也是通过设置timer然后检测设定时间与实际唤醒时间来检测抖动的。</p>
+<ul>
+<li>编译</li>
+</ul>
+<p>要使用osnoise和timerlat，则必须使能内核相关的config</p>
+<pre><code class="language-c">CONFIG_OSNOISE_TRACER
+CONFIG_TIMERLAT_TRACER
+</code></pre>
+<p>这样，就可以在新内核中的debugfs的available_traces显示相关的tracer了</p>
+<pre><code class="language-c"># cat available_tracers
+timerlat osnoise hwlat blk function_graph wakeup_dl wakeup_rt wakeup function nop
+</code></pre>
+<p>其实，这两个tracer就可以直接使用了，不过，不太灵活，可以再继续编译rtla</p>
+<p>在内核源码的tools&#x2F;tracing&#x2F;rtla下，可以编译这个工具，不过，在编译前，要先看一下README，是有一些依赖需要先安装上的</p>
+<pre><code class="language-c">RTLA depends on the following libraries and tools:
+
+ - libtracefs
+ - libtraceevent
+ - libcpupower (optional, for --deepest-idle-state)
+</code></pre>
+<p>安装完相关依赖，编译出rtla的binary即可使用</p>
+<ul>
+<li>使用</li>
+</ul>
+<p>osnoise和timerlat的直接使用，就是和不同的tracer一样的使用方法，echo进current_tracer中即可，这里简单看一下他们的输出</p>
+<p>osnoise：很明显，MAX SINGLE NOISE IN US指的就是测量期间内的最大噪声（抖动&#x2F;调度延迟）,后面的Interference counters则是测量期间内硬件、NMI、IRQ等发生的计数。</p>
+<pre><code class="language-c"># tracer: osnoise
+#
+#                                _-----=&gt; irqs-off
+#                               / _----=&gt; need-resched
+#                              | / _---=&gt; hardirq/softirq
+#                              || / _--=&gt; preempt-depth
+#                              ||| / _-=&gt; migrate-disable                         MAX
+#                              |||| /     delay                                   SINGLE      Interference counters:
+#                              |||||               RUNTIME      NOISE  %% OF CPU  NOISE    +-----------------------------+
+#           TASK-PID      CPU# |||||   TIMESTAMP    IN US       IN US  AVAILABLE  IN US     HW    NMI    IRQ   SIRQ THREAD
+#              | |         |   |||||      |           |             |    |            |      |      |      |      |      |
+           &lt;...&gt;-221339  [000] ..... 3291315.154441: 1000000      10521  98.94790    3922      0      0    287    374      6
+           &lt;...&gt;-221340  [001] ..... 3291315.154837: 1000000       3415  99.65850     880      0      0    274    354      3
+           &lt;...&gt;-221341  [002] ..... 3291315.154912: 1000000       2690  99.73100     471      0      0    253    315      2
+           &lt;...&gt;-221342  [003] ..... 3291315.154959: 1000000       2822  99.71780      61      0      0    284    351      8
+           &lt;...&gt;-221343  [004] ..... 3291315.155043: 1000000       2223  99.77770      38      0      0    250    304      0
+           &lt;...&gt;-221344  [005] ..... 3291315.155129: 1000000       2793  99.72070     431      0      0    255    313      3
+           &lt;...&gt;-221345  [006] ..... 3291315.155162: 1000000       2832  99.71680     559      0      0    258    315      3
+</code></pre>
+<p>timerlat：timerlat则直接显示每个timerlat线程的调度延迟时间</p>
+<pre><code class="language-c">        &lt;idle&gt;-0       [272] d.h1. 3291728.942768: #48    context    irq timer_latency       728 ns
+           &lt;...&gt;-226346  [272] ..... 3291728.942769: #48    context thread timer_latency      1798 ns
+          &lt;idle&gt;-0       [331] d.h1. 3291728.942774: #46    context    irq timer_latency       735 ns
+           &lt;...&gt;-226405  [331] ..... 3291728.942775: #46    context thread timer_latency      1895 ns
+          &lt;idle&gt;-0       [186] d.h1. 3291728.942776: #51    context    irq timer_latency       824 ns
+           &lt;...&gt;-226260  [186] ..... 3291728.942778: #51    context thread timer_latency      1974 ns
+          &lt;idle&gt;-0       [243] d.h1. 3291728.942779: #49    context    irq timer_latency       710 ns
+           &lt;...&gt;-226317  [243] ..... 3291728.942780: #49    context thread timer_latency      1870 ns
+          &lt;idle&gt;-0       [214] d.h1. 3291728.942784: #50    context    irq timer_latency       782 ns
+           &lt;...&gt;-226288  [214] ..... 3291728.942785: #50    context thread timer_latency      1772 ns
+          &lt;idle&gt;-0       [128] d.h1. 3291728.942785: #53    context    irq timer_latency       698 ns
+</code></pre>
+<p>可以看到，一般情况下，上面的osnoise可以大致判断什么造成了cpu抖动，比如nmi、irq或者进程抢占等。</p>
+<p>但是，如果发生了进程抢占，怎么判断是哪个线程抢占造成了抖动呢？</p>
+<p>这种精细活儿，还得rtla来做</p>
+<pre><code class="language-c">rtla version 6.16.0-rc1
+
+  usage: rtla COMMAND ...
+
+  commands:
+     osnoise  - gives information about the operating system noise (osnoise)
+     hwnoise  - gives information about hardware-related noise
+     timerlat - measures the timer irq and thread latency
+</code></pre>
+<p>我最常用的是timerlat的-a XXX参数，这个简直是cyclictest的-b XXX –tracemark的加强版，timerlat的-a XXX在调度延迟大于XXX微秒的时候将自动停止并打印相关栈出来，比如：</p>
+<pre><code class="language-c">  0 00:00:03   |          IRQ Timer Latency (us)        |         Thread Timer Latency (us)      |    Ret user Timer Latency (us)
+CPU COUNT      |      cur       min       avg       max |      cur       min       avg       max |      cur       min       avg       max
+  0 #1         |        2         2         2         2 |       21        21        21        21 |        -         -         -         -
+---------------|----------------------------------------|----------------------------------------|---------------------------------------
+ALL #1      e0 |                  2         2         2 |                 21        21        21 |                  -         -         - |rtla timerlat hit stop tracing
+## CPU 0 hit stop tracing, analyzing it ##
+  IRQ handler delay:                                         0.00 us (0.00 %)
+  IRQ latency:                                               2.02 us
+  Timerlat IRQ duration:                                    15.05 us (71.05 %)
+  Blocking thread:                                           2.94 us (13.89 %)
+                       swapper/0:0                           2.94 us
+    Blocking thread stack trace
+                -&gt; timerlat_irq
+                -&gt; __hrtimer_run_queues
+                -&gt; hrtimer_interrupt
+                -&gt; __sysvec_apic_timer_interrupt
+                -&gt; sysvec_apic_timer_interrupt
+                -&gt; asm_sysvec_apic_timer_interrupt
+                -&gt; mwait_idle
+                -&gt; default_enter_idle
+                -&gt; cpuidle_enter_state
+                -&gt; cpuidle_enter
+                -&gt; cpuidle_idle_call
+                -&gt; do_idle
+                -&gt; cpu_startup_entry
+                -&gt; rest_init
+                -&gt; start_kernel
+                -&gt; x86_64_start_reservations
+                -&gt; x86_64_start_kernel
+                -&gt; common_startup_64
+------------------------------------------------------------------------
+  Thread latency:                                           21.19 us (100%)
+
+Max timerlat IRQ latency from idle: 2.02 us in cpu 0
+  Saving trace to timerlat_trace.txt
+</code></pre>
+<p>除此之外，当然还有很多扩展用法，可以参考<a target="_blank" rel="noopener" href="https://bristot.me/linux-scheduling-latency-debug-and-analysis/">https://bristot.me/linux-scheduling-latency-debug-and-analysis/</a></p>
+<h4 id="其他方法"><a href="#其他方法" class="headerlink" title="其他方法"></a><center>其他方法</center></h4><p>当然，还有很多其他方法可以单独或者搭配上面的方法一起使用的，比如perf sched record查看调度延迟，比如&#x2F;proc&#x2F;[PID]&#x2F;sched中的wait_max等字段，都可以辅助定位cpu抖动的原因。</p>
+<h3 id="常见原因"><a href="#常见原因" class="headerlink" title="常见原因"></a><center>常见原因</center></h3><p>下面列举一下我自己目前遇到的可能造成cpu抖动的原因：</p>
+<ol>
+<li>正常情况。也许抖动并不是出现了问题，比如客户侧网络流量激增、突增大量读写盘操作，这种情况可能导致cpu的抖动，但它是用户侧的行为，我们可以通过一些手段去优化，但不能说这是系统有问题</li>
+<li>cgroup限制了进程的执行配额</li>
+<li>THP透明大页的开启，在频繁分配&#x2F;释放内存的情况下可能导致系统频繁进行回收、聚合透明大页的操作造成抖动</li>
+<li>内存不足，无法分配指定order的页面触发kswapd回收内存或者触发kcompactd规整内存等</li>
+<li>进程抢占，比如一些无关的进程&#x2F;服务的运行抢占了cpu</li>
+<li>绑核错误，本不该在此cpu上执行的任务因为绑核错误跑到了本cpu导致抖动</li>
+<li>numa_balancing的开启可能导致频繁进行内存迁移。如无必要，可以关掉。（另外，由此想到，irqbalance会进行自动修改中断绑核的操作，也许也会造成抖动呢，不过我还没遇到过这种情况）</li>
+<li>OS内的一些优化服务，比如tuned、ksmtuned等，这种服务一直在OS内暗地里进行一些”调优”策略，可能造成cpu抖动</li>
+<li>中断抢占</li>
+<li>硬件原因（硬件错误、bios版本问题、微码错误、过多的smi中断等）</li>
+</ol>
+<p>……</p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
