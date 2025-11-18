@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>修改进程信息的内核模块 | YZWDDSG</title>
+  <title>fsnotify导致的softlockup | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="修改进程信息的内核模块 | YZWDDSG">
+  <meta name="description" content="fsnotify导致的softlockup | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta property="og:type" content="website">
@@ -684,9 +684,9 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="post-修改进程信息的内核模块" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-fsnotify导致的softlockup" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">修改进程信息的内核模块</h1>
+        <h1 class="article-title">fsnotify导致的softlockup</h1>
     
     <div class="article-meta">
         
@@ -696,7 +696,7 @@
             <i class="iconfont icon-category"></i>
             
             
-            <a  data-rel="调度">调度</a>
+            <a  data-rel="故障排查">故障排查</a>
             
         </span>
         
@@ -704,12 +704,12 @@
     </div>
     <div class="article-meta">
         
-            Created At : <time class="date" title='Updated At: 2025-03-31 23:28:31'>2025-03-31 21:53</time>
+            Created At : <time class="date" title='Updated At: 2025-11-19 00:00:19'>2025-11-18 23:53</time>
         
     </div>
     <div class="article-meta">
         
-        <span>Count:1.4k</span>
+        <span>Count:2.8k</span>
         
         
         
@@ -728,7 +728,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0"><span class="toc-text">学习</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97"><span class="toc-text">内核模块</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E8%AE%B0"><span class="toc-text">后记</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B0%83%E6%9F%A5"><span class="toc-text">调查</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -744,205 +744,338 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h3><p>有时候，某些进程可能会出现一些异常，需要排查定位异常原因。</p>
-<p>获取异常进程的信息是比较容易的，ps top这些都可以简单查看，更详细的信息也可以通过kcore来分析。</p>
-<p>但是，如果需要做一些实验修改进程来排查异常原因呢，比如需要修改进程的state或者尝试唤醒进程或者其他操作呢？</p>
-<h3 id="学习"><a href="#学习" class="headerlink" title="学习"></a><center>学习</center></h3><p>可以写一个内核模块，通过加载模块+指定pid的方法来对指定的进程进行修改</p>
-<p>userspace最容易获取到的进程的特定标识是什么呢？pid</p>
-<p>那接下来就需要查看怎么通过pid来获取task_struct</p>
-<p>可以看一下include&#x2F;linux&#x2F;pid.h中有一些函数声明</p>
-<pre><code class="language-c">//通过pid获取pid struct
-extern struct pid *find_get_pid(int nr);
-//通过pid struct获取task_struct
-extern struct task_struct *get_pid_task(struct pid *pid, enum pid_type);
-//通过task_strcut获取pid struct
-extern struct pid *get_task_pid(struct task_struct *task, enum pid_type type);
+        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h3><p>ubuntu机器发生了宕机，需要排查</p>
+<p>内核版本是5.4.0-139</p>
+<h3 id="调查"><a href="#调查" class="headerlink" title="调查"></a><center>调查</center></h3><p>首先先看log</p>
+<pre><code class="language-c">[4580486.597245] watchdog: BUG: soft lockup - CPU#24 stuck for 22s! [migration/24:156]
+[4580486.605816] Modules linked in: cdc_ether usbnet mii mmfs26(OE) mmfslinux(OE) tracedev(OE) nvidia_uvm(OE) nvidia_peermem(POE) veth nvidia_drm(POE) nvidia_modeset(POE) nvidia(POE) ip6t_REJECT nf_reject_ipv6 nf_conntrack_netlink ipt_REJECT nf_reject_ipv4 xt_mark xt_addrtype xt_MASQUERADE xt_set ip_set_hash_ipportnet ip_set_hash_ipportip ip_set_hash_ip ip_set_bitmap_port ip_set_hash_ipport dummy ip_set nf_tables nfnetlink ip_vs_wrr ip_vs_sh ip_vs_rr ip_vs ipvlan overlay iptable_nat ip6table_filter ip6table_nat nf_nat ip6table_mangle ip6_tables xt_conntrack nf_conntrack nf_defrag_ipv6 nf_defrag_ipv4 libcrc32c xt_comment iptable_mangle iptable_filter bpfilter aufs msr cpuid xsk_diag tcp_diag udp_diag raw_diag inet_diag unix_diag af_packet_diag netlink_diag ib_ipoib(OE) ib_umad(OE) rdma_ucm(OE) rdma_cm(OE) iw_cm(OE) ib_cm(OE) nls_iso8859_1 ses enclosure intel_rapl_msr intel_rapl_common binfmt_misc nfit x86_pkg_temp_thermal intel_powerclamp coretemp kvm_intel kvm crct10dif_pclmul crc32_pclmul
+[4580486.605843]  ghash_clmulni_intel aesni_intel crypto_simd ipmi_ssif cryptd glue_helper mpt3sas mxm_wmi raid_class video scsi_transport_sas input_leds joydev ast drm_vram_helper mlx5_ib(OE) ttm ib_uverbs(OE) drm_kms_helper isst_if_mmio isst_if_mbox_pci ib_core(OE) isst_if_common i2c_algo_bit ioatdma mei_me fb_sys_fops syscopyarea sysfillrect sysimgblt i2c_i801 mei dca ipmi_si ipmi_devintf ipmi_msghandler mac_hid acpi_power_meter acpi_pad sch_fq_codel ramoops reed_solomon efi_pstore drm ip_tables x_tables hid_generic mlx5_core(OE) nvme mlxfw(OE) pci_hyperv_intf nvme_core tls psample usbhid mlxdevm(OE) virtio_blk auxiliary(OE) hid mlx_compat(OE) ahci libahci wmi knem(OE) autofs4 [last unloaded: ecc]
+[4580486.605865] CPU: 24 PID: 156 Comm: migration/24 Kdump: loaded Tainted: P           OE     5.4.0-139-generic #156-Ubuntu
+[4580486.605866] Hardware name: Nettrix SSNETTRIXHBX-GN6-F562/60WB32, BIOS BKMH011054-U08 11/29/2024
+[4580486.605871] RIP: 0010:stop_machine_yield+0xc/0x10
+[4580486.605873] Code: 00 00 00 75 0d 4c 8b 65 f8 c9 c3 b8 fe ff ff ff eb e3 e8 37 2b f3 ff 0f 1f 80 00 00 00 00 0f 1f 44 00 00 55 48 89 e5 f3 90 5d &lt;c3&gt; 0f 1f 00 0f 1f 44 00 00 55 48 89 e5 41 57 49 89 ff 41 56 41 55
+[4580486.605874] RSP: 0000:ffffabd919427e50 EFLAGS: 00000246 ORIG_RAX: ffffffffffffff13
+[4580486.605876] RAX: 0000000000000282 RBX: ffffabd935427bc4 RCX: ffff935b3f623610
+[4580486.605876] RDX: ffffabd935427b20 RSI: 0000000000000282 RDI: ffffffffa1a56d00
+[4580486.605877] RBP: ffffabd919427e90 R08: 0000000000000084 R09: 0000000000000001
+[4580486.605877] R10: 000000000af130c3 R11: ffff935b3f62ffb8 R12: 0000000000000001
+[4580486.605877] R13: ffffffffa1a56d00 R14: 0000000000000001 R15: ffffabd935427ba0
+[4580486.605878] FS:  0000000000000000(0000) GS:ffff935b3f600000(0000) knlGS:0000000000000000
+[4580486.605879] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[4580486.605879] CR2: 000010b322096000 CR3: 000000e4907f0002 CR4: 0000000000760ee0
+[4580486.605880] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+[4580486.605880] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+[4580486.605881] PKRU: 55555554
+[4580486.605881] Call Trace:
+[4580486.605884]  ? multi_cpu_stop+0x9d/0x110
+[4580486.605886]  ? stop_machine_yield+0x10/0x10
+[4580486.605888]  cpu_stopper_thread+0x50/0x100
+[4580486.605890]  smpboot_thread_fn+0xd0/0x170
+[4580486.605892]  kthread+0x104/0x140
+[4580486.605893]  ? sort_range+0x30/0x30
+[4580486.605894]  ? kthread_park+0x90/0x90
+[4580486.605896]  ret_from_fork+0x1f/0x40
+[4580486.605898] Kernel panic - not syncing: softlockup: hung tasks
+[4580486.612805] CPU: 24 PID: 156 Comm: migration/24 Kdump: loaded Tainted: P           OEL    5.4.0-139-generic #156-Ubuntu
+[4580486.624653] Hardware name: Nettrix SSNETTRIXHBX-GN6-F562/60WB32, BIOS BKMH011054-U08 11/29/2024
+[4580486.634400] Call Trace:
+[4580486.637900]  &lt;IRQ&gt;
+[4580486.640982]  dump_stack+0x6d/0x8b
+[4580486.645335]  panic+0x101/0x2e3
+[4580486.649396]  watchdog_timer_fn.cold+0x86/0xa0
+[4580486.654791]  __hrtimer_run_queues+0xf7/0x270
+[4580486.660086]  ? softlockup_fn+0x50/0x50
+[4580486.664820]  hrtimer_interrupt+0x109/0x220
+[4580486.669866]  smp_apic_timer_interrupt+0x71/0x140
+[4580486.675405]  apic_timer_interrupt+0xf/0x20
+[4580486.680426]  &lt;/IRQ&gt;
+[4580486.683443] RIP: 0010:stop_machine_yield+0xc/0x10
+[4580486.689093] Code: 00 00 00 75 0d 4c 8b 65 f8 c9 c3 b8 fe ff ff ff eb e3 e8 37 2b f3 ff 0f 1f 80 00 00 00 00 0f 1f 44 00 00 55 48 89 e5 f3 90 5d &lt;c3&gt; 0f 1f 00 0f 1f 44 00 00 55 48 89 e5 41 57 49 89 ff 41 56 41 55
+[4580486.709905] RSP: 0000:ffffabd919427e50 EFLAGS: 00000246 ORIG_RAX: ffffffffffffff13
+[4580486.718548] RAX: 0000000000000282 RBX: ffffabd935427bc4 RCX: ffff935b3f623610
+[4580486.726772] RDX: ffffabd935427b20 RSI: 0000000000000282 RDI: ffffffffa1a56d00
+[4580486.734952] RBP: ffffabd919427e90 R08: 0000000000000084 R09: 0000000000000001
+[4580486.737246] watchdog: BUG: soft lockup - CPU#33 stuck for 22s! [node:3148320]
+[4580486.743131] R10: 000000000af130c3 R11: ffff935b3f62ffb8 R12: 0000000000000001
+[4580486.743134] R13: ffffffffa1a56d00 R14: 0000000000000001 R15: ffffabd935427ba0
+[4580486.751175] Modules linked in: cdc_ether usbnet mii mmfs26(OE) mmfslinux(OE) tracedev(OE) nvidia_uvm(OE) nvidia_peermem(POE) veth nvidia_drm(POE) nvidia_modeset(POE) nvidia(POE) ip6t_REJECT nf_reject_ipv6 nf_conntrack_netlink ipt_REJECT nf_reject_ipv4 xt_mark xt_addrtype xt_MASQUERADE xt_set ip_set_hash_ipportnet ip_set_hash_ipportip ip_set_hash_ip ip_set_bitmap_port ip_set_hash_ipport dummy ip_set nf_tables nfnetlink ip_vs_wrr ip_vs_sh ip_vs_rr ip_vs ipvlan overlay iptable_nat ip6table_filter ip6table_nat nf_nat ip6table_mangle ip6_tables xt_conntrack nf_conntrack nf_defrag_ipv6 nf_defrag_ipv4 libcrc32c xt_comment iptable_mangle iptable_filter bpfilter aufs msr cpuid xsk_diag tcp_diag udp_diag raw_diag inet_diag unix_diag af_packet_diag netlink_diag ib_ipoib(OE) ib_umad(OE) rdma_ucm(OE) rdma_cm(OE) iw_cm(OE) ib_cm(OE) nls_iso8859_1 ses enclosure intel_rapl_msr intel_rapl_common binfmt_misc nfit x86_pkg_temp_thermal intel_powerclamp coretemp kvm_intel kvm crct10dif_pclmul crc32_pclmul
+[4580486.751204]  ghash_clmulni_intel
+[4580486.759358]  ? multi_cpu_stop+0x9d/0x110
+[4580486.767353]  aesni_intel crypto_simd ipmi_ssif cryptd glue_helper mpt3sas mxm_wmi raid_class video scsi_transport_sas input_leds joydev ast drm_vram_helper mlx5_ib(OE) ttm ib_uverbs(OE) drm_kms_helper isst_if_mmio isst_if_mbox_pci ib_core(OE) isst_if_common i2c_algo_bit ioatdma mei_me fb_sys_fops syscopyarea sysfillrect sysimgblt i2c_i801 mei dca ipmi_si ipmi_devintf ipmi_msghandler mac_hid acpi_power_meter acpi_pad sch_fq_codel ramoops reed_solomon efi_pstore drm ip_tables x_tables hid_generic mlx5_core(OE) n
+vme mlxfw(OE) pci_hyperv_intf nvme_core tls psample usbhid mlxdevm(OE) virtio_blk auxiliary(OE) hid mlx_compat(OE) ahci libahci wmi knem(OE) autofs4 [last unloaded: ecc]
+[4580486.861255]  ? stop_machine_yield+0x10/0x10
+[4580486.865335] CPU: 33 PID: 3148320 Comm: node Kdump: loaded Tainted: P           OEL    5.4.0-139-generic #156-Ubuntu
+[4580486.870242]  cpu_stopper_thread+0x50/0x100
+[4580486.933988] Hardware name: Nettrix SSNETTRIXHBX-GN6-F562/60WB32, BIOS BKMH011054-U08 11/29/2024
+[4580486.933997] RIP: 0010:__fsnotify_update_child_dentry_flags.part.0+0xbe/0x110
+[4580486.939171]  smpboot_thread_fn+0xd0/0x170
+[4580486.950445] Code: eb 43 80 cc 40 41 89 07 4c 89 f7 c6 07 00 0f 1f 40 00 49 8b 87 90 00 00 00 4c 8d b8 70 ff ff ff 48 39 c3 74 20 49 83 7f 30 00 &lt;74&gt; e6 4d 8d 77 58 4c 89 f7 e8 94 70 7d 00 41 8b 07 45 85 ed 75 c2
+[4580486.955540]  kthread+0x104/0x140
+[4580486.965066] RSP: 0018:ffffabd947c7fdc8 EFLAGS: 00000246 ORIG_RAX: ffffffffffffff13
+[4580486.973074]  ? sort_range+0x30/0x30
+[4580486.977891] RAX: ffff92f234836090 RBX: ffff92fded6551e0 RCX: 0000000000000000
+[4580486.977895] RDX: 0000000000000001 RSI: 0000000000000000 RDI: ffff930e939c1918
+[4580486.998388]  ? kthread_park+0x90/0x90
+[4580487.002448] RBP: ffffabd947c7fe00 R08: 0000000000000000 R09: 0000000000100000
+[4580487.002450] R10: ffff93d42b4d4660 R11: 0000000000000210 R12: ffff92fded655140
+[4580487.010972]  ret_from_fork+0x1f/0x40
+[4580487.015291] R13: 0000000000000006 R14: ffff930e939c1918 R15: ffff92f234836000
+[4580487.015293] FS:  00007f34a76fe640(0000) GS:ffff93dade040000(0000) knlGS:0000000000000000
 </code></pre>
-<p>接下来看一下这几个函数的实现：</p>
+<p>这里可以看出是soft lockup了，谁导致的呢？怀疑的有两个cpu，一个24号上的migration任务，一个33号cpu上的node任务。看这个log有点乱了，不过大致还是能看出来，最后24号cpu的rsp是ffffabd919427e50，33号cpu的rsp是ffffabd919427e50。</p>
 <ul>
-<li><strong>find_get_pid</strong></li>
+<li><strong>24号cpu的migration进程</strong></li>
 </ul>
-<pre><code class="language-c">//find_get_pid的实现
-//看一下主要的实现在get_pid(find_vpid(nr))
-struct pid *find_get_pid(pid_t nr)
-&#123;
-	struct pid *pid;
-
-	rcu_read_lock();
-	pid = get_pid(find_vpid(nr));
-	rcu_read_unlock();
-
-	return pid;
-&#125;
-
-struct pid *find_vpid(int nr)
-&#123;
-	return find_pid_ns(nr, task_active_pid_ns(current));
-&#125;
-struct pid *find_pid_ns(int nr, struct pid_namespace *ns)
-&#123;
-	return idr_find(&amp;ns-&gt;idr, nr);
-&#125;
-void *idr_find(const struct idr *idr, unsigned long id)
-&#123;
-	return radix_tree_lookup(&amp;idr-&gt;idr_rt, id - idr-&gt;idr_base);
-&#125;
-
-
-static inline struct pid *get_pid(struct pid *pid)
-&#123;
-	if (pid)
-		refcount_inc(&amp;pid-&gt;count);
-	return pid;
-&#125;
-
-//相关结构体
-struct pid_namespace &#123;
-	struct idr idr;
-	struct rcu_head rcu;
-	unsigned int pid_allocated;
-  ...
-&#125;
-struct idr &#123;
-	struct radix_tree_root	idr_rt;
-	unsigned int		idr_base;
-	unsigned int		idr_next;
-&#125;;
+<p>可以看到，只有24号cpu上的migration运行了26秒之多，这个肯定是异常的，26秒也足够导致softlockup了</p>
+<pre><code class="language-c">crash&gt; ps -m 12
+[ 0 00:00:00.550] [IN]  PID: 12     TASK: ffff935b319ebc00  CPU: 0   COMMAND: &quot;migration/0&quot;
+crash&gt; ps -m 18
+[ 0 00:00:00.534] [IN]  PID: 18     TASK: ffff935b30c0bc00  CPU: 1   COMMAND: &quot;migration/1&quot;
+crash&gt; ps -m 24
+[ 0 00:00:00.530] [IN]  PID: 24     TASK: ffff935b30c61e00  CPU: 2   COMMAND: &quot;migration/2&quot;
+crash&gt; ps -m 156
+[ 0 00:00:26.293] [RU]  PID: 156    TASK: ffff935b30a28000  CPU: 24  COMMAND: &quot;migration/24&quot;
+crash&gt; ps -m 180
+[ 0 00:00:00.210] [IN]  PID: 180    TASK: ffff935b30b79e00  CPU: 28  COMMAND: &quot;migration/28&quot;
 </code></pre>
-<p>以上可以看到从pid获取pid struct的过程为：<font color="red">获取当前ns(这块就需要注意了，这里直接获取的current的ns，如果是docker之类的有ns隔离的环境，需要确定调用查询pid的进程和要查询的pid所属的进程是不是处于相同的ns中)-&gt;获取ns的idr-&gt;根据pid号和idr来查找基数(现在应该是使用xarray了)</font></p>
-<p>所以这里我们也能看出，每个ns结构体使用一个基树&#x2F;xarrya维护着所有的pid-&gt;pid struct的映射</p>
-<blockquote>
-<p>噢，btw，看了一下，IDA和IDR可不只是用于namespace的pid管理呢？这俩还算一个比较高等级的抽象呢，可以用于很多需要分配id&#x2F;id到指针映射的场景呢。其中IDR用于维护一个ID到指针的映射，IDA只用于分配ID</p>
-<p>牛的牛的，之前没注意这块，后面还得单开一篇文章看看这块内容</p>
-</blockquote>
-<p><font color="red">注意，这里的get_pid对pid struct增加引用计数了，因此，使用完后还需要释放引用计数，使用put_pid</font></p>
+<p>那么这个在做什么?</p>
+<pre><code class="language-c">crash&gt; bt
+PID: 156    TASK: ffff935b30a28000  CPU: 24  COMMAND: &quot;migration/24&quot;
+ #0 [ffffabd919444d20] machine_kexec at ffffffffa0a6ca23
+ #1 [ffffabd919444d80] __crash_kexec at ffffffffa0b4cc42
+ #2 [ffffabd919444e50] panic at ffffffffa1497f8b
+ #3 [ffffabd919444ed0] watchdog_timer_fn.cold at ffffffffa14a0fd7
+ #4 [ffffabd919444f08] __hrtimer_run_queues at ffffffffa0b2b667
+ #5 [ffffabd919444f70] hrtimer_interrupt at ffffffffa0b2bf19
+bt: invalid kernel virtual address: ffffabd919445000  type: &quot;pt_regs&quot;
+</code></pre>
+<p>栈被破坏了？timer之前的内容没有了？</p>
+<p>好在log中可以看到rsp</p>
+<pre><code class="language-c">crash&gt; bt -S ffffabd919427e50
+PID: 156    TASK: ffff935b30a28000  CPU: 24  COMMAND: &quot;migration/24&quot;
+ #0 [ffffabd919427e50] __schedule at ffffffffa14f3393
+ #1 [ffffabd919427e50] multi_cpu_stop at ffffffffa0b67dad
+ #2 [ffffabd919427e98] cpu_stopper_thread at ffffffffa0b67bb0
+ #3 [ffffabd919427ed8] smpboot_thread_fn at ffffffffa0ac8280
+ #4 [ffffabd919427f08] kthread at ffffffffa0ac10e4
+ #5 [ffffabd919427f50] ret_from_fork at ffffffffa160023f
+</code></pre>
+<p>看上去没什么异常的</p>
 <ul>
-<li><strong>get_pid_task</strong></li>
+<li><strong>33号cpu的node进程</strong></li>
 </ul>
-<pre><code class="language-c">struct task_struct *get_pid_task(struct pid *pid, enum pid_type type)
-&#123;
-	struct task_struct *result;
-	rcu_read_lock();
-	result = pid_task(pid, type);
-	if (result)
-		get_task_struct(result);
-	rcu_read_unlock();
-	return result;
-&#125;
-
-struct task_struct *pid_task(struct pid *pid, enum pid_type type)
-&#123;
-	struct task_struct *result = NULL;
-	if (pid) &#123;
-		struct hlist_node *first;
-		first = rcu_dereference_check(hlist_first_rcu(&amp;pid-&gt;tasks[type]),
-					      lockdep_tasklist_lock_is_held());
-		if (first)
-			result = hlist_entry(first, struct task_struct, pid_links[(type)]);
-	&#125;
-	return result;
-&#125;
-
-static inline struct task_struct *get_task_struct(struct task_struct *t)
-&#123;
-	refcount_inc(&amp;t-&gt;usage);
-	return t;
-&#125;
-
-//相关结构体
-struct pid
-&#123;
-	refcount_t count;
-	unsigned int level;
-	spinlock_t lock;
-	/* lists of tasks that use this pid */
-	struct hlist_head tasks[PIDTYPE_MAX];
-	struct hlist_head inodes;
-	/* wait queue for pidfd notifications */
-	wait_queue_head_t wait_pidfd;
-	struct rcu_head rcu;
-	struct upid numbers[];
-&#125;;
+<pre><code class="language-c">crash&gt; bt
+PID: 3148320  TASK: ffff92e0711f0000  CPU: 33  COMMAND: &quot;node&quot;
+ #0 [fffffe0000764e40] crash_nmi_callback at ffffffffa0a60387
+ #1 [fffffe0000764e50] nmi_handle at ffffffffa0a35cd1
+ #2 [fffffe0000764ea8] default_do_nmi at ffffffffa0a35e6a
+ #3 [fffffe0000764ed0] do_nmi at ffffffffa0a3609e
+ #4 [fffffe0000764ef0] end_repeat_nmi at ffffffffa1601788
+    [exception RIP: delay_tsc+54]
+    RIP: ffffffffa148d826  RSP: ffffabd919620c00  RFLAGS: 00000046
+    RAX: 0000000011b69f75  RBX: 0000000000002704  RCX: 0000000000001021
+    RDX: 00000000005748f7  RSI: 0000000000000021  RDI: 0000000000000a15
+    RBP: ffffabd919620c00   R8: 005748f711b695ed   R9: 0000000000000021
+    R10: ffffffffa29a0228  R11: ffffabd919620cd0  R12: 0000000000000020
+    R13: ffffffffa2b6a7a0  R14: ffffffffa29a0224  R15: ffffffffa2b6a7a0
+    ORIG_RAX: ffffffffffffffff  CS: 0010  SS: 0018
+--- &lt;NMI exception stack&gt; ---
+ #5 [ffffabd919620c00] delay_tsc at ffffffffa148d826
+ #6 [ffffabd919620c08] __const_udelay at ffffffffa148d7a3
+ #7 [ffffabd919620c18] wait_for_xmitr at ffffffffa10959da
+ #8 [ffffabd919620c40] serial8250_console_putchar at ffffffffa1095a7d
+ #9 [ffffabd919620c60] uart_console_write at ffffffffa108e0fc
+#10 [ffffabd919620c90] serial8250_console_write at ffffffffa1099c01
+#11 [ffffabd919620d10] univ8250_console_write at ffffffffa1093646
+#12 [ffffabd919620d20] console_unlock at ffffffffa0b08092
+#13 [ffffabd919620d68] vprintk_emit at ffffffffa0b09b5e
+#14 [ffffabd919620db8] vprintk_default at ffffffffa0b09c99
+#15 [ffffabd919620dc8] vprintk_func at ffffffffa0b0a76c
+#16 [ffffabd919620de8] printk at ffffffffa149d8c1
+#17 [ffffabd919620e48] __show_regs.cold at ffffffffa1491329
+#18 [ffffabd919620eb8] show_regs at ffffffffa0a357e4
+#19 [ffffabd919620ed0] watchdog_timer_fn.cold at ffffffffa14a0f98
+#20 [ffffabd919620f08] __hrtimer_run_queues at ffffffffa0b2b667
+#21 [ffffabd919620f70] hrtimer_interrupt at ffffffffa0b2bf19
+bt: invalid kernel virtual address: ffffabd919621000  type: &quot;pt_regs&quot;
 </code></pre>
-<p>可以看到，其实get_pid_task就是通过去遍历查找pid struct中的tasks链表来查找符合条件的任务</p>
-<p><font color="red">注意这里引用计数也增加了，所以不用的时候应该释放掉，通过put_task_struct</font></p>
-<p>不过这块有些疑问，写在后面</p>
-<ul>
-<li><strong>get_task_pid</strong></li>
-</ul>
-<pre><code class="language-c">struct pid *get_task_pid(struct task_struct *task, enum pid_type type)
-&#123;
-	struct pid *pid;
-	rcu_read_lock();
-	pid = get_pid(rcu_dereference(*task_pid_ptr(task, type)));
-	rcu_read_unlock();
-	return pid;
-&#125;
+<p>这里栈也损坏了，看不到之前的了，这个只能看出来，timer来了之后的栈，之前呢？还好log中能看到33号cpu之前的rsp</p>
+<pre><code class="language-c">crash&gt; bt -S ffffabd947c7fdc8
+PID: 3148320  TASK: ffff92e0711f0000  CPU: 33  COMMAND: &quot;node&quot;
+ #0 [ffffabd947c7fdc8] __schedule at ffffffffa14f3393
+ #1 [ffffabd947c7fe08] __fsnotify_update_child_dentry_flags at ffffffffa0d2191b
+ #2 [ffffabd947c7fe18] fsnotify_recalc_mask at ffffffffa0d226f8
+ #3 [ffffabd947c7fe30] fsnotify_add_mark_locked at ffffffffa0d22d1e
+ #4 [ffffabd947c7fe90] inotify_update_watch at ffffffffa0d2499f
+ #5 [ffffabd947c7fee0] __x64_sys_inotify_add_watch at ffffffffa0d24c28
+ #6 [ffffabd947c7ff30] do_syscall_64 at ffffffffa0a04fd7
+ #7 [ffffabd947c7ff50] entry_SYSCALL_64_after_hwframe at ffffffffa16000a4
+    RIP: 00007f34ae226c0b  RSP: 00007f34a76fdbb8  RFLAGS: 00000206
+    RAX: ffffffffffffffda  RBX: 00007f349420c260  RCX: 00007f34ae226c0b
+    RDX: 0000000007000fc6  RSI: 00007f349420c188  RDI: 0000000000000015
+    RBP: 00007f34a76fdc10   R8: 000000000000021d   R9: 000000000000013d
+    R10: 00007f3494338e50  R11: 0000000000000206  R12: 00007f34a76fdc68
+    R13: 00007f349420c270  R14: 0000000006fc7320  R15: 00007f34a76fdc80
+    ORIG_RAX: 00000000000000fe  CS: 0033  SS: 002b
 
-static struct pid **task_pid_ptr(struct task_struct *task, enum pid_type type)
+crash&gt; timer -C 33
+JIFFIES
+5440018529
+
+TIMER_BASES[33][BASE_STD]: ffff93dade060a80
+  EXPIRES        TTE         TIMER_LIST     FUNCTION
+  5440015122    -3407  ffff93561bfb9448  ffffffffa0aba7e0  &lt;delayed_work_timer_fn&gt;
+  5440015335    -3194  ffff93d855b46650  ffffffffa130b3f0  &lt;neigh_timer_handler&gt;
+  5440015429    -3100  ffff932e34d61020  ffffffffa1381b40  &lt;tw_timer_handler&gt;
+  5440015431    -3098  ffff932e34d62760  ffffffffa1381b40  &lt;tw_timer_handler&gt;
+  5440015434    -3095  ffff932e34d60d38  ffffffffa1381b40  &lt;tw_timer_handler&gt;
+  5440015437    -3092  ffff932e34d61400  ffffffffa1381b40  &lt;tw_timer_handler&gt;
+  5440015439    -3090  ffff932e34d60198  ffffffffa1381b40  &lt;tw_timer_handler&gt;
+  5440016478    -2051  ffff93bed3947358  ffffffffa139db50  &lt;tcp_keepalive_timer&gt;
+  5440016813    -1716  ffff9356caa0f448  ffffffffa0aba7e0  &lt;delayed_work_timer_fn&gt;
+  5440016813    -1716  ffff935b29594448  ffffffffa0aba7e0  &lt;delayed_work_timer_fn&gt;
+  5440017259    -1270  ffff935aa4a97448  ffffffffa0aba7e0  &lt;delayed_work_timer_fn&gt;
+  5440017375    -1154  ffff9356a830c448  ffffffffa0aba7e0  &lt;delayed_work_timer_fn&gt;
+  5440017375    -1154  ffff93d733914448  ffffffffa0aba7e0  &lt;delayed_work_timer_fn&gt;
+  5440017638     -891  ffff935b2aa44448  ffffffffa0aba7e0  &lt;delayed_work_timer_fn&gt;
+  5440017901     -628  ffff935b09e00480  ffffffffa1354050  &lt;dev_watchdog&gt;
+  5440075151    56622  ffff93dade05bc20  ffffffffa0a4d0e0  &lt;mce_timer_fn&gt;
+  5440240252   221723  ffff93d7ed8bca60  ffffffffc0a62bd0  &lt;ip_vs_conn_expire&gt;
+TIMER_BASES[33][BASE_DEF]: ffff93dade061d00
+  EXPIRES        TTE        TIMER_LIST     FUNCTION
+  5440043365   24836  ffff93dade06f848  ffffffffa0ab9cc0  &lt;idle_worker_timeout&gt;
+</code></pre>
+<p>那就看看__fsnotify_update_child_dentry_flags函数？</p>
+<pre><code class="language-c">void __fsnotify_update_child_dentry_flags(struct inode *inode)
 &#123;
-	return (type == PIDTYPE_PID) ?
-		&amp;task-&gt;thread_pid :
-		&amp;task-&gt;signal-&gt;pids[type];
+        struct dentry *alias;
+        int watched;
+
+        if (!S_ISDIR(inode-&gt;i_mode))
+                return;
+
+        /* determine if the children should tell inode about their events */
+        watched = fsnotify_inode_watches_children(inode);
+
+        spin_lock(&amp;inode-&gt;i_lock);
+        /* run all of the dentries associated with this inode.  Since this is a
+         * directory, there damn well better only be one item on this list */
+        hlist_for_each_entry(alias, &amp;inode-&gt;i_dentry, d_u.d_alias) &#123;
+                struct dentry *child;
+
+                /* run all of the children of the original inode and fix their
+                 * d_flags to indicate parental interest (their parent is the
+                 * original inode) */
+                spin_lock(&amp;alias-&gt;d_lock);
+                list_for_each_entry(child, &amp;alias-&gt;d_subdirs, d_child) &#123;
+                        if (!child-&gt;d_inode)
+                                continue;
+
+                        spin_lock_nested(&amp;child-&gt;d_lock, DENTRY_D_LOCK_NESTED);
+                        if (watched)
+                                child-&gt;d_flags |= DCACHE_FSNOTIFY_PARENT_WATCHED;
+                        else
+                                child-&gt;d_flags &amp;= ~DCACHE_FSNOTIFY_PARENT_WATCHED;
+                        spin_unlock(&amp;child-&gt;d_lock);
+                &#125;
+                spin_unlock(&amp;alias-&gt;d_lock);
+        &#125;
+        spin_unlock(&amp;inode-&gt;i_lock);
 &#125;
 </code></pre>
-<p>类似的，在task_struct中存着pid struct相关的信息呢，获取到这个这个之后再执行一下get_pid就好了</p>
-<h3 id="内核模块"><a href="#内核模块" class="headerlink" title="内核模块"></a><center>内核模块</center></h3><p>通过以上学习，已经知道了pid号大概是怎么和task_struct相互转换的，所以剩下的就是转换成代码就好了</p>
-<p>这里提供个大概框架</p>
-<pre><code class="language-c">#include &lt;linux/module.h&gt;
-#include &lt;linux/kernel.h&gt;
-#include &lt;linux/init.h&gt;
-#include &lt;linux/pid.h&gt;
-#include &lt;linux/sched.h&gt;
-#include &lt;linux/sched/task.h&gt;
-
-static int target_pid = -1;
-module_param(target_pid, int, 0);
-
-static int __init XXX(void)
+<p>在锁里执行时间太久了？</p>
+<p>搜一下这个栈，看上去和一个已知问题比较像，<a target="_blank" rel="noopener" href="https://access.redhat.com/solutions/7095274">https://access.redhat.com/solutions/7095274</a></p>
+<p>那跟着大佬的思路看看是不是一个问题呢？</p>
+<pre><code class="language-c">//主要是找到inode
+//这个函数的参数是fsnotify_mark_connector结构体，那就去找这个内容
+void fsnotify_recalc_mask(struct fsnotify_mark_connector *conn)
 &#123;
-        struct task_struct *t;
-        struct pid *p;
+        if (!conn)
+                return;
+//看一下#3这个栈，rdi和(r12+0x38)都是fsnotify_mark_connector结构体地址
+crash&gt; dis -lr ffffffffa0d22d1e |tail -5
+0xffffffffa0d22d0e &lt;fsnotify_add_mark_locked+798&gt;:	je     0xffffffffa0d22bd7 &lt;fsnotify_add_mark_locked+487&gt;
+/build/linux-xiWpQr/linux-5.4.0/fs/notify/mark.c: 664
+0xffffffffa0d22d14 &lt;fsnotify_add_mark_locked+804&gt;:	mov    0x38(%r12),%rdi
+0xffffffffa0d22d19 &lt;fsnotify_add_mark_locked+809&gt;:	callq  0xffffffffa0d226b0 &lt;fsnotify_recalc_mask&gt;
+0xffffffffa0d22d1e &lt;fsnotify_add_mark_locked+814&gt;:	jmpq   0xffffffffa0d22bd7 &lt;fsnotify_add_mark_locked+487&gt;
+//再看一下#2这个栈，这里把r12入栈了，压在了第二个栈
+crash&gt; dis -lr ffffffffa0d226f8 |head -10
+/build/linux-xiWpQr/linux-5.4.0/fs/notify/mark.c: 142
+0xffffffffa0d226b0 &lt;fsnotify_recalc_mask&gt;:	nopl   0x0(%rax,%rax,1) [FTRACE NOP]
+/build/linux-xiWpQr/linux-5.4.0/fs/notify/mark.c: 143
+0xffffffffa0d226b5 &lt;fsnotify_recalc_mask+5&gt;:	test   %rdi,%rdi
+0xffffffffa0d226b8 &lt;fsnotify_recalc_mask+8&gt;:	je     0xffffffffa0d226fc &lt;fsnotify_recalc_mask+76&gt;
+0xffffffffa0d226ba &lt;fsnotify_recalc_mask+10&gt;:	push   %rbp
+0xffffffffa0d226bb &lt;fsnotify_recalc_mask+11&gt;:	mov    %rsp,%rbp
+0xffffffffa0d226be &lt;fsnotify_recalc_mask+14&gt;:	push   %r12
+0xffffffffa0d226c0 &lt;fsnotify_recalc_mask+16&gt;:	mov    %rdi,%r12
+/build/linux-xiWpQr/linux-5.4.0/include/linux/spinlock.h: 338
+//看一下#2的栈内容，从后往前找到第二个入栈的参数，就是ffff93d408b8c0f0，也就是这是r12的内容
+crash&gt; rd ffffabd947c7fe18 -e ffffabd947c7fe30
+ffffabd947c7fe18:  ffffffffa0d226f8 ffff93d408b8c0f0   .&amp;..............
+ffffabd947c7fe28:  ffffabd947c7fe88                    ...G....
+//然后计算一下fsnotify_mark_connector结构体的地址，偏移0x38，然后读出的内容ffff93d42b4d4660就是这个结构体的地址
+//然后再找出obj的值
+crash&gt; p/x 0xffff93d408b8c0f0+0x38
+$7 = 0xffff93d408b8c128
+crash&gt; rd 0xffff93d408b8c128
+ffff93d408b8c128:  ffff93d42b4d4660                    `FM+....
+crash&gt; struct fsnotify_mark_connector.obj ffff93d42b4d4660
+    obj = 0xffff936b8b4c97d8
 
-        if (target_pid &lt; 0) &#123;
-                pr_err(&quot;target pid &lt; 0\n&quot;);
-                return -EINVAL;
-        &#125;
-
-        p = find_get_pid(target_pid);
-        if (!p) &#123;
-                pr_err(&quot;get pid failed\n&quot;);
-                return -EINVAL;
-        &#125;
-
-        t = get_pid_task(p, PIDTYPE_PID);
-        if (!t) &#123;
-                pr_err(&quot;get task_struct failed\n&quot;);
-                put_pid(p);
-                return -EINVAL;
-        &#125;
-        
-        /*
-         *这里可以添加对task_struct的修改内容
-         *比如修改状态、唤醒进程之类的操作
-         */
-
-        put_pid(p);
-        put_task_struct(t);
-        return -EINVAL;
-
+//这里的fsnotify_mark_connector结构体的地址应该就是inode中的i_fsnotify_marks的指针
+//所以找到i_fsnotify_marks在inode中的偏移，就知道inode的地址了，所以inode的地址就是0xffff936b8b4c95a0
+crash&gt; struct inode.i_fsnotify_marks -ox
+struct inode &#123;
+  [0x238] struct fsnotify_mark_connector *i_fsnotify_marks;
 &#125;
+crash&gt; px 0xffff936b8b4c97d8-0x238
+$5 = 0xffff936b8b4c95a0
 
-module_init(XXX);
+//identry链表链的就是dentry的d_u.d_alias
+//可以看一下hlist_add_head(&amp;dentry-&gt;d_u.d_alias, &amp;inode-&gt;i_dentry);
+//所以找到du结构体的偏移，减去这个偏移即是dentry结构体的地址，所以dentry结构体地址就是0xffff92fded655140
+crash&gt; struct inode.i_dentry 0xffff936b8b4c95a0
+    i_dentry = &#123;
+      first = 0xffff92fded6551f0
+    &#125;
+crash&gt; struct dentry.d_u -ox
+struct dentry &#123;
+         union &#123;
+  [0xb0] &#125; d_u;
+&#125;
+crash&gt; px 0xffff92fded6551f0-0xb0
+$6 = 0xffff92fded655140
+//然后就可以查看这个file了
+crash&gt; files -d 0xffff92fded655140
+     DENTRY           INODE           SUPERBLK     TYPE PATH
+ffff92fded655140 ffff936b8b4c95a0 ffff93dad0f17000 DIR  /run/containerd/xxx/xxx/xxx/xxx/xxx/xxx/xxx/xxx/xxx/xxx
 
-MODULE_LICENSE(&quot;GPL&quot;);
+//然后看一下，这个dentry下的subdirs
+crash&gt; struct dentry.d_subdirs ffff92fded655140
+  d_subdirs = &#123;
+    next = 0xffff930e939c1950,
+    prev = 0xffff92ee96445a10
+  &#125;
+crash&gt; list 0xffff930e939c1950
+ffff930e939c1950
+ffff92ede851ddd0
+ffff92f0a7fb7590
+ffff92fbad973710
+ffff92fbad9728d0
+ffff92fbad972e10
+ffff92fbd0ac8090
+ffff92fbd0ac85d0
+ffff92fbd0ac9890
+ffff92fbd0ac9290
+ffff92fbd0ac8750
+.......
+crash&gt; list 0xffff930e939c1950 |wc -l
+//内容太多 卡住
 </code></pre>
-<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a><center>后记</center></h3><ol>
-<li><font color="red">再次注意，使用get_XXX等函数的时候，需要注意下是不是增加了引用计数，等不再使用的时候需要释放引用计数。pid struct、task_struct还有之前遇到的net_device、gendisk这些都是一样的。</font></li>
-<li><font color="red">为什么struct pid中的task不直接做成一个task_struct *类型而是搞一个链表呢？可能是为了进程组、多线程考虑？</font></li>
-<li><font color="red">接上面2，那如果在一个struct pid中有一个task链表中有几个相同的pid_type的任务，get_pid_task会返回什么呢？应该是返回的链表的第一个task。是否会出现一个task链表中有几个相同的pid_type的任务的情况？以及get_pid_task直接返回第一个task是否合理？</font></li>
-</ol>
-<p>​	这个后续还得继续研究一下</p>
+<p>所以可以确定是<a target="_blank" rel="noopener" href="https://access.redhat.com/solutions/7095274%E8%BF%99%E4%B8%AA%E9%97%AE%E9%A2%98">https://access.redhat.com/solutions/7095274这个问题</a></p>
+<p>继续查看，上游可能已经给出了修复172e422ffea2(“fsnotify: clear PARENT_WATCHED flags lazily”)，24年提的，可能现在还没用到5.4 stable中去</p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
