@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>qemu kvm添加新feature虚拟化 | YZWDDSG</title>
+  <title>网卡驱动probe失败 | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="qemu kvm添加新feature虚拟化 | YZWDDSG">
+  <meta name="description" content="网卡驱动probe失败 | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta name="description" content="邮箱：857879363@qq.com bilibili：https:&#x2F;&#x2F;space.bilibili.com&#x2F;346090747 知乎：https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;zhong-ai-83-43 公众号： 本模板链接：3-hexo 本模板原作者：yelog">
@@ -697,9 +697,9 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="post-qemu-kvm添加新feature虚拟化" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-网卡驱动probe失败" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">qemu kvm添加新feature虚拟化</h1>
+        <h1 class="article-title">网卡驱动probe失败</h1>
     
     <div class="article-meta">
         
@@ -709,7 +709,7 @@
             <i class="iconfont icon-category"></i>
             
             
-            <a  data-rel="虚拟化">虚拟化</a>
+            <a  data-rel="故障排查">故障排查</a>
             
         </span>
         
@@ -717,12 +717,12 @@
     </div>
     <div class="article-meta">
         
-            Created At : <time class="date" title='Updated At: 2025-03-07 22:35:48'>2025-03-06 00:13</time>
+            Created At : <time class="date" title='Updated At: 2026-01-30 21:34:30'>2026-01-30 20:50</time>
         
     </div>
     <div class="article-meta">
         
-        <span>Count:1.8k</span>
+        <span>Count:1.3k</span>
         
         
         
@@ -741,7 +741,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0"><span class="toc-text">学习</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C"><span class="toc-text">实验</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E8%AE%B0"><span class="toc-text">后记</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-text">参考</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%92%E6%9F%A5"><span class="toc-text">排查</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -757,255 +757,111 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>不太严谨了，应该算是添加新cap的虚拟化</p>
-<h3 id="学习"><a href="#学习" class="headerlink" title="学习"></a><center>学习</center></h3><p>先找一个当前已经存在的feature看一下这个过程，比如KVM_CAP_S390_IRQCHIP这个cap。内核commit为(“KVM: s390: irq routing for adapter interrupts.”)</p>
-<p><strong>libvirt侧：virsh start</strong></p>
-<pre><code>##virsh start启动一个虚机
-cmdStart
-  ---&gt;virDomainCreateWithFlags	##去调用具体驱动的create domian，一般是qemu
-    ---&gt;qemuDomainCreateWithFlags
-      ---&gt;qemuProcessBeginJob
-        ---&gt;qemuDomainObjStart
-          ---&gt;qemuProcessStart
-            ---&gt;qemuProcessLaunch
-              ---&gt;qemuBuildCommandLine	##构建qemu命令
-              ---&gt;virCommandRun
-                ---&gt;virCommandRunAsync
-                  ---&gt;virExec
+        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h3><p>一台物理机重启后，网卡驱动probe失败了，导致系统起来后不通网</p>
+<p>已知：cmdline添加iommu&#x3D;pt intel_iommu&#x3D;on才会导致驱动probe失败，不添加这些参数，可以probe成功</p>
+<h3 id="排查"><a href="#排查" class="headerlink" title="排查"></a><center>排查</center></h3><p>首先通过带外把该机器上的存在的所有内核（包括系统重启前没问题的内核）都启动了一下，发现都是probe网卡驱动失败，唯一一个成功的内核，就是cmdline中不添加iommu&#x3D;pt intel_iommu&#x3D;on参数的。</p>
+<p>其次，找了一台同规格的机器对比下mlx驱动版本、mlx网卡固件版本等，排除了这些问题。</p>
+<p>之前出过这种问题，厂商的反馈是升级mlx驱动，不过，看上去并不是这个原因。因为其他机器都没问题。</p>
+<p>之前出这个问题的时候，换了一块网卡就好了。现在，保修换了一块网卡，还是没有解决。因此，mlx网卡硬件并没有问题，需要看看到底什么引起了这个问题。</p>
+<p>看一下log</p>
+<pre><code class="language-c">[   37.464510] Compat-mlnx-ofed backport release: f3bf963
+[   37.469645] Backport based on mlnx_ofed/mlnx-ofa_kernel-4.0.git f3bf963
+[   37.476257] compat.git: mlnx_ofed/mlnx-ofa_kernel-4.0.git
+[   37.502684] mlx5_core 0000:31:00.0: firmware version: XXXXX
+[   37.508723] mlx5_core 0000:31:00.0: 63.008 Gb/s available PCIe bandwidth (8 GT/s x8 link)
+[   37.516912] mlx5_core 0000:31:00.0: mlx5_function_setup:1283:(pid 5): Failed initializing command interface, aborting
+[   37.527513] mlx5_core 0000:31:00.0: probe_one:1961:(pid 5): mlx5_init_one failed with error code -12
+[   37.536789] mlx5_core: probe of 0000:31:00.0 failed with error -12
+[   37.543697] mlx5_core 0000:31:00.1: firmware version: XXXXX
+[   37.549728] mlx5_core 0000:31:00.1: 63.008 Gb/s available PCIe bandwidth (8 GT/s x8 link)
+[   37.557910] mlx5_core 0000:31:00.1: mlx5_function_setup:1283:(pid 5): Failed initializing command interface, aborting
+[   37.568506] mlx5_core 0000:31:00.1: probe_one:1961:(pid 5): mlx5_init_one failed with error code -12
+[   37.577700] mlx5_core: probe of 0000:31:00.1 failed with error -12
 </code></pre>
-<p><strong>qemu侧：开始创建虚机</strong></p>
-<pre><code>main			##softmmu/main.,这主要就三条，qemu_init,qemu_main_loop,qemu_cleanup
-  ---&gt;qemu_init			##这里会parse传入的参数，然后根据参数调用对应的函数
-    ---&gt;configure_accelerators		##配置加速器，其实一般也就是kvm
-      ---&gt;do_configure_accelerator
-        ---&gt;accel_init_machine		##这里会调用acc-&gt;init_machine(ms);，kvm的话，也就是kvm_init
-          ---&gt;kvm_init
-            ---&gt;kvm_irqchip_create
-              ---&gt;kvm_check_extension(s, KVM_CAP_S390_IRQCHIP)			##检测是否存在这个feture（实际上是一个发一个KVM_CHECK_EXTENSION的ioctl），也就是实际上是检查kvm是否支持这个feature
-              ---&gt;kvm_vm_enable_cap(s, KVM_CAP_S390_IRQCHIP, 0);		##如果存在的话就enable
-
-#########看一下kvm_vm_enable_cap函数
-##其实是个宏，大致看上去就是初始化一个kvm_enable_cap结构体，其中cap是KVM_CAP_S390_IRQCHIP，flag是0
-##然后初始化一个临时数组把后面的可变参数复制过来
-##然后获取args_tmp和cap.args长度的最小值，应该是怕如果传入的可变参数太多导致cap.args溢出
-##然后把可变参数的args_tmp数组内容copy到cap.args
-##最后去调用kvm_vm_ioctl
-
-#define kvm_vm_enable_cap(s, capability, cap_flags, ...)             \
-    (&#123;                                                               \
-        struct kvm_enable_cap cap = &#123;                                \
-            .cap = capability,                                       \
-            .flags = cap_flags,                                      \
-        &#125;;                                                           \
-        uint64_t args_tmp[] = &#123; __VA_ARGS__ &#125;;                       \
-        size_t n = MIN(ARRAY_SIZE(args_tmp), ARRAY_SIZE(cap.args));  \
-        memcpy(cap.args, args_tmp, n * sizeof(cap.args[0]));         \
-        kvm_vm_ioctl(s, KVM_ENABLE_CAP, &amp;cap);                       \
-    &#125;)
-
-
-int kvm_vm_ioctl(KVMState *s, int type, ...)
+<p>返回-12，也就是ENOMEM，内存不足？</p>
+<p>检查一下dmidecode是不是有掉内存呢？没有。</p>
+<p>把我们的hugetlb预留的大页减少一部分，还是不行。</p>
+<p>再看一下异常机器的log，发现了这里的报错，再结合只有cmdline中添加iommu&#x3D;pt intel_iommu&#x3D;on才会报错这个因素，怀疑是这里报错最终导致mlx驱动probe失败？</p>
+<p><img src="/img/30.png" alt="这是一张图片"></p>
+<pre><code class="language-c">start_kernel
+    -&gt;mm_init
+        -&gt;mem_init
+            -&gt;pci_iommu_alloc
+                -&gt;detect_intel_iommu
+                    -&gt;drivers/iommu/dmar.c:x86_init.iommu.iommu_init = intel_iommu_init
+                        -&gt;intel_iommu_init
+                            -&gt;bus_set_iommu
+                                -&gt;iommu_bus_init
+                                    -&gt;add_iommu_group
+                                        -&gt;.add_device（iommu ops）
+                                           -&gt;intel_iommu_add_device
+                                               -&gt;iommu_request_dma_domain_for_dev(传IOMMU_DOMAIN_IDENTITY，iommu直接映射)/iommu_request_dm_for_dev（传IOMMU_DOMAIN_DMA，不能被iommu直接映射）
+                                                  -&gt;request_default_domain_for_dev
+</code></pre>
+<pre><code class="language-c">static int intel_iommu_add_device(struct device *dev)
 &#123;
-    int ret;
-    void *arg;
-    ##这块其实是对可变参数的处理，这是一个可变参数的列表
-    va_list ap;
+        struct dmar_domain *dmar_domain;
+        struct iommu_domain *domain;
+        struct intel_iommu *iommu;
+        struct iommu_group *group;
+        u8 bus, devfn;
+        int ret;
+............
+        if (domain-&gt;type == IOMMU_DOMAIN_DMA) &#123;
+                if (device_def_domain_type(dev) == IOMMU_DOMAIN_IDENTITY) &#123;
+                        ret = iommu_request_dm_for_dev(dev);
+                        if (ret) &#123;
+                                dmar_domain-&gt;flags |= DOMAIN_FLAG_LOSE_CHILDREN;
+                                domain_add_dev_info(si_domain, dev);
+                                dev_info(dev,
+                                        &quot;Device uses a private identity domain.\n&quot;);
+                                return 0;
+                        &#125;
 
-    ##初始化ap，指向type后的第一个参数
-    va_start(ap, type);
-    ##从ap中提取一个void *类型的参数
-    arg = va_arg(ap, void *);
-    va_end(ap);
-
-    trace_kvm_vm_ioctl(type, arg);
-    accel_ioctl_begin();
-    ret = ioctl(s-&gt;vmfd, type, arg);
-    accel_ioctl_end();
-    if (ret == -1) &#123;
-        ret = -errno;
-    &#125;
-    return ret;
-&#125;
-</code></pre>
-<p>可以看到其实跟KVM_CAP_S390_IRQCHIP相关的就是初始化过程中通过KVM_CHECK_EXTENSION类型的ioctl去查kvm是否支持该feature，如果支持的话，就发KVM_ENABLE_CAP类型的ioctl去enable它</p>
-<p><strong>kernel侧：</strong></p>
-<pre><code>##首先它在include/uapi/linux/kvm.h中定义了这个宏
-#define KVM_CAP_S390_IRQCHIP 99
-
-##然后看接收KVM_CHECK_EXTENSION ioctl的处理
-kvm_vm_ioctl
-  ---&gt;kvm_vm_ioctl_check_extension_generic
-    ---&gt;kvm_vm_ioctl_check_extension		##这里直接返回了1,所以qemu的ioctl收到1就认为kvm支持这个feature
-
-##在qemu的流程中，这里KVM_CHECK_EXTENSION的ioctl查到kvm支持这个feature了，就发KVM_ENABLE_CAP的ioctl去enable了
-/* for KVM_ENABLE_CAP */
-struct kvm_enable_cap &#123;
-	/* in */
-	__u32 cap;
-	__u32 flags;
-	__u64 args[4];
-	__u8  pad[64];
-&#125;;
-
-kvm_vm_ioctl
-  ---&gt;copy_from_user		##从userspace把kvm_enable_cap结构体的内容copy过来
-  ---&gt;kvm_vm_ioctl_enable_cap_generic
-    ---&gt;kvm_vm_ioctl_enable_cap			##然后这里检查cap中的一些内容，然后打开进行enable的相关操作
-</code></pre>
-<p><font color="red">另外，需要注意下，如果要对一些msr进行虚拟化或透传的话，如果是只有读操作还好，如果会往msr中进行写操作，就需要考虑很多事情了，比如：是否需要考虑虚机和宿主机侧修改msr数据不一致导致问题，是否需要补偿？vcpu从cpu间进行迁移的话需要怎么做？多个vcpu运行在一个cpu上需要怎么做？</font></p>
-<h3 id="实验"><a href="#实验" class="headerlink" title="实验"></a><center>实验</center></h3><p>有一个MSR_PPIN msr，这个在虚机中肯定是没有虚拟化的，将它虚拟化试试看。添加一个新cap，协商cap并允许虚机访问这个msr</p>
-<p>首先先看一下我的宿主机上这个msr的内容（左图）是可以读到的，然后看一下我的虚机中，是读不到的</p>
-<p><img src="/img/1.png" alt="这是一张图片"></p>
-<p>开搞！！！</p>
-<ul>
-<li><strong>修改</strong></li>
-</ul>
-<p><strong>qemu侧修改：</strong></p>
-<pre><code>diff --git a/accel/kvm/kvm-all.c b/accel/kvm/kvm-all.c
-index be2a7adba7..2a37beaac9 100644
---- a/accel/kvm/kvm-all.c
-+++ b/accel/kvm/kvm-all.c
-@@ -2661,6 +2661,10 @@ static int kvm_init(MachineState *ms)
-         &#125;
-     &#125;
-
-+    if(kvm_vm_check_extension(s, KVM_CAP_PPIN)) &#123;
-+        kvm_vm_enable_cap(s, KVM_CAP_PPIN, 0);
-+    &#125;
-+
- #ifdef KVM_CAP_VCPU_EVENTS
-     s-&gt;vcpu_events = kvm_check_extension(s, KVM_CAP_VCPU_EVENTS);
- #endif
-diff --git a/linux-headers/linux/kvm.h b/linux-headers/linux/kvm.h
-index 20a3755fa5..28f70cf1f9 100644
---- a/linux-headers/linux/kvm.h
-+++ b/linux-headers/linux/kvm.h
-@@ -1114,6 +1114,7 @@ struct kvm_ppc_resize_hpt &#123;
- #define KVM_CAP_ARM_MTE 205
- #define KVM_CAP_XSAVE2 208
- #define KVM_CAP_SYS_ATTRIBUTES 209
-+#define KVM_CAP_PPIN 250
-
- #define KVM_CAP_APERFMPERF 500
- #define KVM_CAP_APERFMPERF2 501
-</code></pre>
-<p>这块其实主要就是在linux-headers&#x2F;linux&#x2F;kvm.h新定义一个KVM_CAP_PPIN cap号；然后通过kvm_vm_check_extension和kvm_vm_enable_cap查询和开启这个cap</p>
-<p><strong>kernel侧修改：</strong></p>
-<pre><code>diff --git a/arch/x86/include/asm/kvm_host.h b/arch/x86/include/asm/kvm_host.h
-index 97c9363700ef..b3355fa61149 100644
---- a/arch/x86/include/asm/kvm_host.h
-+++ b/arch/x86/include/asm/kvm_host.h
-@@ -958,6 +958,7 @@ struct kvm_vcpu_arch &#123;
- #if IS_ENABLED(CONFIG_HYPERV)
-        hpa_t hv_root_tdp;
- #endif
-+       u64 ppin;
- &#125;;
-
- struct kvm_lpage_info &#123;
-diff --git a/arch/x86/kvm/x86.c b/arch/x86/kvm/x86.c
-index 50841b390a2b..45db5ff78505 100644
---- a/arch/x86/kvm/x86.c
-+++ b/arch/x86/kvm/x86.c
-@@ -4149,6 +4149,9 @@ int kvm_get_msr_common(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
-                msr_info-&gt;data = vcpu-&gt;arch.guest_fpu.xfd_err;
-                break;
-+       case MSR_PPIN:
-+               msr_info-&gt;data = vcpu-&gt;arch.ppin;
-+               break;
- #endif
-        default:
-                if (kvm_pmu_is_valid_msr(vcpu, msr_info-&gt;index))
-@@ -4327,6 +4330,7 @@ int kvm_vm_ioctl_check_extension(struct kvm *kvm, long ext)
-        case KVM_CAP_VAPIC:
-        case KVM_CAP_ENABLE_CAP:
-        case KVM_CAP_VM_DISABLE_NX_HUGE_PAGES:
-+       case KVM_CAP_PPIN:
-                r = 1;
-                break;
-        case KVM_CAP_EXIT_HYPERCALL:
-@@ -6366,6 +6370,9 @@ split_irqchip_unlock:
+                        return -ENODEV;
                 &#125;
-                mutex_unlock(&amp;kvm-&gt;lock);
-                break;
-+       case KVM_CAP_PPIN:
-+               r = 0;
-+               break;
-        default:
-                r = -EINVAL;
-                break;
-diff --git a/include/uapi/linux/kvm.h b/include/uapi/linux/kvm.h
-index 85365bd8ec8d..2f5959fea170 100644
---- a/include/uapi/linux/kvm.h
-+++ b/include/uapi/linux/kvm.h
-@@ -1184,6 +1184,7 @@ struct kvm_ppc_resize_hpt &#123;
- #define KVM_CAP_S390_ZPCI_OP 221
- #define KVM_CAP_S390_CPU_TOPOLOGY 222
- #define KVM_CAP_DIRTY_LOG_RING_ACQ_REL 223
-+#define KVM_CAP_PPIN 250
- #define KVM_CAP_APERFMPERF 500
- #define KVM_CAP_APERFMPERF2 501
+        &#125; else &#123;
+                if (device_def_domain_type(dev) == IOMMU_DOMAIN_DMA) &#123;
+                        ret = iommu_request_dma_domain_for_dev(dev);
+                        if (ret) &#123;
+                                dmar_domain-&gt;flags |= DOMAIN_FLAG_LOSE_CHILDREN;
+                                if (!get_private_domain_for_dev(dev)) &#123;
+                                        dev_warn(dev,
+                                                &quot;Failed to get a private domain.\n&quot;);
+                                        return -ENOMEM;
+                                &#125;
+
+                                dev_info(dev,
+                                        &quot;Device uses a private dma domain.\n&quot;);
+                                return 0;
 </code></pre>
-<p>这块的主要修改有：新定义一个KVM_CAP_PPIN cap号，和qemu中相同；在kvm_vm_ioctl_check_extension和kvm_vm_ioctl_enable_cap中分别提供该cap的查询和enable；在kvm_vcpu_arch定义一个新的ppin变量，主要用于虚机访问msr时 导致vm exit退出时返回的msr的值；kvm_get_msr_common中处理MSR_PPIN，给msr_info-&gt;data赋值，也就是刚才的ppin</p>
-<p><font color="red">这里说明一下，这个并不是一个完整的例子，只是简单测试走一下流程。实际上一般来说，在enable这个cap的时候还需要做一些操作，比如设置一些标志之类，然后在create vcpu的时候根据标志进行处理；然后并没有给ppin进行赋值，实际上应该在vcpu_enter_guest中在vm enter和vm exit的时候对ppin进行赋值，这样在虚机中访问的时候得到的就是和宿主机上相同的值了。在在我上面的例子中，虚机中输出的应该是0，因为并没有给ppin赋值。</font></p>
-<ul>
-<li><strong>结果</strong></li>
-</ul>
-<p>此时虚机侧已经可以看到</p>
-<p><img src="/img/2.png" alt="这是一张图片"></p>
-<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a><center>后记</center></h3><ul>
-<li><p><strong>读msr的方法</strong></p>
-</li>
-<li><ul>
-<li><strong>msr-tools</strong></li>
-</ul>
-</li>
-</ul>
-<p>然后rdmsr 0x0000004f这样就可以读，比如</p>
-<p><img src="/img/3.png" alt="这是一张图片"></p>
-<p>ps：但是我的虚机没有网，没法安装msr-tools</p>
-<ul>
-<li><ul>
-<li><strong>内核模块</strong></li>
-</ul>
-</li>
-</ul>
-<p>可以写内核模块，使用内核rdmsr系列函数</p>
-<p>ps：但是我的宿主机和虚机内核不是同一个内核，还得重编内核或者安装devel包，也有点麻烦</p>
-<ul>
-<li><ul>
-<li><strong>自己编写c程序</strong></li>
-</ul>
-</li>
-</ul>
-<p>strace msr-tools的rdmsr过程可以看到，其实这个是通过读&#x2F;dev&#x2F;cpu&#x2F;X&#x2F;msr来实现的</p>
-<p>那同样我们也可以读这个设备文件来实现，类似下面这样</p>
-<pre><code>#include &lt;stdio.h&gt;
-#include &lt;unistd.h&gt;
-#include &lt;stdint.h&gt;
-#include &lt;fcntl.h&gt;
+<p>看log可以轻易知道，这里走的是else这个分支。所以，当前domain是Identity类型，但是这个设备却是需要申请DMA类型的domain，然后还失败了，返回ENOMEM</p>
+<p>首先，从其他正常机器上我们可以看到，当前domain是Identity类型，但是这个设备却是需要申请DMA类型的domain，这个是正常的。区别就在于，正常机器上get_private_domain_for_dev成功了，但是在异常机器上失败了。</p>
+<p>看log，异常机器上因为对02:00.0 add_device的过程中失败了，所以触发了回滚，把之前成功add device的设备也都从iommu group中remove了。这样一来，mlx网卡肯定就不再iommu group中了（甚至都还没到都把mlx网卡从iommu group中remove那一步）</p>
+<p>然后再看mlx驱动probe失败的log，查找代码中能返回ENOMEM的地方。最终，只发现了一处可疑点。</p>
+<pre><code class="language-c">alloc_cmd_page
+	-&gt;dma_alloc_coherent
+		-&gt;dma_alloc_attrs
+			-&gt;对应ops的alloc，启用iommu的情况下就是intel_alloc_coherent
 
-#define MSR_PPIN    0x0000004f
-int main()
-&#123;
-    uint64_t val;
-    int fd = open(&quot;/dev/cpu/0/msr&quot;, O_RDONLY);
-    if (fd &lt; 0) &#123;
-        printf(&quot;open msr failed\n&quot;);
-        return -1;
-    &#125;
 
-    if(pread(fd, &amp;val, sizeof(val), MSR_PPIN) != sizeof(val)) &#123;
-        printf(&quot;read msr failed\n&quot;);
-        close(fd);
-        return -1;
-    &#125;
-
-    printf(&quot;MSR_PPIN val is %lx\n&quot;, val);
-    return 0;
-&#125;
+ const struct dma_map_ops intel_dma_ops = &#123;
+        .alloc = intel_alloc_coherent,
 </code></pre>
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a><center>参考</center></h3><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/hanyonglu/archive/2011/05/07/2039916.html">https://www.cnblogs.com/hanyonglu/archive/2011/05/07/2039916.html</a></p>
+<p>应该就是在这里，因为之前的iommu_group中add device失败，把group domain这些的device都释放了，然而mlx驱动probe的过程中会调用iommu的ops注册的DMA api去申请内存，所以失败了。</p>
+<p>所以，到此，网卡驱动probe失败的原因我们清楚了。<font color='red'>我们启用了inte_iommu&#x3D;on+iommu&#x3D;pt，但是在iommu group中add device 02:00.0的时候失败了，所以就回滚把所有的设备从iommu group中remove了，mlx网卡也不例外，然后probe mlx驱动的时候需要使用dma api分配一些页面，也就是使用intel_alloc_coherent（因为开启了inte_iommu&#x3D;on+iommu&#x3D;pt），不过，因为之前一些错误把所有的设备从iommu group中释放了，这里的alloc也就理所当然的失败了</font></p>
+<p>然后后面再看，为什么02:00.0加错了iommu group了呢？</p>
+<p>再看一下dmesg中iommu add device的log，发现</p>
+<pre><code class="language-c">[   19.665858] iommu: Adding device 0000:00:1c.0 to group 17
+[   19.671296] iommu: Adding device 0000:00:1c.5 to group 17
+</code></pre>
+<p>在正常机器上，这俩是放到了不同的group中，这俩是什么呢？</p>
+<p><img src="/img/31.png" alt="这是一张图片"></p>
+<p>两个pci bridge。</p>
+<p>这俩在正常机器上为什么被放到了不同的iommu group下？</p>
+<p>原来，正常机器上的0000:00:1c.5是由ACS能力的，但是与异常机器上，ACS丢了</p>
+<p><img src="/img/32.png" alt="这是一张图片"></p>
+<p>可能是异常机器的bios版本有问题或者主板上的这个pci bridge坏掉了。</p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
