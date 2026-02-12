@@ -7,21 +7,15 @@
   <meta name="description" content="popen导致的问题及分析 | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
-<meta name="description" content="背景一台物理机重启后，网卡驱动probe失败了，导致系统起来后不通网 已知：cmdline添加iommu&#x3D;pt intel_iommu&#x3D;on才会导致驱动probe失败，不添加这些参数，可以probe成功 排查首先通过带外把该机器上的存在的所有内核（包括系统重启前没问题的内核）都启动了一下，发现都是probe网卡驱动失败，唯一一个成功的内核，就是cmdline中不添加iommu&amp;">
-<meta property="og:type" content="article">
-<meta property="og:title" content="网卡驱动probe失败">
-<meta property="og:url" content="http://example.com/2026/01/30/%E7%BD%91%E5%8D%A1%E9%A9%B1%E5%8A%A8probe%E5%A4%B1%E8%B4%A5/index.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="categories">
+<meta property="og:url" content="http://example.com/categories/index.html">
 <meta property="og:site_name" content="YZWDDSG">
-<meta property="og:description" content="背景一台物理机重启后，网卡驱动probe失败了，导致系统起来后不通网 已知：cmdline添加iommu&#x3D;pt intel_iommu&#x3D;on才会导致驱动probe失败，不添加这些参数，可以probe成功 排查首先通过带外把该机器上的存在的所有内核（包括系统重启前没问题的内核）都启动了一下，发现都是probe网卡驱动失败，唯一一个成功的内核，就是cmdline中不添加iommu&amp;">
 <meta property="og:locale">
-<meta property="og:image" content="http://example.com/img/30.png">
-<meta property="og:image" content="http://example.com/img/31.png">
-<meta property="og:image" content="http://example.com/img/32.png">
-<meta property="article:published_time" content="2026-01-30T12:50:05.000Z">
-<meta property="article:modified_time" content="2026-01-30T13:34:30.120Z">
+<meta property="article:published_time" content="2025-02-23T15:43:05.000Z">
+<meta property="article:modified_time" content="2025-02-23T15:43:53.864Z">
 <meta property="article:author" content="YZWDDSG">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/img/30.png">
 
 
 <link rel="icon" href="/img/avatar.jpg">
@@ -118,7 +112,7 @@
 
 <ul>
     <li>
-        <div class="all active" data-rel="全部文章">全部文章
+        <div class="all active" data-rel="All">All
             
                 <small>(34)</small>
             
@@ -317,7 +311,7 @@
         
             <a class="about  site_url"
                
-               href="/about">关于</a>
+               href="/about">About</a>
         
         
     </div>
@@ -333,7 +327,7 @@
     <div class="nav-right">
         <div class="friends-area">
     <div class="friends-title">
-        友情链接
+        Links
         <i class="iconfont icon-left"></i>
     </div>
     <div class="friends-content">
@@ -347,20 +341,20 @@
         <div class="title-list">
     <div class="right-top">
         <div id="default-panel">
-            <i class="iconfont icon-search" data-title="搜索 快捷键 i"></i>
-            <div class="right-title">全部文章</div>
-            <i class="iconfont icon-file-tree" data-title="切换到大纲视图 快捷键 w"></i>
+            <i class="iconfont icon-search" data-title="search shortcut key i"></i>
+            <div class="right-title">All</div>
+            <i class="iconfont icon-file-tree" data-title="switch to outline view shortcut key w"></i>
         </div>
         <div id="search-panel">
-            <i class="iconfont icon-left" data-title="返回"></i>
+            <i class="iconfont icon-left" data-title="return"></i>
             <input id="local-search-input" autocomplete="off"/>
             <label class="border-line" for="input"></label>
-            <i class="iconfont icon-case-sensitive" data-title="大小写敏感"></i>
-            <i class="iconfont icon-tag" data-title="标签"></i>
+            <i class="iconfont icon-case-sensitive" data-title="case sensitive"></i>
+            <i class="iconfont icon-tag" data-title="label"></i>
         </div>
         <div id="outline-panel" style="display: none">
-            <div class="right-title">大纲</div>
-            <i class="iconfont icon-list" data-title="切换到文章列表"></i>
+            <div class="right-title">outline</div>
+            <i class="iconfont icon-list" data-title="switch to article list"></i>
         </div>
     </div>
 
@@ -376,7 +370,7 @@
     <nav id="title-list-nav">
         
         
-        <a  class="全部文章 故障排查 "
+        <a  class="All 故障排查 "
            href="/2026/01/30/%E7%BD%91%E5%8D%A1%E9%A9%B1%E5%8A%A8probe%E5%A4%B1%E8%B4%A5/"
            data-tag=""
            data-author="" >
@@ -385,7 +379,7 @@
         </a>
         
         
-        <a  class="全部文章 故障排查 "
+        <a  class="All 故障排查 "
            href="/2025/11/18/fsnotify%E5%AF%BC%E8%87%B4%E7%9A%84softlockup/"
            data-tag=""
            data-author="" >
@@ -394,7 +388,7 @@
         </a>
         
         
-        <a  class="全部文章 其他 "
+        <a  class="All 其他 "
            href="/2025/11/02/%E5%86%85%E6%A0%B8%E4%B8%AD%E7%9A%84guard%E5%AE%8F/"
            data-tag=""
            data-author="" >
@@ -403,7 +397,7 @@
         </a>
         
         
-        <a  class="全部文章 故障排查 "
+        <a  class="All 故障排查 "
            href="/2025/10/26/CPU%E6%8A%96%E5%8A%A8%E5%8E%9F%E5%9B%A0/"
            data-tag=""
            data-author="" >
@@ -412,7 +406,7 @@
         </a>
         
         
-        <a  class="全部文章 其他 "
+        <a  class="All 其他 "
            href="/2025/10/19/%E6%9F%A5%E7%9C%8Binitramfs/"
            data-tag=""
            data-author="" >
@@ -421,7 +415,7 @@
         </a>
         
         
-        <a  class="全部文章 其他 "
+        <a  class="All 其他 "
            href="/2025/08/18/%E4%B8%80%E4%B8%AAFPU%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98%E7%9A%84%E4%BF%AE%E5%A4%8D-without-kdump/"
            data-tag=""
            data-author="" >
@@ -430,7 +424,7 @@
         </a>
         
         
-        <a  class="全部文章 故障排查 "
+        <a  class="All 故障排查 "
            href="/2025/07/04/kdump%E5%A4%B1%E8%B4%A5%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/"
            data-tag=""
            data-author="" >
@@ -439,7 +433,7 @@
         </a>
         
         
-        <a  class="全部文章 个人 "
+        <a  class="All 个人 "
            href="/2025/06/13/%E8%AE%B0%E4%B8%80%E5%8F%AA%E6%B5%81%E6%B5%AA%E6%96%91%E7%82%B9%E7%8B%97/"
            data-tag=""
            data-author="" >
@@ -448,7 +442,7 @@
         </a>
         
         
-        <a  class="全部文章 硬件 "
+        <a  class="All 硬件 "
            href="/2025/05/28/AMD-ERAPS/"
            data-tag=""
            data-author="" >
@@ -457,7 +451,7 @@
         </a>
         
         
-        <a  class="全部文章 其他 "
+        <a  class="All 其他 "
            href="/2025/04/26/popen%E5%AF%BC%E8%87%B4%E7%9A%84%E9%97%AE%E9%A2%98%E5%8F%8A%E5%88%86%E6%9E%90/"
            data-tag=""
            data-author="" >
@@ -466,7 +460,7 @@
         </a>
         
         
-        <a  class="全部文章 存储 "
+        <a  class="All 存储 "
            href="/2025/04/20/nbd%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%AE%9E%E7%8E%B0/"
            data-tag=""
            data-author="" >
@@ -475,7 +469,7 @@
         </a>
         
         
-        <a  class="全部文章 内存 "
+        <a  class="All 内存 "
            href="/2025/04/11/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3meminfo%E4%B8%AD%E7%9A%84MemAvailable%E5%92%8CMemFree/"
            data-tag=""
            data-author="" >
@@ -484,7 +478,7 @@
         </a>
         
         
-        <a  class="全部文章 故障排查 "
+        <a  class="All 故障排查 "
            href="/2025/04/09/%E6%89%A7%E8%A1%8Crpm%E5%91%BD%E4%BB%A4%E5%8D%A1%E6%AD%BB%E6%8E%92%E6%9F%A5/"
            data-tag=""
            data-author="" >
@@ -493,7 +487,7 @@
         </a>
         
         
-        <a  class="全部文章 调度 "
+        <a  class="All 调度 "
            href="/2025/04/07/CPU%E5%88%A9%E7%94%A8%E7%8E%87%E4%B8%8D%E5%9D%87%E8%A1%A1%E9%97%AE%E9%A2%98-sched-domain%E5%AD%A6%E4%B9%A0/"
            data-tag=""
            data-author="" >
@@ -502,7 +496,7 @@
         </a>
         
         
-        <a  class="全部文章 硬件 "
+        <a  class="All 硬件 "
            href="/2025/04/05/PCIE%E8%AE%BE%E5%A4%87%E7%83%AD%E6%8F%92%E6%8B%94/"
            data-tag=""
            data-author="" >
@@ -511,7 +505,7 @@
         </a>
         
         
-        <a  class="全部文章 个人 "
+        <a  class="All 个人 "
            href="/2025/04/03/%E6%88%91%E5%92%8C%E6%88%91%E7%9A%84%E7%8B%97%E5%AD%90%E4%BB%AC/"
            data-tag=""
            data-author="" >
@@ -520,7 +514,7 @@
         </a>
         
         
-        <a  class="全部文章 调度 "
+        <a  class="All 调度 "
            href="/2025/03/31/%E4%BF%AE%E6%94%B9%E8%BF%9B%E7%A8%8B%E4%BF%A1%E6%81%AF%E7%9A%84%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/"
            data-tag=""
            data-author="" >
@@ -529,7 +523,7 @@
         </a>
         
         
-        <a  class="全部文章 故障排查 "
+        <a  class="All 故障排查 "
            href="/2025/03/30/%E4%B8%80%E6%AC%A1%E4%B8%A2%E5%8C%85%E7%9A%84%E6%8E%92%E6%9F%A5/"
            data-tag=""
            data-author="" >
@@ -538,7 +532,7 @@
         </a>
         
         
-        <a  class="全部文章 故障排查 "
+        <a  class="All 故障排查 "
            href="/2025/03/29/systemd-resolved%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8/"
            data-tag=""
            data-author="" >
@@ -547,7 +541,7 @@
         </a>
         
         
-        <a  class="全部文章 故障排查 "
+        <a  class="All 故障排查 "
            href="/2025/03/22/rt%E8%B0%83%E5%BA%A6%E5%99%A8bug%E5%AF%BC%E8%87%B4%E5%AE%95%E6%9C%BA%E7%9A%84%E6%8E%92%E6%9F%A5/"
            data-tag=""
            data-author="" >
@@ -556,7 +550,7 @@
         </a>
         
         
-        <a  class="全部文章 OS "
+        <a  class="All OS "
            href="/2025/03/21/%E4%BF%AE%E6%94%B9debian%E5%86%85%E6%A0%B8%E6%BA%90%E7%A0%81%E5%B9%B6%E6%89%93%E5%8C%85/"
            data-tag=""
            data-author="" >
@@ -565,7 +559,7 @@
         </a>
         
         
-        <a  class="全部文章 故障排查 "
+        <a  class="All 故障排查 "
            href="/2025/03/17/%E8%AE%B0%E4%B8%80%E6%AC%A1%E4%BA%91%E7%9B%98%E7%83%AD%E6%8B%94%E5%A4%B1%E8%B4%A5/"
            data-tag=""
            data-author="" >
@@ -574,7 +568,7 @@
         </a>
         
         
-        <a  class="全部文章 硬件 "
+        <a  class="All 硬件 "
            href="/2025/03/13/MMX%E3%80%81FMA%E3%80%81SSE%E4%B8%8EAVX/"
            data-tag=""
            data-author="" >
@@ -583,7 +577,7 @@
         </a>
         
         
-        <a  class="全部文章 文件系统 "
+        <a  class="All 文件系统 "
            href="/2025/03/12/proc%E3%80%81sysctl%E5%92%8Csysfs/"
            data-tag=""
            data-author="" >
@@ -592,7 +586,7 @@
         </a>
         
         
-        <a  class="全部文章 其他 "
+        <a  class="All 其他 "
            href="/2025/03/11/%E4%BF%AE%E6%94%B9bios%E9%85%8D%E7%BD%AE/"
            data-tag=""
            data-author="" >
@@ -601,7 +595,7 @@
         </a>
         
         
-        <a  class="全部文章 OS "
+        <a  class="All OS "
            href="/2025/03/10/%E4%BF%AE%E6%94%B9%E5%85%AC%E7%89%88%E5%86%85%E6%A0%B8/"
            data-tag=""
            data-author="" >
@@ -610,7 +604,7 @@
         </a>
         
         
-        <a  class="全部文章 power "
+        <a  class="All power "
            href="/2025/03/09/proc-cpuinfo%E6%98%BE%E7%A4%BA%E9%A2%91%E7%8E%87%E5%8E%9F%E7%90%86/"
            data-tag=""
            data-author="" >
@@ -619,7 +613,7 @@
         </a>
         
         
-        <a  class="全部文章 OS "
+        <a  class="All OS "
            href="/2025/03/07/rsyslog%E9%85%8D%E7%BD%AE/"
            data-tag=""
            data-author="" >
@@ -628,7 +622,7 @@
         </a>
         
         
-        <a  class="全部文章 虚拟化 "
+        <a  class="All 虚拟化 "
            href="/2025/03/06/qemu-kvm%E6%B7%BB%E5%8A%A0%E6%96%B0feature%E8%99%9A%E6%8B%9F%E5%8C%96/"
            data-tag=""
            data-author="" >
@@ -637,7 +631,7 @@
         </a>
         
         
-        <a  class="全部文章 故障排查 "
+        <a  class="All 故障排查 "
            href="/2025/02/27/hung-task%E5%8E%9F%E7%90%86/"
            data-tag=""
            data-author="" >
@@ -646,7 +640,7 @@
         </a>
         
         
-        <a  class="全部文章 硬件 "
+        <a  class="All 硬件 "
            href="/2025/02/26/netconsole/"
            data-tag=""
            data-author="" >
@@ -655,7 +649,7 @@
         </a>
         
         
-        <a  class="全部文章 个人 "
+        <a  class="All 个人 "
            href="/2025/02/26/%E8%88%92%E6%B4%BB%E8%88%92%E6%B4%BB%E7%AD%8B%E9%AA%A8%EF%BC%8C%E6%8A%96%E6%93%9E%E6%8A%96%E6%93%9E%E7%B2%BE%E7%A5%9E/"
            data-tag=""
            data-author="" >
@@ -664,7 +658,7 @@
         </a>
         
         
-        <a  class="全部文章 故障排查 "
+        <a  class="All 故障排查 "
            href="/2025/02/25/softlockup%E4%B8%8Ehardlockup/"
            data-tag=""
            data-author="" >
@@ -673,7 +667,7 @@
         </a>
         
         
-        <a  class="全部文章 网络 "
+        <a  class="All 网络 "
            href="/2025/02/24/netpoll%E5%8E%9F%E7%90%86/"
            data-tag=""
            data-author="" >
@@ -691,7 +685,7 @@
 
     </div>
     <div class="hide-list">
-        <div class="semicircle" data-title="切换全屏 快捷键 s">
+        <div class="semicircle" data-title="Toggle full screen shortcut key s">
             <div class="brackets first"><</div>
             <div class="brackets">&gt;</div>
         </div>
@@ -719,18 +713,18 @@
     </div>
     <div class="article-meta">
         
-            发布时间 : <time class="date" title='最后更新: 2025-04-26 23:21:01'>2025-04-26 23:15</time>
+            Created At : <time class="date" title='Updated At: 2025-04-26 23:21:01'>2025-04-26 23:15</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:2.9k</span>
+        <span>Count:2.9k</span>
         
         
         
-        <span class="top-comment" title="跳转至评论区">
+        <span class="top-comment" title="Jump to comment area">
             <a href="#comments">
-                评论:<span class="count-comment">
+                Comment:<span class="count-comment">
                     <span class="spinner">
                       <div class="cube1"></div>
                       <div class="cube2"></div>
@@ -1156,7 +1150,7 @@ weak_alias (__libc_mallopt, __mallopt) weak_alias (__libc_mallopt, mallopt)
 
     </div>
     <div class="full-toc">
-        <button class="full" data-title="切换全屏 快捷键 s"><span class="min "></span></button>
+        <button class="full" data-title="Toggle full screen shortcut key s"><span class="min "></span></button>
 <a class="" id="rocket" ></a>
 
     </div>
