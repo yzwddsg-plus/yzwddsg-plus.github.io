@@ -737,7 +737,7 @@
     </div>
     <div class="article-meta">
         
-            Created At : <time class="date" title='Updated At: 2026-02-13 23:52:12'>2026-02-13 21:21</time>
+            Created At : <time class="date" title='Updated At: 2026-02-14 00:10:44'>2026-02-13 21:21</time>
         
     </div>
     <div class="article-meta">
@@ -1502,7 +1502,7 @@ int main()
 <p>可以看到fork出来的子进程1596658是继承了自定义handler的，kill命令并不能杀死它</p>
 <h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a><center>后记</center></h3><ul>
 <li>注意到get_signal中，判断目标进程如果是SIGNAL_GROUP_EXIT或group_exec_task就走SIGKILL信号去处理，group_exec_task是怎么个意思？下面再开一篇文章看看吧</li>
-<li>最后，提个小问题，上面可以看到，SIG_KTHREAD和SIG_KTHREAD_KERNEL分别是2和3，那么如果我秀娥一个用户程序，把sa_handler赋值为(void *)0x2或者(void *)0x3，那么在处理信号get_signal中难道就直接认为是内核态的信号处理流程了嘛？答案就在上面的内容中了。</li>
+<li>最后，提个小问题，上面可以看到，SIG_KTHREAD和SIG_KTHREAD_KERNEL分别是2和3，那么如果我写一个用户程序，把sa_handler赋值为(void *)0x2或者(void *)0x3，那么在处理信号get_signal中难道就直接认为是内核态的信号处理流程了嘛？答案就在上面的内容中了。</li>
 </ul>
 <p>最后的最后：祝大家新年快乐，万事大吉，天天开心</p>
 <p>11st</p>
