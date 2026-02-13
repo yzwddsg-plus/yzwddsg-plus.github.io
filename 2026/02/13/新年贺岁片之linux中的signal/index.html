@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>新年贺岁片之linux中的signal | YZWDDSG</title>
+  <meta name="keywords" content="">
+  <meta name="description" content="新年贺岁片之linux中的signal | YZWDDSG">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
+<meta property="og:type" content="website">
+<meta property="og:title" content="categories">
+<meta property="og:url" content="http://example.com/categories/index.html">
+<meta property="og:site_name" content="YZWDDSG">
+<meta property="og:locale">
+<meta property="article:published_time" content="2025-02-23T15:43:05.000Z">
+<meta property="article:modified_time" content="2025-02-23T15:43:53.864Z">
+<meta property="article:author" content="YZWDDSG">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="icon" href="/img/avatar.jpg">
+
+<link href="/css/style.css?v=1.1.0" rel="stylesheet">
+
+<link href="/css/hl_theme/atom-dark.css?v=1.1.0" rel="stylesheet">
+
+<link href="//cdn.jsdelivr.net/npm/animate.css@4.1.0/animate.min.css" rel="stylesheet">
+
+<script src="//cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+<script src="/js/titleTip.js?v=1.1.0" ></script>
+
+<script src="//cdn.jsdelivr.net/npm/highlightjs@9.16.2/highlight.pack.min.js"></script>
+<script>
+    hljs.initHighlightingOnLoad();
+</script>
+
+<script src="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js"></script>
+
+
+
+<script src="//cdn.jsdelivr.net/npm/jquery.cookie@1.4.1/jquery.cookie.min.js" ></script>
+
+<script src="/js/iconfont.js?v=1.1.0" ></script>
+<script src="/js/custom-iconfont.js?v=1.1.0" ></script>
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<div style="display: none">
+  <input class="theme_disqus_on" value="false">
+  <input class="theme_preload_comment" value="">
+  <input class="theme_blog_path" value="">
+  <input id="theme_shortcut" value="true" />
+  <input id="theme_highlight_on" value="true" />
+  <input id="theme_code_copy" value="true" />
+</div>
+
+
+
+<body>
+<aside class="nav">
+    <div class="nav-left">
+        <a href="/"
+   class="avatar_target">
+    <img class="avatar"
+         src="/img/avatar.jpg"/>
+</a>
+<div class="author">
+    <span>YZWDDSG</span>
+</div>
+
+<div class="icon">
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+</div>
+
+
+
+
+
+<ul>
+    <li>
+        <div class="all active" data-rel="All">All
+            
+                <small>(35)</small>
+            
+        </div>
+    </li>
+    
+        
+            
+                
+    <li>
+        <div data-rel="硬件">
+            
+            硬件
+            <small>(4)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="调度">
+            
+            调度
+            <small>(2)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="内存">
+            
+            内存
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="存储">
+            
+            存储
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="网络">
+            
+            网络
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="文件系统">
+            
+            文件系统
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="虚拟化">
+            
+            虚拟化
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="power">
+            
+            power
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="OS">
+            
+            OS
+            <small>(3)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="故障排查">
+            
+            故障排查
+            <small>(11)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="其他">
+            
+            其他
+            <small>(5)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="个人">
+            
+            个人
+            <small>(3)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+        
+            
+                
+    <li>
+        <div data-rel="其他qi">
+            
+            其他qi
+            <small>(1)</small>
+        </div>
+        
+    </li>
+
+            
+        
+    
+</ul>
+<div class="left-bottom">
+    <div class="menus">
+        
+            
+            
+            
+    </div>
+    <div>
+        
+            <a class="about  site_url"
+               
+               href="/about">About</a>
+        
+        
+    </div>
+</div>
+<input type="hidden" id="yelog_site_posts_number" value="35">
+<input type="hidden" id="yelog_site_word_count" value="83.5k">
+<div style="display: none">
+    <span id="busuanzi_value_site_uv"></span>
+    <span id="busuanzi_value_site_pv"></span>
+</div>
+
+    </div>
+    <div class="nav-right">
+        <div class="friends-area">
+    <div class="friends-title">
+        Links
+        <i class="iconfont icon-left"></i>
+    </div>
+    <div class="friends-content">
+        <ul>
+            
+            <li><a target="_blank" href="http://yelog.org/">叶落阁</a></li>
+            
+        </ul>
+    </div>
+</div>
+        <div class="title-list">
+    <div class="right-top">
+        <div id="default-panel">
+            <i class="iconfont icon-search" data-title="search shortcut key i"></i>
+            <div class="right-title">All</div>
+            <i class="iconfont icon-file-tree" data-title="switch to outline view shortcut key w"></i>
+        </div>
+        <div id="search-panel">
+            <i class="iconfont icon-left" data-title="return"></i>
+            <input id="local-search-input" autocomplete="off"/>
+            <label class="border-line" for="input"></label>
+            <i class="iconfont icon-case-sensitive" data-title="case sensitive"></i>
+            <i class="iconfont icon-tag" data-title="label"></i>
+        </div>
+        <div id="outline-panel" style="display: none">
+            <div class="right-title">outline</div>
+            <i class="iconfont icon-list" data-title="switch to article list"></i>
+        </div>
+    </div>
+
+    <div class="tags-list">
+    <input id="tag-search" />
+    <div class="tag-wrapper">
+        
+    </div>
+
+</div>
+
+    
+    <nav id="title-list-nav">
+        
+        
+        <a  class="All 其他qi "
+           href="/2026/02/13/%E6%96%B0%E5%B9%B4%E8%B4%BA%E5%B2%81%E7%89%87%E4%B9%8Blinux%E4%B8%AD%E7%9A%84signal/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="新年贺岁片之linux中的signal">新年贺岁片之linux中的signal</span>
+            <span class="post-date" title="2026-02-13 21:21:34">2026/02/13</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2026/01/30/%E7%BD%91%E5%8D%A1%E9%A9%B1%E5%8A%A8probe%E5%A4%B1%E8%B4%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="网卡驱动probe失败">网卡驱动probe失败</span>
+            <span class="post-date" title="2026-01-30 20:50:05">2026/01/30</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/11/18/fsnotify%E5%AF%BC%E8%87%B4%E7%9A%84softlockup/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="fsnotify导致的softlockup">fsnotify导致的softlockup</span>
+            <span class="post-date" title="2025-11-18 23:53:46">2025/11/18</span>
+        </a>
+        
+        
+        <a  class="All 其他 "
+           href="/2025/11/02/%E5%86%85%E6%A0%B8%E4%B8%AD%E7%9A%84guard%E5%AE%8F/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="内核中的guard宏">内核中的guard宏</span>
+            <span class="post-date" title="2025-11-02 22:49:38">2025/11/02</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/10/26/CPU%E6%8A%96%E5%8A%A8%E5%8E%9F%E5%9B%A0/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="CPU抖动原因">CPU抖动原因</span>
+            <span class="post-date" title="2025-10-26 23:34:25">2025/10/26</span>
+        </a>
+        
+        
+        <a  class="All 其他 "
+           href="/2025/10/19/%E6%9F%A5%E7%9C%8Binitramfs/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="查看initramfs">查看initramfs</span>
+            <span class="post-date" title="2025-10-19 23:28:27">2025/10/19</span>
+        </a>
+        
+        
+        <a  class="All 其他 "
+           href="/2025/08/18/%E4%B8%80%E4%B8%AAFPU%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98%E7%9A%84%E4%BF%AE%E5%A4%8D-without-kdump/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="一个FPU相关问题的修复---without kdump">一个FPU相关问题的修复---without kdump</span>
+            <span class="post-date" title="2025-08-18 21:53:35">2025/08/18</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/07/04/kdump%E5%A4%B1%E8%B4%A5%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="kdump失败问题排查">kdump失败问题排查</span>
+            <span class="post-date" title="2025-07-04 23:03:39">2025/07/04</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/06/13/%E8%AE%B0%E4%B8%80%E5%8F%AA%E6%B5%81%E6%B5%AA%E6%96%91%E7%82%B9%E7%8B%97/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="记一只流浪斑点狗">记一只流浪斑点狗</span>
+            <span class="post-date" title="2025-06-13 21:39:16">2025/06/13</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/05/28/AMD-ERAPS/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="AMD ERAPS">AMD ERAPS</span>
+            <span class="post-date" title="2025-05-28 21:52:56">2025/05/28</span>
+        </a>
+        
+        
+        <a  class="All 其他 "
+           href="/2025/04/26/popen%E5%AF%BC%E8%87%B4%E7%9A%84%E9%97%AE%E9%A2%98%E5%8F%8A%E5%88%86%E6%9E%90/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="popen导致的问题及分析">popen导致的问题及分析</span>
+            <span class="post-date" title="2025-04-26 23:15:08">2025/04/26</span>
+        </a>
+        
+        
+        <a  class="All 存储 "
+           href="/2025/04/20/nbd%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%AE%9E%E7%8E%B0/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="nbd驱动的实现">nbd驱动的实现</span>
+            <span class="post-date" title="2025-04-20 16:41:42">2025/04/20</span>
+        </a>
+        
+        
+        <a  class="All 内存 "
+           href="/2025/04/11/%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3meminfo%E4%B8%AD%E7%9A%84MemAvailable%E5%92%8CMemFree/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="如何理解meminfo中的MemAvailable和MemFree">如何理解meminfo中的MemAvailable和MemFree</span>
+            <span class="post-date" title="2025-04-11 19:43:19">2025/04/11</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/04/09/%E6%89%A7%E8%A1%8Crpm%E5%91%BD%E4%BB%A4%E5%8D%A1%E6%AD%BB%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="执行rpm命令卡死排查">执行rpm命令卡死排查</span>
+            <span class="post-date" title="2025-04-09 22:11:15">2025/04/09</span>
+        </a>
+        
+        
+        <a  class="All 调度 "
+           href="/2025/04/07/CPU%E5%88%A9%E7%94%A8%E7%8E%87%E4%B8%8D%E5%9D%87%E8%A1%A1%E9%97%AE%E9%A2%98-sched-domain%E5%AD%A6%E4%B9%A0/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="CPU利用率不均衡问题-sched_domain学习">CPU利用率不均衡问题-sched_domain学习</span>
+            <span class="post-date" title="2025-04-07 22:04:47">2025/04/07</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/04/05/PCIE%E8%AE%BE%E5%A4%87%E7%83%AD%E6%8F%92%E6%8B%94/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="PCIE设备热插拔">PCIE设备热插拔</span>
+            <span class="post-date" title="2025-04-05 22:00:12">2025/04/05</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/04/03/%E6%88%91%E5%92%8C%E6%88%91%E7%9A%84%E7%8B%97%E5%AD%90%E4%BB%AC/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="我和我的狗子们">我和我的狗子们</span>
+            <span class="post-date" title="2025-04-03 22:18:32">2025/04/03</span>
+        </a>
+        
+        
+        <a  class="All 调度 "
+           href="/2025/03/31/%E4%BF%AE%E6%94%B9%E8%BF%9B%E7%A8%8B%E4%BF%A1%E6%81%AF%E7%9A%84%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改进程信息的内核模块">修改进程信息的内核模块</span>
+            <span class="post-date" title="2025-03-31 21:53:34">2025/03/31</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/30/%E4%B8%80%E6%AC%A1%E4%B8%A2%E5%8C%85%E7%9A%84%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="一次丢包的排查">一次丢包的排查</span>
+            <span class="post-date" title="2025-03-30 12:56:05">2025/03/30</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/29/systemd-resolved%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="systemd-resolved服务异常">systemd-resolved服务异常</span>
+            <span class="post-date" title="2025-03-29 22:28:32">2025/03/29</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/22/rt%E8%B0%83%E5%BA%A6%E5%99%A8bug%E5%AF%BC%E8%87%B4%E5%AE%95%E6%9C%BA%E7%9A%84%E6%8E%92%E6%9F%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="rt调度器bug导致宕机的排查">rt调度器bug导致宕机的排查</span>
+            <span class="post-date" title="2025-03-22 21:08:39">2025/03/22</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/21/%E4%BF%AE%E6%94%B9debian%E5%86%85%E6%A0%B8%E6%BA%90%E7%A0%81%E5%B9%B6%E6%89%93%E5%8C%85/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改debian内核源码并打包">修改debian内核源码并打包</span>
+            <span class="post-date" title="2025-03-21 21:53:56">2025/03/21</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/03/17/%E8%AE%B0%E4%B8%80%E6%AC%A1%E4%BA%91%E7%9B%98%E7%83%AD%E6%8B%94%E5%A4%B1%E8%B4%A5/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="记一次云盘热拔失败">记一次云盘热拔失败</span>
+            <span class="post-date" title="2025-03-17 22:02:52">2025/03/17</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/03/13/MMX%E3%80%81FMA%E3%80%81SSE%E4%B8%8EAVX/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="MMX、FMA、SSE与AVX">MMX、FMA、SSE与AVX</span>
+            <span class="post-date" title="2025-03-13 21:37:54">2025/03/13</span>
+        </a>
+        
+        
+        <a  class="All 文件系统 "
+           href="/2025/03/12/proc%E3%80%81sysctl%E5%92%8Csysfs/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="proc、sysctl和sysfs">proc、sysctl和sysfs</span>
+            <span class="post-date" title="2025-03-12 22:00:23">2025/03/12</span>
+        </a>
+        
+        
+        <a  class="All 其他 "
+           href="/2025/03/11/%E4%BF%AE%E6%94%B9bios%E9%85%8D%E7%BD%AE/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改bios配置">修改bios配置</span>
+            <span class="post-date" title="2025-03-11 21:49:28">2025/03/11</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/10/%E4%BF%AE%E6%94%B9%E5%85%AC%E7%89%88%E5%86%85%E6%A0%B8/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="修改公版内核">修改公版内核</span>
+            <span class="post-date" title="2025-03-10 22:13:00">2025/03/10</span>
+        </a>
+        
+        
+        <a  class="All power "
+           href="/2025/03/09/proc-cpuinfo%E6%98%BE%E7%A4%BA%E9%A2%91%E7%8E%87%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="/proc/cpuinfo显示频率原理">/proc/cpuinfo显示频率原理</span>
+            <span class="post-date" title="2025-03-09 22:00:49">2025/03/09</span>
+        </a>
+        
+        
+        <a  class="All OS "
+           href="/2025/03/07/rsyslog%E9%85%8D%E7%BD%AE/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="rsyslog配置">rsyslog配置</span>
+            <span class="post-date" title="2025-03-07 22:36:29">2025/03/07</span>
+        </a>
+        
+        
+        <a  class="All 虚拟化 "
+           href="/2025/03/06/qemu-kvm%E6%B7%BB%E5%8A%A0%E6%96%B0feature%E8%99%9A%E6%8B%9F%E5%8C%96/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="qemu kvm添加新feature虚拟化">qemu kvm添加新feature虚拟化</span>
+            <span class="post-date" title="2025-03-06 00:13:34">2025/03/06</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/02/27/hung-task%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="hung task原理">hung task原理</span>
+            <span class="post-date" title="2025-02-27 22:54:58">2025/02/27</span>
+        </a>
+        
+        
+        <a  class="All 硬件 "
+           href="/2025/02/26/netconsole/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="netconsole">netconsole</span>
+            <span class="post-date" title="2025-02-26 23:01:56">2025/02/26</span>
+        </a>
+        
+        
+        <a  class="All 个人 "
+           href="/2025/02/26/%E8%88%92%E6%B4%BB%E8%88%92%E6%B4%BB%E7%AD%8B%E9%AA%A8%EF%BC%8C%E6%8A%96%E6%93%9E%E6%8A%96%E6%93%9E%E7%B2%BE%E7%A5%9E/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="舒活舒活筋骨，抖擞抖擞精神">舒活舒活筋骨，抖擞抖擞精神</span>
+            <span class="post-date" title="2025-02-26 00:05:33">2025/02/26</span>
+        </a>
+        
+        
+        <a  class="All 故障排查 "
+           href="/2025/02/25/softlockup%E4%B8%8Ehardlockup/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="softlockup与hardlockup">softlockup与hardlockup</span>
+            <span class="post-date" title="2025-02-25 22:13:35">2025/02/25</span>
+        </a>
+        
+        
+        <a  class="All 网络 "
+           href="/2025/02/24/netpoll%E5%8E%9F%E7%90%86/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="netpoll原理">netpoll原理</span>
+            <span class="post-date" title="2025-02-24 21:36:30">2025/02/24</span>
+        </a>
+        
+        <div id="no-item-tips">
+
+        </div>
+    </nav>
+    <div id="outline-list">
+    </div>
+</div>
+
+    </div>
+    <div class="hide-list">
+        <div class="semicircle" data-title="Toggle full screen shortcut key s">
+            <div class="brackets first"><</div>
+            <div class="brackets">&gt;</div>
+        </div>
+    </div>
+</aside>
+<div id="post">
+    <div class="pjax">
+        <article id="post-新年贺岁片之linux中的signal" class="article article-type-post" itemscope itemprop="blogPost">
+    
+        <h1 class="article-title">新年贺岁片之linux中的signal</h1>
+    
+    <div class="article-meta">
+        
+        
+        
+        <span class="book">
+            <i class="iconfont icon-category"></i>
+            
+            
+            <a  data-rel="其他qi">其他qi</a>
+            
+        </span>
+        
+        
+    </div>
+    <div class="article-meta">
+        
+            Created At : <time class="date" title='Updated At: 2026-02-13 23:52:12'>2026-02-13 21:21</time>
+        
+    </div>
+    <div class="article-meta">
+        
+        <span>Count:4.6k</span>
+        
+        
+        
+        <span class="top-comment" title="Jump to comment area">
+            <a href="#comments">
+                Comment:<span class="count-comment">
+                    <span class="spinner">
+                      <div class="cube1"></div>
+                      <div class="cube2"></div>
+                    </span>
+                </span>
+            </a>
+        </span>
+        
+    </div>
+    
+    <div class="toc-ref">
+    
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0"><span class="toc-text">学习</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B0%8F%E5%AE%9E%E9%AA%8C"><span class="toc-text">小实验</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E8%AE%B0"><span class="toc-text">后记</span></a></li></ol>
+    
+<style>
+    .left-col .switch-btn,
+    .left-col .switch-area {
+        display: none;
+    }
+    .toc-level-3 i,
+    .toc-level-3 ol {
+        display: none !important;
+    }
+</style>
+</div>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h3><p>众所周知，signal是linux内核中一种重要的异步通信机制，没有signal，我们可能很难打断一个进程的执行。</p>
+<p>接下来我们带着一些问题去看signal相关的内容：</p>
+<ol>
+<li>信号怎么发送的？</li>
+<li>信号怎么处理的？</li>
+<li>为什么D进程不响应信号？</li>
+<li>内核线程和用户线程的信号处理有什么区别吗？</li>
+</ol>
+<h3 id="学习"><a href="#学习" class="headerlink" title="学习"></a><center>学习</center></h3><ul>
+<li><strong>当ctrl^C &#x2F; kill时，内核发生了什么?</strong></li>
+</ul>
+<p>我们先开两个窗口，在其中一个窗口执行sleep 60，在另一个窗口上，strace一下这个进程，按下ctrl+C之后，我们可以发现，sleep进程被kill掉了，log显示是收到SIGINT被kill掉的</p>
+<p><img src="/img/33.png" alt="这是一张图片"></p>
+<p>前台运行的进程可以直接ctrl^C打断，那后台运行的进程呢？我们一般使用kill [pid]命令。</p>
+<p>和上面一样，我们开启两个窗口。在其中一个窗口执行sleep 60 &amp;创建一个后台进程，这时候会得到一个pid，然后strace这个pid。在另一个窗口执行kill [pid]去杀死这个进程，我们的strace结果就会得到下图所示的内容。可以看到这里是显示收到了SIGTERM信号而把进程kill掉了。</p>
+<p><img src="/img/34.png" alt="这是一张图片"></p>
+<p>同理，可以试一下我们平时常用的kill -9，其实是收到SIGKILL信号。还可以尝试ctrl^Z、kill -6等其他常用的操作&#x2F;命令，看看它们接受到的是什么信号。</p>
+<p>那么内核中都有哪些信号呢？区别是什么？</p>
+<p>在include&#x2F;uapi&#x2F;asm-generic&#x2F;signal.h中可以定义了很多信号，一般常见的有以下几种：</p>
+<table>
+<thead>
+<tr>
+<th>信号</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SIGHUP</td>
+<td>终端退出的hangup信号。在一个终端的开一个进程，当我们关闭这个终端时，运行的这个进程就会因为收到SIGHUP信号而退出。我们可以通过nohup命令来使当前的进程不响应SIGHUP信号。</td>
+</tr>
+<tr>
+<td>SIGINT</td>
+<td>一般是ctrl^C发出的让进程中断的信号。</td>
+</tr>
+<tr>
+<td>SIGKILL</td>
+<td>强制杀死进程的信号，<font color='red'>不可以被捕获、忽略、自定义注册信号</font>。kill -9可以触发</td>
+</tr>
+<tr>
+<td>SIGSEGV</td>
+<td>段错误信号。</td>
+</tr>
+<tr>
+<td>SIGTERM</td>
+<td>杀死进程，可以自定义信号处理方式。kill命令发送的信号。</td>
+</tr>
+<tr>
+<td>SIGCHLD</td>
+<td>子进程状态改变，向父进程进行通知的信号。</td>
+</tr>
+<tr>
+<td>SIGCONT</td>
+<td>继续执行的信号。</td>
+</tr>
+<tr>
+<td>SIGSTOP</td>
+<td>停止执行的信号，<font color='red'>不可以被捕获、忽略、自定义注册信号</font>。</td>
+</tr>
+<tr>
+<td>SIGTSTP</td>
+<td>暂停执行的信号，一般是ctrl^Z触发。</td>
+</tr>
+</tbody></table>
+<ul>
+<li><strong>信号的发送</strong></li>
+</ul>
+<p>之前说到，ctrl^C和kill命令实际上都是给目标进程发送了信号，那么这个过程是怎么样的呢？</p>
+<p>先来看一下kill命令的过程，直接看syscall的函数，调用关系如下</p>
+<pre><code class="language-c">SYSCALL_DEFINE2(kill, pid_t, pid, int, sig)
+  -&gt;kill_something_info
+    -&gt;kill_proc_info
+      -&gt;kill_pid_info
+        -&gt;kill_pid_info_type
+          -&gt;group_send_sig_info
+            -&gt;do_send_sig_info
+              -&gt;send_signal_locked
+                -&gt;__send_signal_locked
+
+
+static int __send_signal_locked(int sig, struct kernel_siginfo *info,
+                                struct task_struct *t, enum pid_type type, bool force)
+&#123;
+
+.......
+        //这里会进行一些特殊操作：
+        //1:如果目标进程的signal-&gt;flags中已经有SIGNAL_GROUP_EXIT了，返回false。因为现在目标进程已经在退出了
+        //2:如果是停止类信号(具体定义可见SIG_KERNEL_STOP_MASK)，就将目标进程组中的所有SIGCONT信号flush掉
+        //3:如果是SIGCONT，则将目标进程组中的所有的SIG_KERNEL_STOP_MASK的信号flush掉，然后尝试唤醒目标进程
+        if (!prepare_signal(sig, t, force))
+                goto ret;
+
+        //如果是PIDTYPE_PID类型，也就是只针对线程，则获取线程对应的pending。如果不是只针对线程，则获取t-&gt;signal-&gt;shared_pending共享的pending
+        pending = (type != PIDTYPE_PID) ? &amp;t-&gt;signal-&gt;shared_pending : &amp;t-&gt;pending;
+
+        //如果是标准信号且该信号已经在目标进程的的pending上了，则直接返回
+        if (legacy_queue(pending, sig))
+                goto ret;
+......
+        //如果是SIGKILL信号或者内核线程的话，跳过分配sigqueue的阶段。
+        //我认为是因为:1.SIGKILL就是直接立即让目标进程去处理并退出了2:内核线程不响应这些信号所以没必要
+        if ((sig == SIGKILL) || (t-&gt;flags &amp; PF_KTHREAD))
+                goto out_set;
+......
+        //分配并填充sigqueue
+        q = sigqueue_alloc(sig, t, GFP_ATOMIC, override_rlimit);
+
+        if (q) &#123;
+          //添加到目标进程的pending链表上
+          list_add_tail(&amp;q-&gt;list, &amp;pending-&gt;list);
+......
+        &#125;
+out_set:
+        signalfd_notify(t, sig);					
+        sigaddset(&amp;pending-&gt;signal, sig); //把sig信号添加到目标进程的pendingset中
+
+        complete_signal(sig, t, type);		//调用signal_wake_up（这里会设置task的TIF_SIGPENDING）-&gt;kick_process-&gt;smp_send_reschedule
+ret:
+        trace_signal_generate(sig, info, t, type != PIDTYPE_PID, result);
+        return ret;
+&#125;
+</code></pre>
+<p>再看一下ctrl^C中断的过程，过程应该如下，应该是tty终端驱动接收了这些字符：</p>
+<pre><code class="language-c">static struct tty_ldisc_ops n_tty_ops = &#123;
+.......
+        .receive_buf     = n_tty_receive_buf,
+        .write_wakeup    = n_tty_write_wakeup,
+        .receive_buf2    = n_tty_receive_buf2,
+        .lookahead_buf   = n_tty_lookahead_flow_ctrl,
+&#125;;
+
+
+n_tty_receive_buf
+  -&gt;n_tty_receive_buf_common
+    -&gt;__receive_buf
+      -&gt;n_tty_receive_buf_standard
+        -&gt;n_tty_receive_char_special
+        
+
+static void n_tty_receive_char_special(struct tty_struct *tty, u8 c,
+                                       bool lookahead_done)
+&#123;
+......
+        if (L_ISIG(tty)) &#123;
+                if (c == INTR_CHAR(tty)) &#123;
+                        n_tty_receive_signal_char(tty, SIGINT, c);
+                        return;
+&#125;
+
+
+static void
+n_tty_receive_signal_char(struct tty_struct *tty, int signal, u8 c)
+&#123;
+        isig(signal, tty);
+......
+&#125;
+
+
+static void __isig(int sig, struct tty_struct *tty)
+&#123;
+        struct pid *tty_pgrp = tty_get_pgrp(tty);
+        if (tty_pgrp) &#123;
+                kill_pgrp(tty_pgrp, sig, 1);
+                put_pid(tty_pgrp);
+        &#125;
+&#125;
+                        
+</code></pre>
+<p>再继续追kill_pgrp的话就会发现，最后会调用到do_send_sig_info，就是走上面的发送signal的流程了。</p>
+<p>所以一个信号发送流程可以简化如下：</p>
+<p><img src="/img/35.png" alt="这是一张图片"></p>
+<ul>
+<li><strong>接收信号的处理</strong></li>
+</ul>
+<p>不管是用户敲键盘触发中断还是使用kill命令调用系统调用，最终的结果都是把信号挂到目标进程的pending上了。那么目标进程是怎么处理的呢？</p>
+<p>处理过程如下：</p>
+<pre><code class="language-c">//X86为例
+__exit_to_user_mode_loop			//进程从内核态返回用户态
+  -&gt;arch_do_signal_or_restart //如果设置了_TIF_SIGPENDING | _TIF_NOTIFY_SIGNAL
+    -&gt;get_signal							//获取信号
+    -&gt;handle_signal						//如果有用户自定义的handler，设置相关寄存器跳转执行自定义函数
+</code></pre>
+<p>其实主要看一下get_signal的过程：</p>
+<pre><code class="language-c">bool get_signal(struct ksignal *ksig)
+&#123;
+        struct sighand_struct *sighand = current-&gt;sighand;
+        struct signal_struct *signal = current-&gt;signal;
+        int signr;
+        .......
+
+relock:
+        spin_lock_irq(&amp;sighand-&gt;siglock);
+        ......
+
+        for (;;) &#123;
+                struct k_sigaction *ka;
+                enum pid_type type;
+
+                //如果目标进程组正在exit或者有线程正在执行exec（正在执行exec为什么需要sigkill？因为正在执行exec需要把其他kill掉，新开一篇文章说一下）
+                //则设置信号为SIGKILL，然后从pending set中删掉SIGKILL重新计算pending并跳转到fatal，其实fatal就是主要去执行do_group_exit去exit了
+                if ((signal-&gt;flags &amp; SIGNAL_GROUP_EXIT) ||
+                     signal-&gt;group_exec_task) &#123;
+                        signr = SIGKILL;
+                        sigdelset(&amp;current-&gt;pending.signal, SIGKILL);
+                        trace_signal_deliver(SIGKILL, SEND_SIG_NOINFO,
+                                             &amp;sighand-&gt;action[SIGKILL-1]);
+                        recalc_sigpending();
+
+                        goto fatal;
+                
+
+                //判断jobctrl frozen等情况的处理
+
+                
+                type = PIDTYPE_PID;
+                //优先dequeue同步信号，见SYNCHRONOUS_MASK，即段错误、bus error等错误需要立即处理的同步信号
+                signr = dequeue_synchronous_signal(&amp;ksig-&gt;info);
+                //若没有同步信号，才需要从队列中去取出信号，规则是从低到高遍历未block的信号
+                //如果有设置了pending set的信号，则去queue中取出对应的signal
+                if (!signr)
+                        signr = dequeue_signal(&amp;current-&gt;blocked, &amp;ksig-&gt;info, &amp;type);
+                if (!signr)
+                        break; /* will return 0 */
+
+                ......
+                //取出action
+                ka = &amp;sighand-&gt;action[signr-1];
+                trace_signal_deliver(signr, &amp;ksig-&gt;info, ka);
+
+                //判断sa.sa_handler的值
+                //如果是SIG_IGN，则忽略
+                //如果不是SIG_DFL，则有用户自定义handler，设置用户函数指针，break，在后面的handle_signal中去处理
+                //剩下就是SIG_DFL，就是默认的处理
+                if (ka-&gt;sa.sa_handler == SIG_IGN) /* Do nothing.  */
+                        continue;
+                if (ka-&gt;sa.sa_handler != SIG_DFL) &#123;
+                        /* Run the handler.  */
+                        ksig-&gt;ka = *ka;
+
+                        if (ka-&gt;sa.sa_flags &amp; SA_ONESHOT)
+                                ka-&gt;sa.sa_handler = SIG_DFL;
+
+                        break; /* will return non-zero &quot;signr&quot; value */
+                &#125;
+
+                //SIG_DFL处理，若是需要忽略的signal，continue
+                if (sig_kernel_ignore(signr)) /* Default is nothing. */
+                        continue;
+
+                //SIG_DFL处理，处理停止类信号
+                if (sig_kernel_stop(signr)) &#123;
+                        if (signr != SIGSTOP) &#123;
+                                spin_unlock_irq(&amp;sighand-&gt;siglock);
+
+                                if (is_current_pgrp_orphaned())
+                                        goto relock;
+
+                                spin_lock_irq(&amp;sighand-&gt;siglock);
+                        &#125;
+
+                        if (likely(do_signal_stop(signr))) &#123;
+                                /* It released the siglock.  */
+                                goto relock;
+                        &#125;
+                        continue;
+                &#125;
+
+        fatal:
+                spin_unlock_irq(&amp;sighand-&gt;siglock);
+                if (unlikely(cgroup_task_frozen(current)))
+                        cgroup_leave_frozen(true);
+
+                current-&gt;flags |= PF_SIGNALED;
+
+                //SIG_DFL处理，产生core dump的信号处理
+                if (sig_kernel_coredump(signr)) &#123;
+                        if (print_fatal_signals)
+                                print_fatal_signal(signr);
+                        proc_coredump_connector(current);
+                        vfs_coredump(&amp;ksig-&gt;info);
+                &#125;
+
+                /*
+                 * PF_USER_WORKER threads will catch and exit on fatal signals
+                 * themselves. They have cleanup that must be performed, so we
+                 * cannot call do_exit() on their behalf. Note that ksig won&#39;t
+                 * be properly initialized, PF_USER_WORKER&#39;s shouldn&#39;t use it.
+                 */
+                if (current-&gt;flags &amp; PF_USER_WORKER)
+                        goto out;
+
+                //SIG_DFL处理，其他杀死进程的信号处理
+                do_group_exit(signr);
+                /* NOTREACHED */
+        &#125;
+        spin_unlock_irq(&amp;sighand-&gt;siglock);
+
+        ksig-&gt;sig = signr;
+
+        if (signr &amp;&amp; !(ksig-&gt;ka.sa.sa_flags &amp; SA_EXPOSE_TAGBITS))
+                hide_si_addr_tag_bits(ksig);
+out:
+        return signr &gt; 0;
+&#125;
+</code></pre>
+<p>以上，我们可以看到，其实接收信号的主要处理过程可以简要概括如下：</p>
+<ol>
+<li>处理特殊状态。如果目标进程组已经处于SIGNAL_GROUP_EXIT或其他特殊状态，先处理</li>
+<li>取同步信号</li>
+<li>（若无同步信号被取出）按照信号号从低到高遍历取出一个未被block的信号</li>
+<li>判断取出信号的current-&gt;sighand.action[signr-1].sa._sa_handler的值：如果SIG_IGN，则忽略；如果非SIG_DFL，则跳转到用户自定义handler；SIG_DFL，则按照信号类型进行处理。</li>
+</ol>
+<p>如上，可以看到接收和处理信号的过程中分了好多类型，总结如下：</p>
+<table>
+<thead>
+<tr>
+<th>信号类型</th>
+<th>信号</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>标准信号</td>
+<td>停止信号（SIG_KERNEL_STOP_MASK）：SIGSTOP、SIGTSTP、SIGTTIN、SIGTTOU</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>忽略类信号(SIG_KERNEL_IGNORE_MASK):SIGCONT、SIGCHLD、SIGWINCH、SIGURG</td>
+<td>SIGCONT在信号处理过程中将忽略，这个信号主要在信号发送流程起作用</td>
+</tr>
+<tr>
+<td></td>
+<td>core dump类信号(SIG_KERNEL_COREDUMP_MASK):SIGQUIT、SIGILL、SIGTRAP、SIGABRT、SIGFPE、SIGSEGV、SIGBUS、SIGSYS、SIGXCPU、SIGXFSZ</td>
+<td>产生core_dump</td>
+</tr>
+<tr>
+<td></td>
+<td>其他信号</td>
+<td>直接导致进程组exit</td>
+</tr>
+<tr>
+<td>实时信号</td>
+<td>SIGRTMIN &lt;&#x3D; signr &lt; SIGRTMAX的信号</td>
+<td>与标准信号的最大区别在于：标准信号在sigqueue中只能存在一个，而实时信号可以存在多个，fifo排队处理（在上面的__send_signal_locked函数中可以体现出来，判断如果legacy_queue直接goto ret了，而实时信号可以继续入队）Note that SIGRTMIN is often blocked, so it is better to use (at least) SIGRTMIN + 1.</td>
+</tr>
+</tbody></table>
+<p>除此之外，标准信号还可以分为同步信号和其他信号，同步信号（SYNCHRONOUS_MASK）有SIGSEGV、SIGBUS、SIGILL、SIGTRAP、SIGFPE、SIGSYS，指因为指令异常或者其他异常情况需要同步处理的信号。</p>
+<p>为了更直观地感知信号处理过程中这些数据结构直接的关系，我们找一个vmcore来看一下：</p>
+<pre><code class="language-c">crash&gt; task_struct.signal,sighand,blocked,real_blocked,saved_sigmask,pending ffff99fd8a730000
+  signal = 0xffff99fd9258e780,
+  sighand = 0xffff99fd91d439c0,
+  blocked = &#123;
+    sig = &#123;0&#125;
+  &#125;,
+  real_blocked = &#123;
+    sig = &#123;0&#125;
+  &#125;,
+  saved_sigmask = &#123;
+    sig = &#123;0&#125;
+  &#125;,
+  pending = &#123;
+    list = &#123;													//sigqueue链表
+      next = 0xffff99fd8a730c10,
+      prev = 0xffff99fd8a730c10
+    &#125;,
+    signal = &#123;												//pending set
+      sig = &#123;0&#125;
+    &#125;
+  &#125;,
+crash&gt; sighand_struct 0xffff99fd91d439c0
+......
+ action = &#123;&#123;
+      sa = &#123;
+        sa_handler = 0x452e70,			//自定义handler函数地址
+        sa_flags = 67108864,
+        sa_restorer = 0x7f2a45236400,
+        sa_mask = &#123;
+          sig = &#123;1132494587&#125;
+        &#125;
+      &#125;
+    &#125;, &#123;
+      sa = &#123;
+        sa_handler = 0x453100,		//自定义handler函数地址
+        sa_flags = 67108864,
+        sa_restorer = 0x7f2a45236400,
+        sa_mask = &#123;
+          sig = &#123;0&#125;
+        &#125;
+      &#125;
+    &#125;, &#123;
+      sa = &#123;
+        sa_handler = 0x1,					//SIG_IGN
+        sa_flags = 67108864,
+        sa_restorer = 0x7f2a45236400,
+        sa_mask = &#123;
+          sig = &#123;0&#125;
+        &#125;
+      &#125;
+    &#125;, &#123;
+    ......
+        &#125;, &#123;
+      sa = &#123;
+        sa_handler = 0x0,					//SIG_DFL
+        sa_flags = 0,
+        sa_restorer = 0x0,
+        sa_mask = &#123;
+          sig = &#123;0&#125;
+        &#125;
+      &#125;
+      .......
+</code></pre>
+<ul>
+<li><strong>信号的处理时机</strong></li>
+</ul>
+<p>上面已经可以看出，信号的检查和处理主要发生在从<font color='red'>内核态返回用户态之前</font>。</p>
+<p>所以这里也就可以知道，为什么D进程不响应信号？因为D进程在等IO或者等什么其他资源，不会走到运行态，不存在内核态到用户态的过程，因此也就没有响应并处理信号的时机。</p>
+<p>除此之外，看上面的信号发送和处理过程，还可以想到，哪些情况下不能响应信号呢？</p>
+<ul>
+<li>进程一直在内核态执行，不返回用户态。比如softlockup了</li>
+<li>信号被屏蔽</li>
+<li>目标进程正在exit</li>
+<li>……</li>
+</ul>
+<p>那么，如果我把nohz打开，然后再用户态起一个死循环进程，进程还能立即响应信号嘛？</p>
+<p><img src="/img/36.png" alt="这是一张图片"></p>
+<p><img src="/img/37.png" alt="这是一张图片"></p>
+<p>可以kill掉，为什么？</p>
+<p>其实答案还是在发送信号的__send_signal_locked函数中，在complete_signal中我们可以看到，首先会尝试通过wake_up_state去唤醒进程（这里针对的就是没有在运行的进程，wake_up过程中自然就有机会让目标进程响应信号），如果进程在别的cpu上正在运行，则kick_process触发该cpu的重新调度（这样也有机会让目标进程进行调度去响应信号）。至于目标进程正在该cpu上运行的情况，一般情况下，一个进程给自己发什么信号呢？如果内部调用kill之类的函数，则系统调用进入kernel然后返回userspace的时候会触发信号响应了。</p>
+<ul>
+<li><strong>为什么SIGKILL和SIGSTOP不能自定义</strong></li>
+</ul>
+<p>可以猜测，内核至少要保留一些能让进程停止或退出的信号不被hook，这个应该是合理的。</p>
+<p>那内核是怎么做的呢？</p>
+<pre><code class="language-c">#define SIG_KERNEL_ONLY_MASK (\
+        rt_sigmask(SIGKILL)   |  rt_sigmask(SIGSTOP))
+#define sig_kernel_only(sig)		siginmask(sig, SIG_KERNEL_ONLY_MASK)
+
+
+//发送信号时，ignore SIG_KERNEL_ONLY_MASK信号
+__send_signal_locked
+  -&gt;prepare_signal
+    -&gt;sig_ignored
+      -&gt;sig_task_ignored
+static bool sig_task_ignored(struct task_struct *t, int sig, bool force)
+&#123;
+......
+        /* SIGKILL and SIGSTOP may not be sent to the global init */
+        if (unlikely(is_global_init(t) &amp;&amp; sig_kernel_only(sig)))
+                return true;
+        if (unlikely(t-&gt;signal-&gt;flags &amp; SIGNAL_UNKILLABLE) &amp;&amp;
+            handler == SIG_DFL &amp;&amp; !(force &amp;&amp; sig_kernel_only(sig)))
+                return true;
+
+//即使unkillable的线程也要响应SIG_KERNEL_ONLY_MASK信号
+bool get_signal(struct ksignal *ksig)
+&#123;
+......
+               if (unlikely(signal-&gt;flags &amp; SIGNAL_UNKILLABLE) &amp;&amp;
+                                !sig_kernel_only(signr))
+                        continue;
+
+//禁止对SIG_KERNEL_ONLY_MASK信号信号注册自定义handler
+rt_sigaction/sigaction/signal(syscall)
+  -&gt;do_sigaction
+int do_sigaction(int sig, struct k_sigaction *act, struct k_sigaction *oact)
+&#123;
+.......
+        if (!valid_signal(sig) || sig &lt; 1 || (act &amp;&amp; sig_kernel_only(sig)))
+                return -EINVAL;
+</code></pre>
+<ul>
+<li><strong>内核线程对信号的处理</strong></li>
+</ul>
+<p>我们从一段core开始</p>
+<pre><code class="language-c">crash&gt; set 2
+    PID: 2
+COMMAND: &quot;kthreadd&quot;
+   TASK: ffff99fd8037c000  [THREAD_INFO: ffff99fd8037c000]
+    CPU: 54
+  STATE: TASK_INTERRUPTIBLE
+crash&gt; task_struct.signal,sighand,blocked,real_blocked,saved_sigmask,pending ffff99fd8037c000
+  signal = 0xffff99fd81710480,
+  sighand = 0xffff99fd81708840,
+  blocked = &#123;
+    sig = &#123;0&#125;
+  &#125;,
+  real_blocked = &#123;
+    sig = &#123;0&#125;
+  &#125;,
+  saved_sigmask = &#123;
+    sig = &#123;0&#125;
+  &#125;,
+  pending = &#123;
+    list = &#123;
+      next = 0xffff99fd8037cc10,
+      prev = 0xffff99fd8037cc10
+    &#125;,
+    signal = &#123;
+      sig = &#123;0&#125;
+    &#125;
+  &#125;,
+crash_v804&gt; sighand_struct 0xffff99fd81708840 |grep sa_handler			//所有handler都是SIG_IGN
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+        sa_handler = 0x1,
+crash&gt;
+</code></pre>
+<p>以上可以看出，内核线程的所有sa_handler都是SIG_IGN，这个过程在threadd内核线程创建的时候,后面所有的内核线程都fork自kthreadd，所以所有的内核线程的所有sa_handler都是SIG_IGN</p>
+<pre><code class="language-c">int kthreadd(void *unused)
+&#123;
+.......
+        ignore_signals(tsk);
+        
+void ignore_signals(struct task_struct *t)
+&#123;
+        int i;
+
+        for (i = 0; i &lt; _NSIG; ++i)
+                t-&gt;sighand-&gt;action[i].sa.sa_handler = SIG_IGN;
+
+        flush_signals(t);
+&#125;
+</code></pre>
+<p>然后我们看kernel&#x2F;signal.c中的代码，发现对内核线程的特殊处理，并没有明显的直接禁止向内核线程发送信号&#x2F;禁止内核线程接收信号！</p>
+<pre><code class="language-c">static bool sig_task_ignored(struct task_struct *t, int sig, bool force)
+&#123;
+.......
+        if (unlikely((t-&gt;flags &amp; PF_KTHREAD) &amp;&amp;
+                     (handler == SIG_KTHREAD_KERNEL) &amp;&amp; !force))
+                return true;
+
+
+//只是在判断SIGKILL和目标线程是内核线程的时候，不创建sigqueue，并没有直接禁止向内核线程发送信号！
+static int __send_signal_locked(int sig, struct kernel_siginfo *info,
+                                struct task_struct *t, enum pid_type type, bool force)
+&#123;
+......
+        if ((sig == SIGKILL) || (t-&gt;flags &amp; PF_KTHREAD))
+                goto out_set;
+</code></pre>
+<p>如此说来，内核线程是可能可以响应信号的（如果内核线程不能响应信号，为什么要把信号处理的相关结构体放到task_struct中，而不是去区分用户线程和内核线程，为什么内核线程还要有这些结构体，从这里也应该可以猜测处内核线程是可以处理信号的吧）</p>
+<pre><code class="language-c">#define SIG_KTHREAD ((__force __sighandler_t)2)
+#define SIG_KTHREAD_KERNEL ((__force __sighandler_t)3)
+
+//允许内核线程处理某个信号，包括userspace和kernel发出的
+static inline void allow_signal(int sig)
+&#123;
+        /*
+         * Kernel threads handle their own signals. Let the signal code
+         * know it&#39;ll be handled, so that they don&#39;t get converted to
+         * SIGKILL or just silently dropped.
+         */
+        kernel_sigaction(sig, SIG_KTHREAD);
+&#125;
+
+//允许内核线程处理某个信号，只处理来自kernel的信号
+static inline void allow_kernel_signal(int sig)
+&#123;
+        /*
+         * Kernel threads handle their own signals. Let the signal code
+         * know signals sent by the kernel will be handled, so that they
+         * don&#39;t get silently dropped.
+         */
+        kernel_sigaction(sig, SIG_KTHREAD_KERNEL);
+&#125;
+
+static inline void disallow_signal(int sig)
+&#123;
+        kernel_sigaction(sig, SIG_IGN);
+&#125;
+</code></pre>
+<p>所以我们可以看到不少驱动的内核线程里可以通过以上哪些函数设置是否允许某个signal被响应</p>
+<pre><code class="language-c">   1    659  drivers/isdn/mISDN/l1oip_core.c &lt;&lt;l1oip_socket_thread&gt;&gt;
+             allow_signal(SIGTERM);
+   2   8487  drivers/md/md.c &lt;&lt;md_thread&gt;&gt;
+             allow_signal(SIGKILL);
+   3   4102  drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c &lt;&lt;brcmf_sdio_watchdog_thread&gt;&gt;
+             allow_signal(SIGTERM);
+   4    385  drivers/staging/rtl8723bs/core/rtw_cmd.c &lt;&lt;rtw_cmd_thread&gt;&gt;
+             allow_signal(SIGTERM);
+   5   2492  drivers/staging/rtl8723bs/core/rtw_xmit.c &lt;&lt;rtw_xmit_thread&gt;&gt;
+             allow_signal(SIGTERM);
+   6    409  drivers/staging/rtl8723bs/hal/rtl8723bs_xmit.c &lt;&lt;rtl8723bs_xmit_thread&gt;&gt;
+             allow_signal(SIGTERM);
+</code></pre>
+<p>需要注意，内核线程肯定是没有内核态-&gt;用户态这个过程的，因此内核线程的信号处理时机与用户进程是不同的，内核线程需要自己维护pending的检查</p>
+<p>当然，也许更常用的内核线程之间的停止机制是：kthread_should_stop和kthread_stop</p>
+<h3 id="小实验"><a href="#小实验" class="headerlink" title="小实验"></a><center>小实验</center></h3><p>从一个例子开始，测试对SIGINT自定义信号处理函数，并屏蔽SIGTERM信号</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;signal.h&gt;
+#include &lt;string.h&gt;
+
+void yzwddsg_handle_int(int signum) &#123;
+        printf(&quot;haha, hook %d\n&quot;, signum);
+&#125;
+
+int main()
+&#123;
+        struct sigaction act_int, act_term;
+
+        memset(&amp;act_int, 0, sizeof(act_int));
+        act_int.sa_handler = &amp;yzwddsg_handle_int;
+        sigaction(SIGINT, &amp;act_int, NULL);
+
+        memset(&amp;act_term, 0, sizeof(act_term));
+        act_term.sa_handler = SIG_IGN;
+        sigaction(SIGTERM, &amp;act_term, NULL);
+
+        while(1) &#123;
+                ;
+        &#125;
+
+        return 0;
+&#125;
+</code></pre>
+<p><img src="/img/38.png" alt="这是一张图片"></p>
+<p>ctrl+C已经被hook，没法停止程序</p>
+<p><img src="/img/39.png" alt="这是一张图片"></p>
+<p>kill也被忽略，kill -9才能杀死</p>
+<p>尝试把对SIGTERM换成SIGKILL</p>
+<p><img src="/img/40.png" alt="这是一张图片"></p>
+<p>进程依然可以被kill -9杀死，如果检查sigaction的返回值的话可以看到其实返回的是-1，也就是系统调用给SIGKILL设置自定义handler失败了</p>
+<p>那么，fork子进程是不是继承了父进程的handler呢？</p>
+<p>修改一下代码</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;signal.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;stdlib.h&gt;
+
+void yzwddsg_handle_int(int signum) &#123;
+        printf(&quot;haha, hook %d\n&quot;, signum);
+&#125;
+
+int main()
+&#123;
+        struct sigaction act_int, act_term;
+        pid_t child;
+
+        memset(&amp;act_int, 0, sizeof(act_int));
+        act_int.sa_handler = &amp;yzwddsg_handle_int;
+        sigaction(SIGINT, &amp;act_int, NULL);
+
+        memset(&amp;act_term, 0, sizeof(act_term));
+        act_term.sa_handler = SIG_IGN;
+        sigaction(SIGTERM, &amp;act_term, NULL);
+
+        child = fork();
+
+        if (child == 0) &#123;
+                while(1) &#123;&#125;
+        &#125; else &#123;
+                printf(&quot;child pid is %d\n&quot;, child);
+                exit(0);
+        &#125;
+
+        return 0;
+&#125;
+</code></pre>
+<p><img src="/img/41.png" alt="这是一张图片"></p>
+<p>可以看到fork出来的子进程1596658是继承了自定义handler的，kill命令并不能杀死它</p>
+<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a><center>后记</center></h3><ul>
+<li>注意到get_signal中，判断目标进程如果是SIGNAL_GROUP_EXIT或group_exec_task就走SIGKILL信号去处理，group_exec_task是怎么个意思？下面再开一篇文章看看吧</li>
+<li>最后，提个小问题，上面可以看到，SIG_KTHREAD和SIG_KTHREAD_KERNEL分别是2和3，那么如果我秀娥一个用户程序，把sa_handler赋值为(void *)0x2或者(void *)0x3，那么在处理信号get_signal中难道就直接认为是内核态的信号处理流程了嘛？答案就在上面的内容中了。</li>
+</ul>
+<p>最后的最后：祝大家新年快乐，万事大吉，天天开心</p>
+<p>11st</p>
+
+      
+       <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
+    </div>
+</article>
+
+
+
+
+
+    <div id="comments"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+<script type="text/javascript">
+    $.getScript('/js/gitalk.js', function () {
+        var gitalk = new Gitalk({
+            clientID: 'Ov23lihTjDF3jklWOX9b',
+            clientSecret: '1304f65e90138886cd32255710839a4ba192f266',
+            repo: 'yzwddsg-plus.github.io',
+            owner: 'yzwddsg-plus',
+            admin: ['yzwddsg-plus'],
+            id: decodeURI(location.pathname),
+            distractionFreeMode: 'true',
+            language: 'zh-CN',
+            perPage: parseInt('10',10)
+        })
+        gitalk.render('comments')
+    })
+</script>
+
+
+
+
+
+
+
+    </div>
+    <div class="copyright">
+        <p class="footer-entry">
+    YZWDDSG
+</p>
+<p class="footer-entry">Built with <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/yelog/hexo-theme-3-hexo" target="_blank">3-hexo</a> theme</p>
+
+    </div>
+    <div class="full-toc">
+        <button class="full" data-title="Toggle full screen shortcut key s"><span class="min "></span></button>
+<a class="" id="rocket" ></a>
+
+    </div>
+</div>
+
+</body>
+<script src="/js/jquery.pjax.js?v=1.1.0" ></script>
+
+<script src="/js/script.js?v=1.1.0" ></script>
+<script>
+    var img_resize = 'default';
+    function initArticle() {
+        /*渲染对应的表格样式*/
+        
+
+        /*渲染打赏样式*/
+        
+
+        /*高亮代码块行号*/
+        
+
+        /*访问数量*/
+        
+
+        /*代码高亮，行号对齐*/
+        $('.pre-numbering').css('line-height',$('.has-numbering').css('line-height'));
+
+        
+        
+    }
+
+    /*打赏页面隐藏与展示*/
+    
+
+</script>
+
+<!--加入行号的高亮代码块样式-->
+
+<!--自定义样式设置-->
+<style>
+    
+    
+    .nav-right .title-list nav a .post-title, .nav-right .title-list #local-search-result a .post-title {
+        color: #383636;
+    }
+    
+    
+    .nav-right .title-list nav a .post-date, .nav-right .title-list #local-search-result a .post-date {
+        color: #5e5e5f;
+    }
+    
+    
+    .nav-right nav a.hover, #local-search-result a.hover{
+        background-color: #e2e0e0;
+    }
+    
+    
+
+    /*列表样式*/
+    
+
+    /* 背景图样式 */
+    
+    
+
+
+    /*引用块样式*/
+    
+
+    /*文章列表背景图*/
+    
+    .nav-right:before {
+        content: ' ';
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.3;
+        background: url("https://i.loli.net/2019/07/22/5d3521411f3f169375.png");
+        background-repeat: no-repeat;
+        background-position: 50% 0;
+        -ms-background-size: cover;
+        -o-background-size: cover;
+        -moz-background-size: cover;
+        -webkit-background-size: cover;
+        background-size: cover;
+    }
+    
+
+    
+    #post .pjax article :not(pre) > code {
+        color: #24292e;
+        font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,Courier,monospace;
+        background-color: rgba(27,31,35,.05);
+        border-radius: 3px;
+        font-size: 85%;
+        margin: 0;
+        padding: .2em .4em;
+    }
+    
+</style>
+
+
+
+
+
+
+
+</html>
