@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>网卡驱动probe失败 | YZWDDSG</title>
+  <title>一次物理机反复重启的问题排查 | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="网卡驱动probe失败 | YZWDDSG">
+  <meta name="description" content="一次物理机反复重启的问题排查 | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta property="og:type" content="website">
@@ -711,9 +711,9 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="post-网卡驱动probe失败" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-一次物理机反复重启的问题排查" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">网卡驱动probe失败</h1>
+        <h1 class="article-title">一次物理机反复重启的问题排查</h1>
     
     <div class="article-meta">
         
@@ -731,7 +731,7 @@
     </div>
     <div class="article-meta">
         
-            发布时间 : <time class="date" title='最后更新: 2026-01-30 21:34:30'>2026-01-30 20:50</time>
+            发布时间 : <time class="date" title='最后更新: 2026-03-03 21:56:14'>2026-03-03 21:49</time>
         
     </div>
     <div class="article-meta">
@@ -755,7 +755,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%92%E6%9F%A5"><span class="toc-text">排查</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF"><span class="toc-text">问题背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B0%83%E6%9F%A5"><span class="toc-text">调查</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -771,111 +771,67 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h3><p>一台物理机重启后，网卡驱动probe失败了，导致系统起来后不通网</p>
-<p>已知：cmdline添加iommu&#x3D;pt intel_iommu&#x3D;on才会导致驱动probe失败，不添加这些参数，可以probe成功</p>
-<h3 id="排查"><a href="#排查" class="headerlink" title="排查"></a><center>排查</center></h3><p>首先通过带外把该机器上的存在的所有内核（包括系统重启前没问题的内核）都启动了一下，发现都是probe网卡驱动失败，唯一一个成功的内核，就是cmdline中不添加iommu&#x3D;pt intel_iommu&#x3D;on参数的。</p>
-<p>其次，找了一台同规格的机器对比下mlx驱动版本、mlx网卡固件版本等，排除了这些问题。</p>
-<p>之前出过这种问题，厂商的反馈是升级mlx驱动，不过，看上去并不是这个原因。因为其他机器都没问题。</p>
-<p>之前出这个问题的时候，换了一块网卡就好了。现在，保修换了一块网卡，还是没有解决。因此，mlx网卡硬件并没有问题，需要看看到底什么引起了这个问题。</p>
-<p>看一下log</p>
-<pre><code class="language-c">[   37.464510] Compat-mlnx-ofed backport release: f3bf963
-[   37.469645] Backport based on mlnx_ofed/mlnx-ofa_kernel-4.0.git f3bf963
-[   37.476257] compat.git: mlnx_ofed/mlnx-ofa_kernel-4.0.git
-[   37.502684] mlx5_core 0000:31:00.0: firmware version: XXXXX
-[   37.508723] mlx5_core 0000:31:00.0: 63.008 Gb/s available PCIe bandwidth (8 GT/s x8 link)
-[   37.516912] mlx5_core 0000:31:00.0: mlx5_function_setup:1283:(pid 5): Failed initializing command interface, aborting
-[   37.527513] mlx5_core 0000:31:00.0: probe_one:1961:(pid 5): mlx5_init_one failed with error code -12
-[   37.536789] mlx5_core: probe of 0000:31:00.0 failed with error -12
-[   37.543697] mlx5_core 0000:31:00.1: firmware version: XXXXX
-[   37.549728] mlx5_core 0000:31:00.1: 63.008 Gb/s available PCIe bandwidth (8 GT/s x8 link)
-[   37.557910] mlx5_core 0000:31:00.1: mlx5_function_setup:1283:(pid 5): Failed initializing command interface, aborting
-[   37.568506] mlx5_core 0000:31:00.1: probe_one:1961:(pid 5): mlx5_init_one failed with error code -12
-[   37.577700] mlx5_core: probe of 0000:31:00.1 failed with error -12
+        <h3 id="问题背景"><a href="#问题背景" class="headerlink" title="问题背景"></a><center>问题背景</center></h3><p>某台机器硬件故障，报修完成后，启动失败。</p>
+<p>通过ilo查看发现系统反复重启，但是换回报修之前的内核可以正常启动（这里说明一下，我们在这个机器上提前安装了一个新版的内核，恰好这次报修重启使用上了新版本的内核）。</p>
+<h3 id="调查"><a href="#调查" class="headerlink" title="调查"></a><center>调查</center></h3><p>首先需要明确反复重启的点在哪？</p>
+<p><img src="/img/42.png" alt="这是一张图片"></p>
+<p>通过ilo可以看到，在系统启动51秒左右的时间就突然重启，反复如此。</p>
+<p>而这时候，可以看到还没进行switch_root，所以应该还是在initramfs阶段。</p>
+<p>那是不是这个新内核的initramfs有问题呢？对比一下该版本的initramfs大小和可以正常启动的内核的initramfs的包大小，发现该异常内核的initramfs包要小了将近7M。</p>
+<p>然后把有问题的initramfs包和没问题的initramfs包分别解压对比一下里面的内容。</p>
+<p>发现有问题的机器initramfs中的usr&#x2F;lib64下比没问题的机器同路径下少了很多内容，而且，有问题的机器的initramfs中为什么有一些so库在opt&#x2F;compiler&#x2F;gcc-12的目录下？</p>
+<pre><code class="language-shell">//没有问题
+[yzwddsg lib64]$ ls |wc -l
+173
+//有问题
+[yzwddsg lib64]$ ls |wc -l
+14
+[yzwddsg gcc-12]$ pwd
+/home/wfs/aaa/you/opt/compiler/gcc-12
+[yzwddsg gcc-12]$ ll
+total 4
+drwxr-xr-x 2 wfs wfs 4096 Feb 28 16:26 lib
+lrwxrwxrwx 1 wfs wfs    3 Feb 28 16:26 lib64 -&gt; lib
+[yzwddsg gcc-12]$ ls lib
+ld-2.33.so            libc.so.6      libgcc_s.so    libm.so.6           libresolv-2.33.so  librt.so    libz.so.1.2.11
+ld-linux-x86-64.so.2  libdl-2.33.so  libgcc_s.so.1  libpthread-2.33.so  libresolv.so       librt.so.1
+libc-2.33.so          libdl.so       libm-2.33.so   libpthread.so       libresolv.so.2     libz.so
+libc.so               libdl.so.2     libm.so        libpthread.so.0     librt-2.33.so      libz.so.1
 </code></pre>
-<p>返回-12，也就是ENOMEM，内存不足？</p>
-<p>检查一下dmidecode是不是有掉内存呢？没有。</p>
-<p>把我们的hugetlb预留的大页减少一部分，还是不行。</p>
-<p>再看一下异常机器的log，发现了这里的报错，再结合只有cmdline中添加iommu&#x3D;pt intel_iommu&#x3D;on才会报错这个因素，怀疑是这里报错最终导致mlx驱动probe失败？</p>
-<p><img src="/img/30.png" alt="这是一张图片"></p>
-<pre><code class="language-c">start_kernel
-    -&gt;mm_init
-        -&gt;mem_init
-            -&gt;pci_iommu_alloc
-                -&gt;detect_intel_iommu
-                    -&gt;drivers/iommu/dmar.c:x86_init.iommu.iommu_init = intel_iommu_init
-                        -&gt;intel_iommu_init
-                            -&gt;bus_set_iommu
-                                -&gt;iommu_bus_init
-                                    -&gt;add_iommu_group
-                                        -&gt;.add_device（iommu ops）
-                                           -&gt;intel_iommu_add_device
-                                               -&gt;iommu_request_dma_domain_for_dev(传IOMMU_DOMAIN_IDENTITY，iommu直接映射)/iommu_request_dm_for_dev（传IOMMU_DOMAIN_DMA，不能被iommu直接映射）
-                                                  -&gt;request_default_domain_for_dev
+<p>这里就可以先大致猜测一下，是不是有人修改了基础环境，导致制作initramfs的时候，去优先找gcc-12路径下的内容了，导致打包的initramfs有问题。</p>
+<p>先实锤一下上面的结论，从正常机器上直接挪一个异常内核版本对应的initramfs包并替换，直接重启一把，没问题。</p>
+<p>所以基本确定就是因为有人搞坏了基础环境导致的。</p>
+<p>但还得追查一下，到底是哪里被修改了呢?</p>
+<p>直接把&#x2F;opt&#x2F;compiler&#x2F;gcc-12挪走，dracut -f重新制作initramfs，发现initramfs中不仅没有opt&#x2F;compiler&#x2F;gcc-12目录了，连usr&#x2F;lib64都没有任何so库了！</p>
+<p>尝试dracut -f -v打印更多日志，没发现什么有效信息。</p>
+<p>ldconfig -p动态库缓存中没有gcc-12相关内容</p>
+<p>在&#x2F;usr&#x2F;lib&#x2F;dracut&#x2F;dracut-functions.sh脚本中加上set -x，并在最后添加一些打印内容，比如</p>
+<pre><code class="language-shell">echo $PATH
+echo $LD_LIBRARY_PATH
+echo $LD_PRELOAD
+ldd /usr/bin/ls
+...
 </code></pre>
-<pre><code class="language-c">static int intel_iommu_add_device(struct device *dev)
-&#123;
-        struct dmar_domain *dmar_domain;
-        struct iommu_domain *domain;
-        struct intel_iommu *iommu;
-        struct iommu_group *group;
-        u8 bus, devfn;
-        int ret;
-............
-        if (domain-&gt;type == IOMMU_DOMAIN_DMA) &#123;
-                if (device_def_domain_type(dev) == IOMMU_DOMAIN_IDENTITY) &#123;
-                        ret = iommu_request_dm_for_dev(dev);
-                        if (ret) &#123;
-                                dmar_domain-&gt;flags |= DOMAIN_FLAG_LOSE_CHILDREN;
-                                domain_add_dev_info(si_domain, dev);
-                                dev_info(dev,
-                                        &quot;Device uses a private identity domain.\n&quot;);
-                                return 0;
-                        &#125;
-
-                        return -ENODEV;
-                &#125;
-        &#125; else &#123;
-                if (device_def_domain_type(dev) == IOMMU_DOMAIN_DMA) &#123;
-                        ret = iommu_request_dma_domain_for_dev(dev);
-                        if (ret) &#123;
-                                dmar_domain-&gt;flags |= DOMAIN_FLAG_LOSE_CHILDREN;
-                                if (!get_private_domain_for_dev(dev)) &#123;
-                                        dev_warn(dev,
-                                                &quot;Failed to get a private domain.\n&quot;);
-                                        return -ENOMEM;
-                                &#125;
-
-                                dev_info(dev,
-                                        &quot;Device uses a private dma domain.\n&quot;);
-                                return 0;
+<p>发现只有$PATH变成了&#x2F;usr&#x2F;sbin:&#x2F;usr&#x2F;bin，这个是正常的，在制作initramfs的时候会修改一下$PATH</p>
+<p>但是ldd的结果明显是有问题的</p>
+<pre><code class="language-shell">+++ ldd /usr/bin/ls
+    linux-vdso.so.1 (0x00007ffdc31db000)
+    libselinux.so.1 =&gt; not found
+    libcap.so.2 =&gt; not found
+    libacl.so.1 =&gt; not found
+    libc.so.6 =&gt; /opt/compiler/gcc-12/lib/libc.so.6 (0x00007f1941807000)
+    /lib64/ld-linux-x86-64.so.2 =&gt; /opt/compiler/gcc-12/lib64/ld-linux-x86-64.so.2 (0x00007f19419cf000)
 </code></pre>
-<p>看log可以轻易知道，这里走的是else这个分支。所以，当前domain是Identity类型，但是这个设备却是需要申请DMA类型的domain，然后还失败了，返回ENOMEM</p>
-<p>首先，从其他正常机器上我们可以看到，当前domain是Identity类型，但是这个设备却是需要申请DMA类型的domain，这个是正常的。区别就在于，正常机器上get_private_domain_for_dev成功了，但是在异常机器上失败了。</p>
-<p>看log，异常机器上因为对02:00.0 add_device的过程中失败了，所以触发了回滚，把之前成功add device的设备也都从iommu group中remove了。这样一来，mlx网卡肯定就不再iommu group中了（甚至都还没到都把mlx网卡从iommu group中remove那一步）</p>
-<p>然后再看mlx驱动probe失败的log，查找代码中能返回ENOMEM的地方。最终，只发现了一处可疑点。</p>
-<pre><code class="language-c">alloc_cmd_page
-	-&gt;dma_alloc_coherent
-		-&gt;dma_alloc_attrs
-			-&gt;对应ops的alloc，启用iommu的情况下就是intel_alloc_coherent
-
-
- const struct dma_map_ops intel_dma_ops = &#123;
-        .alloc = intel_alloc_coherent,
-</code></pre>
-<p>应该就是在这里，因为之前的iommu_group中add device失败，把group domain这些的device都释放了，然而mlx驱动probe的过程中会调用iommu的ops注册的DMA api去申请内存，所以失败了。</p>
-<p>所以，到此，网卡驱动probe失败的原因我们清楚了。<font color='red'>我们启用了inte_iommu&#x3D;on+iommu&#x3D;pt，但是在iommu group中add device 02:00.0的时候失败了，所以就回滚把所有的设备从iommu group中remove了，mlx网卡也不例外，然后probe mlx驱动的时候需要使用dma api分配一些页面，也就是使用intel_alloc_coherent（因为开启了inte_iommu&#x3D;on+iommu&#x3D;pt），不过，因为之前一些错误把所有的设备从iommu group中释放了，这里的alloc也就理所当然的失败了</font></p>
-<p>然后后面再看，为什么02:00.0加错了iommu group了呢？</p>
-<p>再看一下dmesg中iommu add device的log，发现</p>
-<pre><code class="language-c">[   19.665858] iommu: Adding device 0000:00:1c.0 to group 17
-[   19.671296] iommu: Adding device 0000:00:1c.5 to group 17
-</code></pre>
-<p>在正常机器上，这俩是放到了不同的group中，这俩是什么呢？</p>
-<p><img src="/img/31.png" alt="这是一张图片"></p>
-<p>两个pci bridge。</p>
-<p>这俩在正常机器上为什么被放到了不同的iommu group下？</p>
-<p>原来，正常机器上的0000:00:1c.5是由ACS能力的，但是与异常机器上，ACS丢了</p>
-<p><img src="/img/32.png" alt="这是一张图片"></p>
-<p>可能是异常机器的bios版本有问题或者主板上的这个pci bridge坏掉了。</p>
+<p>这里ldd的so库就是去gcc-12中去找了，直接在shell中执行ldd &#x2F;usr&#x2F;bin&#x2F;ls是正常的</p>
+<p>所以，肯定是dracut制作期间的环境改变导致的</p>
+<p>继续在&#x2F;usr&#x2F;lib&#x2F;dracut&#x2F;dracut-functions.sh中添加了更多打印，尝试打印一下&#x2F;lib64&#x2F;ld-linux-x86-64.so.2 这些是不是在dracut制作期间软链接到了，也都是正常的</p>
+<p>然后打印一下which ldd</p>
+<p>发现问题了，原来dracut制作期间使用的ldd实际上是一个软链接，链接到gcc-12中的ldd，而在shell中直接执行ldd，使用的是正常的环境下的ldd。</p>
+<p>问题根因如下（试试新学的画图工具）：</p>
+<p>1.一般在shell中执行一个命令，先在环境变量中查找这个binary所在的位置，找到后再执行这个binary。在dracut制作initramfs的时候，dracut的一些脚本会修改环境变量，这样dracut制作过程中执行ldd的话，就会在新的环境变量中去查找ldd这个binary。</p>
+<p><img src="/img/43.png" alt="这是一张图片"></p>
+<p>2.有人在安装gcc-12的时候，把原来的&#x2F;usr&#x2F;bin&#x2F;ldd删掉了，改为软链接到&#x2F;opt&#x2F;compiler&#x2F;gcc-12&#x2F;bin&#x2F;ldd。原本，不修改环境变量的情况下，使用的是&#x2F;gcc-8&#x2F;bin下的ldd，所以不会出现问题。而在dracut制作initramfs的时候，环境变量被修改了，需要在&#x2F;usr&#x2F;sbin:&#x2F;usr&#x2F;bin这种路径下去查找ldd binary，但这时候&#x2F;usr&#x2F;bin&#x2F;ldd已经变成了软链接，链接到gcc-12的ldd。所以，在制作initramfs的时候，相当于使用&#x2F;opt&#x2F;compiler&#x2F;gcc-12&#x2F;bin&#x2F;ldd了，制作出来的initramfs自然会少许多so库，且位置不对。</p>
+<p><img src="/img/44.png" alt="这是一张图片"></p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
