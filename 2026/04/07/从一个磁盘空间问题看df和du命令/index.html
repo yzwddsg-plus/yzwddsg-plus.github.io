@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>popen导致的问题及分析 | YZWDDSG</title>
+  <title>从一个磁盘空间问题看df和du命令 | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="popen导致的问题及分析 | YZWDDSG">
+  <meta name="description" content="从一个磁盘空间问题看df和du命令 | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta property="og:type" content="website">
@@ -738,9 +738,9 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="post-popen导致的问题及分析" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-从一个磁盘空间问题看df和du命令" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">popen导致的问题及分析</h1>
+        <h1 class="article-title">从一个磁盘空间问题看df和du命令</h1>
     
     <div class="article-meta">
         
@@ -750,7 +750,7 @@
             <i class="iconfont icon-category"></i>
             
             
-            <a  data-rel="其他">其他</a>
+            <a  data-rel="文件系统">文件系统</a>
             
         </span>
         
@@ -758,12 +758,12 @@
     </div>
     <div class="article-meta">
         
-            发布时间 : <time class="date" title='最后更新: 2025-04-26 23:21:01'>2025-04-26 23:15</time>
+            发布时间 : <time class="date" title='最后更新: 2026-04-07 22:32:01'>2026-04-07 21:33</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:2.9k</span>
+        <span>字数:2.7k</span>
         
         
         
@@ -782,7 +782,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0"><span class="toc-text">学习</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#popen%E4%B8%8Epclose"><span class="toc-text">popen与pclose</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#popen%E5%8E%9F%E7%90%86"><span class="toc-text">popen原理</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#pclose%E5%8E%9F%E7%90%86"><span class="toc-text">pclose原理</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E8%AE%B0"><span class="toc-text">后记</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E8%BF%87%E7%A8%8B"><span class="toc-text">问题排查过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#df%E5%91%BD%E4%BB%A4%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-text">df命令的实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#du%E5%91%BD%E4%BB%A4%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-text">du命令的实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B0%8F%E5%AE%9E%E9%AA%8C"><span class="toc-text">小实验</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -798,358 +798,272 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h3><p>前段时间，因为某些原因，不能使用glibc提供的popen，所以只能自己模拟popen的实现写了一个新的popen（方便区分，就叫yzwddsg_popen吧）。然后就在前两天，突然爆出来一个问题，使用自己写的yzwddsg_popen fork出来的子进程没有回收，全都变成僵尸进程了，被自己蠢到了。</p>
-<p>先说根因：自己实现了yzwddsg_popen，然而关闭FILE<em>的时候还是使用的glibc的pclose。实际上glibc中的pclose除了关闭FILE</em>之外，还会调用waitpid回收子进程，那么pclose怎么根据传递的FILE<em>找到子进程的pid进行回收的呢？就在在glibc的popen中做的。而自己实现的yzwddsg_popen不会构建这个FILE</em>和pid的关系，因此glibc的pclose也就不会回收yzwddsg_popen fork出来的子进程。</p>
-<p>因此，本文有两个目的：一是警醒自己以后再写这些函数的时候一定得先彻底弄清楚原本的实现，尤其是像这种open close、up down、get put、add sub等配对使用的函数，指不定就隐含一些别的操作；二是通过这个事故了解下glibc中popen pclose的实现，通过俩函数窥探一下glibc的函数的组织和实现方式。</p>
-<h3 id="学习"><a href="#学习" class="headerlink" title="学习"></a><center>学习</center></h3><p>（本文参考的glibc的源码版本是2.1.2版本，虽然老，但足够学习使用）</p>
-<h5 id="popen与pclose"><a href="#popen与pclose" class="headerlink" title="popen与pclose"></a>popen与pclose</h5><p>看源码前，总得先看一下这俩函数的功能。其实就是其实就是创建一个pipe流to&#x2F;from一个子进程。</p>
-<blockquote>
-<p>popen, pclose - pipe stream to or from a process</p>
-</blockquote>
-<p>所以其实很明显，popen和pclose一般用来做什么呢？比如在某个程序中起个子进程执行个shell命令之类的，然后把结果传回进程，或者进程向这个子进程传送消息之类的。通过manual的解释也能基本知道popen做了什么，就是创建pipe+fork。</p>
-<p>再看一下使用方式，popen有两个参数，一个会传给&#x2F;bin&#x2F;sh带-c去执行的shell命令，一个type标识是用于读还是用于写，返回一个FILE*。pclose就传入FILE*，去关闭popen打开的pipe。</p>
-<pre><code class="language-c">#include &lt;stdio.h&gt;
+        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h3><p>隔壁组同学遇到个问题让排查一下，说是df -h和du -h显示的磁盘容量是不同的。</p>
+<p>具体表现为，du -sh &#x2F;根分区看到的磁盘使用量是28G，而df -h &#x2F;看到的磁盘使用量是369G，差了300多G，于是需要排查这消失的300多G去了哪里呢？</p>
+<pre><code class="language-shell">root@xxxxxxx:~# du -sh /
+28G	/
 
-FILE *popen(const char *command, const char *type);
-
-int pclose(FILE *stream);
-
-The  command argument is a pointer to a null-terminated string containing a shell command line.  This command is passed
-to /bin/sh using the -c flag; interpretation, if any, is performed by the shell.  The type argument is a pointer  to  a
-null-terminated string which must contain either the letter &#39;r&#39; for reading or the letter &#39;w&#39; for writing.
+root@xxxxxxx:~# df -h /
+/dev/vda2       492G  368G  104G  78% /
 </code></pre>
-<h5 id="popen原理"><a href="#popen原理" class="headerlink" title="popen原理"></a>popen原理</h5><p>接下来看一下glibc中关于popen的实现。</p>
-<p>首先先看下面这段，从这里我们要扒出popen调用的函数。</p>
-<p>strong_alias的作用是强别名，strong_alias (_IO_new_popen, __new_popen)指的也就是_IO_new_popen和__new_popen其实是同一个函数。</p>
-<p>default_symbol_version指的是版本控制，default_symbol_version (__new_popen, popen, GLIBC_2.1);指的是在glibc的2.1版本中，__new_popen是popen的实现，这俩指向的是同一函数。</p>
-<p>weak_alias是指，当没有定义对应的实现或别名的时候，这个弱别名生效。</p>
-<p>所以，可以知道，在当前的版本中，popen执行的其实就是__new_popen，而__new_popen实际上就是_IO_new_popen函数。所以执行popen的时候，实质上执行的就是_IO_new_popen。</p>
-<p>这么版本控制、强别名、弱别名搞这么复杂有什么用呢？一是，可以用于版本兼容；二是，可以隐藏内部实现；三是，可以允许用户自己定义一些实现来覆盖弱别名。</p>
-<pre><code class="language-c">#if defined PIC &amp;&amp; DO_VERSIONING
-strong_alias (_IO_new_popen, __new_popen)
-default_symbol_version (_IO_new_popen, _IO_popen, GLIBC_2.1);
-default_symbol_version (__new_popen, popen, GLIBC_2.1);
-default_symbol_version (_IO_new_proc_open, _IO_proc_open, GLIBC_2.1);
-default_symbol_version (_IO_new_proc_close, _IO_proc_close, GLIBC_2.1);
-#else
-# ifdef strong_alias
-strong_alias (_IO_new_popen, popen)
-# endif
-# ifdef weak_alias
-weak_alias (_IO_new_popen, _IO_popen)
-weak_alias (_IO_new_proc_open, _IO_proc_open)
-weak_alias (_IO_new_proc_close, _IO_proc_close)
-# endif
-#endif
+<p>这里就介绍下这个问题的排查过程，然后借此机会看一下df和du命令的底层实现。</p>
+<h3 id="问题排查过程"><a href="#问题排查过程" class="headerlink" title="问题排查过程"></a><center>问题排查过程</center></h3><p>看到这种，首先肯定想到是不是有文件已经删掉了但是fd没有释放呢？</p>
+<p>lsof |grep deleted看一下，确实有一些fd没释放</p>
+<pre><code class="language-shell">root@xxxxxxx:/# lsof |grep deleted
+xxx 1038387 1038390 xxx            root  112u      REG               0,27  10488584          3 /dev/shm/skynet_shared_memory (deleted)
+xxx 1038387 1038391 xxx            root  112u      REG               0,27  10488584          3 /dev/shm/skynet_shared_memory (deleted)
+xxx 1038387 1038392 xxx            root  112u      REG               0,27  10488584          3 /dev/shm/skynet_shared_memory (deleted)
+xxx 1038387 1038393 xxx            root  112u      REG               0,27  10488584          3 /dev/shm/skynet_shared_memory (deleted)
+xxx 1038387 1038394 xxx            root  112u      REG               0,27  10488584          3 /dev/shm/skynet_shared_memory (deleted)
+......
 </code></pre>
-<p>如上，可以知道，我们程序中的popen，在glibc中实际上执行的就是_IO_new_popen，接下来看看这块内容</p>
-<pre><code class="language-c">#相关结构体，其中_IO_jump_t* vtable相当于cpp的虚函数表，后面我们会看到怎么用
-struct _IO_FILE_plus
-&#123;
-  _IO_FILE file;
-  const struct _IO_jump_t *vtable;
-&#125;;
-
-#这个结构体包含一个_IO_FILE_plus，一个pid和一个指向自己的指针
-#所以，这个结构体把FILE和pid联系了起来，并且组成一个链表管理
-struct _IO_proc_file
-&#123;
-  struct _IO_FILE_plus file;
-  /* Following fields must match those in class procbuf (procbuf.h) */
-  _IO_pid_t pid;
-  struct _IO_proc_file *next;
-&#125;;
+<p>但是马上就可以排除这些，首先每个文件大小才10M，算下来远远达不到消失的300多G那么多，另外，看路径可以知道，这是个tmpfs，在内存中的，不占用磁盘空间。</p>
+<p>所以绝对不可能是这些fd没释放导致的问题。</p>
+<p>查看history发现有人执行过一个脚本，是一个mount nvme盘的脚本。发现这个脚本mount &#x2F;ssd到nvme盘了。那猜测应该就是&#x2F;ssd下原本就有内容，然后还强行mount &#x2F;ssd到nvme盘上，导致挂载点覆盖了。</p>
+<p>然后把现在的&#x2F;ssd挂载点umount掉，看一下果然原本就有&#x2F;ssd这个目录，数据大小为300多G。删掉这里的内容之后重新mount &#x2F;ssd到nvme设备就好了。</p>
+<h3 id="df命令的实现"><a href="#df命令的实现" class="headerlink" title="df命令的实现"></a><center>df命令的实现</center></h3><p>strace df -h &#x2F;看一下df命令实际上是调用了什么呢？</p>
+<pre><code class="language-shell">......
+statfs(&quot;/&quot;, &#123;f_type=EXT2_SUPER_MAGIC, f_bsize=4096, f_blocks=111101586, f_bfree=105525587, f_bavail=105521491, f_files=57376768, f_ffree=57142542, f_fsid=&#123;1398045837, 701130627&#125;, f_namelen=255, f_frsize=4096, f_flags=ST_VALID|ST_RELATIME&#125;) = 0
+......
+</code></pre>
+<p>可以看到，其实df命令最终就是通过statfs系统调用来获取的磁盘容量等内容，那么我们看一下statfs系统调用过程。</p>
+<pre><code class="language-c">//首先statfs是super_operations中的一个函数指针结构体，所以实际上每个文件系统都有他自己的statfs函数
+//我们当前使用的是ext4文件系统，所以实际上调用的是ext4_statfs
+struct super_operations &#123;
+        ......
+        int (*statfs)(struct dentry *dentry, struct kstatfs *kstatfs);
 
 
-#剔除一些不重要的判断和条件编译，只要最主要的流程
-_IO_FILE *
-_IO_new_popen (command, mode)
-     const char *command;
-     const char *mode;
+static int ext4_statfs(struct dentry *dentry, struct kstatfs *buf)
 &#123;
-  #定义一个locked_FILE结构体
-  struct locked_FILE
-  &#123;
-    struct _IO_proc_file fpx;
-  &#125; *new_f;
-  _IO_FILE *fp;
-  #给这个结构体分配内存
-  new_f = (struct locked_FILE *) malloc (sizeof (struct locked_FILE));
-  if (new_f == NULL)
-    return NULL;
-  #给fp赋值为_IO_proc_file中_IO_FILE_plus的file
-  fp = &amp;new_f-&gt;fpx.file.file;
-  _IO_init (fp, 0);
-  _IO_JUMPS (fp) = &amp;_IO_proc_jumps;
-  #这里会设置offset 状态之类，以及执行_IO_link_in
-  #_IO_link_in的作用是设置flag为linked然后把file放到全局链表中_IO_list_all，表示已经link in
-  _IO_new_file_init (fp);
-  #如果没有_IO_UNIFIED_JUMPTABLES特性的话，就把vtable置NULL
-#if  !_IO_UNIFIED_JUMPTABLES
-  new_f-&gt;fpx.file.vtable = NULL;
+        struct super_block *sb = dentry-&gt;d_sb;
+        struct ext4_sb_info *sbi = EXT4_SB(sb);
+        struct ext4_super_block *es = sbi-&gt;s_es;
+        ext4_fsblk_t overhead = 0, resv_blocks;
+        s64 bfree;
+        resv_blocks = EXT4_C2B(sbi, atomic64_read(&amp;sbi-&gt;s_resv_clusters));
+
+        if (!test_opt(sb, MINIX_DF))
+                overhead = sbi-&gt;s_overhead;
+
+        buf-&gt;f_type = EXT4_SUPER_MAGIC;
+        buf-&gt;f_bsize = sb-&gt;s_blocksize;
+        buf-&gt;f_blocks = ext4_blocks_count(es) - EXT4_C2B(sbi, overhead);
+        bfree = percpu_counter_sum_positive(&amp;sbi-&gt;s_freeclusters_counter) -
+                percpu_counter_sum_positive(&amp;sbi-&gt;s_dirtyclusters_counter);
+        /* prevent underflow in case that few free space is available */
+        buf-&gt;f_bfree = EXT4_C2B(sbi, max_t(s64, bfree, 0));
+        buf-&gt;f_bavail = buf-&gt;f_bfree -
+                        (ext4_r_blocks_count(es) + resv_blocks);
+        if (buf-&gt;f_bfree &lt; (ext4_r_blocks_count(es) + resv_blocks))
+                buf-&gt;f_bavail = 0;
+        buf-&gt;f_files = le32_to_cpu(es-&gt;s_inodes_count);
+        buf-&gt;f_ffree = percpu_counter_sum_positive(&amp;sbi-&gt;s_freeinodes_counter);
+        buf-&gt;f_namelen = EXT4_NAME_LEN;
+        buf-&gt;f_fsid = uuid_to_fsid(es-&gt;s_uuid);
+#ifdef CONFIG_QUOTA
+        if (ext4_test_inode_flag(dentry-&gt;d_inode, EXT4_INODE_PROJINHERIT) &amp;&amp;
+            sb_has_quota_limits_enabled(sb, PRJQUOTA))
+                ext4_statfs_project(sb, EXT4_I(dentry-&gt;d_inode)-&gt;i_projid, buf);
 #endif
-  if (_IO_new_proc_open (fp, command, mode) != NULL)
-    return fp;
-  #这里相当于失败处理，如果前面失败了，unlink然后free调刚才malloc的locked_FILE
-  _IO_un_link (fp);
-  free (new_f);
-  return NULL;
-&#125;
-
-#可以看到_IO_init就是初始化了_IO_FILE的字段
-void
-_IO_init (fp, flags)
-     _IO_FILE *fp;
-     int flags;
-&#123;
-  fp-&gt;_flags = _IO_MAGIC|flags;
-  fp-&gt;_IO_buf_base = NULL;
-  fp-&gt;_IO_buf_end = NULL;
-  fp-&gt;_IO_read_base = NULL;
-  fp-&gt;_IO_read_ptr = NULL;
-  fp-&gt;_IO_read_end = NULL;
-  fp-&gt;_IO_write_base = NULL;
-  fp-&gt;_IO_write_ptr = NULL;
-  fp-&gt;_IO_write_end = NULL;
-  fp-&gt;_chain = NULL; /* Not necessary. */
-
-  fp-&gt;_IO_save_base = NULL;
-  fp-&gt;_IO_backup_base = NULL;
-  fp-&gt;_IO_save_end = NULL;
-  fp-&gt;_markers = NULL;
-  fp-&gt;_cur_column = 0;
-#if _IO_JUMPS_OFFSET
-  fp-&gt;_vtable_offset = 0;
-#endif
-#ifdef _IO_MTSAFE_IO
-  _IO_lock_init (*fp-&gt;_lock);
-#endif
-&#125;
-
-#那么_IO_JUMPS做了什么？可以看到就是把_IO_FILE所在的结构体的vtable赋值，这里就是_IO_proc_jumps
-#define _IO_JUMPS(THIS) ((struct _IO_FILE_plus *) (THIS))-&gt;vtable
-#所以这里就是相当于给虚函数表中的ops赋上函数指针
-struct _IO_jump_t _IO_proc_jumps = &#123;
-  JUMP_INIT_DUMMY,
-  JUMP_INIT(finish, _IO_new_file_finish),
-  JUMP_INIT(overflow, _IO_new_file_overflow),
-  JUMP_INIT(underflow, _IO_new_file_underflow),
-  JUMP_INIT(uflow, _IO_default_uflow),
-  JUMP_INIT(pbackfail, _IO_default_pbackfail),
-  JUMP_INIT(xsputn, _IO_new_file_xsputn),
-  JUMP_INIT(xsgetn, _IO_default_xsgetn),
-  JUMP_INIT(seekoff, _IO_new_file_seekoff),
-  JUMP_INIT(seekpos, _IO_default_seekpos),
-  JUMP_INIT(setbuf, _IO_new_file_setbuf),
-  JUMP_INIT(sync, _IO_new_file_sync),
-  JUMP_INIT(doallocate, _IO_file_doallocate),
-  JUMP_INIT(read, _IO_file_read),
-  JUMP_INIT(write, _IO_new_file_write),
-  JUMP_INIT(seek, _IO_file_seek),
-  JUMP_INIT(close, _IO_new_proc_close),
-  JUMP_INIT(stat, _IO_file_stat),
-  JUMP_INIT(showmanyc, _IO_default_showmanyc),
-  JUMP_INIT(imbue, _IO_default_imbue)
-&#125;;
-
-# define JUMP_INIT(NAME, VALUE) VALUE
-# define JUMP_INIT_DUMMY JUMP_INIT(dummy, 0), JUMP_INIT (dummy2, 0)
-
-
-#_IO_new_proc_open函数的主要内容如下，我们把它精简一下
-_IO_FILE *
-_IO_new_proc_open (fp, command, mode)
-     _IO_FILE *fp;
-     const char *command;
-     const char *mode;
-&#123;
-  volatile int read_or_write;
-  volatile int parent_end, child_end;
-  int pipe_fds[2];
-  _IO_pid_t child_pid;
-  #创建pipe
-  if (_IO_pipe (pipe_fds) &lt; 0)
-    return NULL;
-  #根据传来的type设置parent_end和child_end
-  #众所周知，比如如果是要读的话，也就是父进程读子进程的输出
-  #那么就设置parent_end为pipe0，即读，设置child_end为pipe1，就是写
-  #后面fork子进程出来，就可以在父进程关闭child_end，在子进程关闭parent_end
-  #形成一个子进程输出，父进程读取的单向管道（因为父进程的写和子进程的读都关闭了）
-  if (mode[0] == &#39;r&#39; &amp;&amp; mode[1] == &#39;\0&#39;)
-    &#123;
-      parent_end = pipe_fds[0];
-      child_end = pipe_fds[1];
-      read_or_write = _IO_NO_WRITES;
-    &#125;
-  else if (mode[0] == &#39;w&#39; &amp;&amp; mode[1] == &#39;\0&#39;)
-    &#123;
-      parent_end = pipe_fds[1];
-      child_end = pipe_fds[0];
-      read_or_write = _IO_NO_READS;
-    &#125;
-  。。。
-  #fork子进程并设置_IO_proc_file中的pid
-  #这里就把子进程的pid和file关联上了
-  ((_IO_proc_file *) fp)-&gt;pid = child_pid = _IO_fork ();
-  if (child_pid == 0)
-    &#123;
-      。。。
-      #如刚才所说，关闭parent_end
-      _IO_close (parent_end);
-      #如果child_end不是标准输入输出，需要转成标准输入输出，因为这是pipe
-      if (child_end != child_std_end)
-        &#123;
-          _IO_dup2 (child_end, child_std_end);
-          _IO_close (child_end);
-        &#125;
-      #exec执行传入的shell命令，然后退出
-      _IO_execl (&quot;/bin/sh&quot;, &quot;sh&quot;, &quot;-c&quot;, command, (char *) 0);
-      _IO__exit (127);
-    &#125;
-  #如刚才所说，父进程关闭child_end
-  _IO_close (child_end);
-  #处理fork失败的情况
-  #众所周知，fork成功的话，子进程返回0，就是上面的处理
-  #fork成功，父进程返回子进程的pid，fork失败，不产生子进程，父进程返回值小于0
-  #（所以，上面执行((_IO_proc_file *) fp)-&gt;pid = child_pid = _IO_fork ();，在父进程中赋值的是子进程的pid）
-  if (child_pid &lt; 0)
-    &#123;
-      _IO_close (parent_end);
-           return NULL;
-    &#125;
-  #把fd关联上file
-  _IO_fileno (fp) = parent_end;
-
-  #链接到proc_file_chain中
-  ((_IO_proc_file *) fp)-&gt;next = proc_file_chain;
-  proc_file_chain = (_IO_proc_file *) fp;
-。。。
+        return 0;
 &#125;
 </code></pre>
-<p>所以，用户程序中的popen在glibc中的执行过程可以总结如下：</p>
+<p>可以看出来，df命令查看磁盘容量的过程其实就是去调用对应文件系统statfs函数获取super block(sb)中的一些信息，通过这些信息来计算磁盘容量等。</p>
+<h3 id="du命令的实现"><a href="#du命令的实现" class="headerlink" title="du命令的实现"></a><center>du命令的实现</center></h3><p>那strace du -sh &#x2F;来看一下du的执行过程，可以看到输出是很长的，能看到大致是在遍历&#x2F;根分区下的每一级目录的每一个文件，然后执行如下过程：</p>
+<pre><code class="language-shell">getdents(4, /* 3 entries */, 32768)     = 88
+getdents(4, /* 0 entries */, 32768)     = 0
+close(4)                                = 0
+newfstatat(6, &quot;lastnotification&quot;, &#123;st_mode=S_IFREG|0600, st_size=11, ...&#125;, AT_SYMLINK_NOFOLLOW) = 0
+close(6)                                = 0
+close(5)                                = 0
+newfstatat(3, &quot;.lesshst&quot;, &#123;st_mode=S_IFREG|0600, st_size=517, ...&#125;, AT_SYMLINK_NOFOLLOW) = 0
+newfstatat(3, &quot;perf.data&quot;, &#123;st_mode=S_IFREG|0600, st_size=3640779, ...&#125;, AT_SYMLINK_NOFOLLOW) = 0
+newfstatat(3, &quot;nohup.out&quot;, &#123;st_mode=S_IFREG|0600, st_size=244, ...&#125;, AT_SYMLINK_NOFOLLOW) = 0
+newfstatat(3, &quot;bios.txt&quot;, &#123;st_mode=S_IFREG|0644, st_size=305008, ...&#125;, AT_SYMLINK_NOFOLLOW) = 0
+newfstatat(3, &quot;a.sh&quot;, &#123;st_mode=S_IFREG|0644, st_size=39, ...&#125;, AT_SYMLINK_NOFOLLOW) = 0
+newfstatat(3, &quot;.ssh&quot;, &#123;st_mode=S_IFDIR|0700, st_size=4096, ...&#125;, AT_SYMLINK_NOFOLLOW) = 0
+openat(3, &quot;.ssh&quot;, O_RDONLY|O_NOCTTY|O_NONBLOCK|O_DIRECTORY|O_NOFOLLOW) = 4
+fcntl(4, F_GETFD)                       = 0
+fcntl(4, F_SETFD, FD_CLOEXEC)           = 0
+fstat(4, &#123;st_mode=S_IFDIR|0700, st_size=4096, ...&#125;) = 0
+fcntl(4, F_GETFL)                       = 0x38800 (flags O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY|O_NOFOLLOW)
+fcntl(4, F_SETFD, FD_CLOEXEC)           = 0
+newfstatat(3, &quot;.ssh&quot;, &#123;st_mode=S_IFDIR|0700, st_size=4096, ...&#125;, AT_SYMLINK_NOFOLLOW) = 0
+</code></pre>
+<p>基本上就是getdents获取获取dentry，然后newfstatat遍历所有文件的数据。如此进行递归遍历。</p>
+<p>看一下newfstatat系统调用获取的是什么？大致过程如下：</p>
+<pre><code class="language-c">newfstatat系统调用入口
+  -&gt;vfs_fstatat
+    -&gt;vfs_fstat(通过fd而非文件路径的方式)
+      -&gt;vfs_getattr
+        -&gt;ext4_file_getattr
+          -&gt;generic_fillattr
+
+
+void generic_fillattr(struct mnt_idmap *idmap, u32 request_mask,
+                      struct inode *inode, struct kstat *stat)
+&#123;
+        vfsuid_t vfsuid = i_uid_into_vfsuid(idmap, inode);
+        vfsgid_t vfsgid = i_gid_into_vfsgid(idmap, inode);
+
+        stat-&gt;dev = inode-&gt;i_sb-&gt;s_dev;
+        stat-&gt;ino = inode-&gt;i_ino;
+        stat-&gt;mode = inode-&gt;i_mode;
+        stat-&gt;nlink = inode-&gt;i_nlink;
+        stat-&gt;uid = vfsuid_into_kuid(vfsuid);
+        stat-&gt;gid = vfsgid_into_kgid(vfsgid);
+        stat-&gt;rdev = inode-&gt;i_rdev;
+        stat-&gt;size = i_size_read(inode);
+        stat-&gt;atime = inode_get_atime(inode);
+        ......
+&#125;
+</code></pre>
+<p>可以看到，实际上就是根据fd&#x2F;文件路径获取对应的inode，从inode中提取一些元数据信息。</p>
+<h3 id="小实验"><a href="#小实验" class="headerlink" title="小实验"></a><center>小实验</center></h3><ul>
+<li>进程持有删除的文件</li>
+</ul>
+<pre><code class="language-shell">//创建一个aaa文件，大小为1G
+dd if=/dev/zero of=aaa bs=1M count=1024
+
+//创建完成后，df和du命令的结果
+[root@yzwddsg tmp]# df -h /
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda2       424G   23G  402G   6% /
+[root@yzwddsg tmp]# du -sh /tmp
+1.3G	/tmp
+
+//创建一个后台进程打开aaa（进入到另一个不同的目录下执行）
+[root@yzwddsg /]# nohup tail -f /tmp/aaa &amp;
+[1] 314337
+
+//删除aaa
+[root@yzwddsg tmp]# rm -rf aaa
+
+//再次执行df和du查看输出
+[root@yzwddsg tmp]# df -h /
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda2       424G   24G  401G   6% /
+[root@yzwddsg tmp]# du -sh /tmp
+270M	/tmp
+</code></pre>
+<p>进程持有fd时，du命令已经统计不到相关信息了，但是df命令中貌似还存在该文件的信息。</p>
+<p>这里，删除aaa后，其实du看到的就已经没有了</p>
+<p>但是df中还是有，并且多了2G而不是1G。这是因为，tail -f命令，第一，增加了一个nohup.out，这个占用了1G，另外，aaa的fd被持有，还有1G</p>
 <ul>
-<li><ul>
-<li><font color='red'>初始化_IO_FILE字段，比如flag _IO_buf_base等，也就是设置file本身的一些属性，比如读写基址之类</font></li>
-<li><font color='red'>设置虚函数表，包括一些函数的实现，比如read write close之类（其实就类似VFS的作用）</font></li>
-<li><font color='red'>把file link到全局链表</font></li>
-<li><font color='red'>创建pipe</font></li>
-<li><font color='red'>fork子进程（这里会把pid传给_IO_proc_file中的pid，也就实现了pid和file的关联）</font></li>
-<li><font color='red'>子进程执行设定的shell命令</font></li>
-<li><font color='red'>把_IO_proc_file链接到proc_file_chain中</font></li>
+<li>稀疏文件</li>
 </ul>
-</li>
-</ul>
-<h5 id="pclose原理"><a href="#pclose原理" class="headerlink" title="pclose原理"></a>pclose原理</h5><p>把上面追完之后，再看pclose其实就简单多了</p>
-<pre><code class="language-c">#如此，可知pclose实际就是执行__new_pclose
-default_symbol_version (__new_pclose, pclose, GLIBC_2.1);
+<pre><code class="language-shell">//创建一个稀疏文件
+dd if=/dev/zero of=aaa bs=1M seek=1024 count=1
 
-#而__new_pclose函数中是执行_IO_new_fclose函数，所以我们直接看_IO_new_fclose函数
-#以下，可以看出，_IO_new_fclose其实为了兼容fp做了一些判断的，而我们这里的pipe流肯定不是fulebuf，因此直接走_IO_FINISH
-_IO_new_fclose (fp)
-     _IO_FILE *fp;
-&#123;
-。。。
-  if (fp-&gt;_IO_file_flags &amp; _IO_IS_FILEBUF)
-    status = _IO_file_close_it (fp);
-  else
-    status = fp-&gt;_flags &amp; _IO_ERR_SEEN ? -1 : 0;
-  _IO_FINISH (fp);
-。。。
-  if (fp != _IO_stdin &amp;&amp; fp != _IO_stdout &amp;&amp; fp != _IO_stderr)
-    &#123;
-      fp-&gt;_IO_file_flags = 0;
-      free(fp);
-    &#125;
-。。。
-&#125;
-#总之这里一系列宏定义其实就是最终找到虚函数表中的函数指针去执行对应的函数，也就是_IO_new_file_finish
-#define _IO_FINISH(FP) JUMP1 (__finish, FP, 0)
-# define JUMP1(FUNC, THIS, X1) _IO_JUMPS_FUNC(THIS)-&gt;FUNC (THIS, X1)
-#define _IO_JUMPS(THIS) ((struct _IO_FILE_plus *) (THIS))-&gt;vtable
-#if _IO_JUMPS_OFFSET
-# define _IO_JUMPS_FUNC(THIS) \
- (*(struct _IO_jump_t **) ((void *) &amp;((struct _IO_FILE_plus *) (THIS))-&gt;vtable\
-                           + (THIS)-&gt;_vtable_offset))
-#else
-# define _IO_JUMPS_FUNC(THIS) _IO_JUMPS(THIS)
-#endif
-
-
-_IO_new_file_finish (fp, dummy)
-     _IO_FILE *fp;
-     int dummy;
-&#123;
-  if (_IO_file_is_open (fp))
-    &#123;
-      #flush
-      _IO_do_flush (fp);
-      if (!(fp-&gt;_flags &amp; _IO_DELETE_DONT_CLOSE))
-      #然后调用_IO_SYSCLOSE，这个其实也是一个函数指针，跳到__close，这里就是_IO_new_proc_close
-        _IO_SYSCLOSE (fp);
-    &#125;
-  #这里做的就是把FILE的一些属性进行清理，对应之前的_IO_new_file_init的操作
-  #然后把fp unlink
-  _IO_default_finish (fp, 0);
-&#125;
-
-
-_IO_new_proc_close (fp)
-     _IO_FILE *fp;
-&#123;
-  #从proc_file_chain unlink
-  /* Unlink from proc_file_chain. */
-  for ( ; *ptr != NULL; ptr = &amp;(*ptr)-&gt;next)
-    &#123;
-      if (*ptr == (_IO_proc_file *) fp)
-        &#123;
-          *ptr = (*ptr)-&gt;next;
-          status = 0;
-          break;
-        &#125;
-    &#125;
-
-  #关闭fp
-  if (status &lt; 0 || _IO_close (_IO_fileno(fp)) &lt; 0)
-    return -1;
-  #waitpid等待回收子进程
-  do
-    &#123;
-      wait_pid = _IO_waitpid (((_IO_proc_file *) fp)-&gt;pid, &amp;wstatus, 0);
-    &#125;
-  while (wait_pid == -1 &amp;&amp; errno == EINTR);
-  if (wait_pid == -1)
-    return -1;
-  return wstatus;
-&#125;
+//分别ls、du和df看一下输出
+[root@yzwddsg tmp]# ls -lh aaa
+-rw-r--r-- 1 root root 1.1G Apr  7 16:58 aaa
+[root@yzwddsg tmp]# df -h /
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda2       424G   22G  403G   6% /
+[root@yzwddsg tmp]# du -sh /tmp
+271M	/tmp
 </code></pre>
-<p>所以，pclose的执行过程可以总结为：</p>
+<p>稀疏文件，df和du命令都只统计了实际大小，而ls命令看到的是逻辑大小。</p>
 <ul>
-<li><ul>
-<li><font color='red'>flush，确保没有残留数据</font></li>
-<li><font color='red'>从proc_file_chain中unlink _IO_proc_file结构体</font></li>
-<li><font color='red'>关闭fd</font></li>
-<li><font color='red'>waitpid回收子进程</font></li>
-<li><font color='red'>把fp从全局文件链表unlink</font></li>
+<li>压缩文件</li>
 </ul>
-</li>
-</ul>
-<blockquote>
-<p>注：</p>
-<p>可以看到popen有linkin挂链表操作，pclose对应两次unlink操作。这俩链表的作用：proc_file_chain就是相当于专门用于popen的一个静态全局链表，用于链接_IO_proc_file，而_IO_proc_file结构体的主要作用其实上面也说了，其实就是为popen关联pid和file；而_IO_list_all链表可不只用于popen，它是维护一个一个全局的（当然，是进程级别）打开文件的链表，维护管理所有打开的FILE*流。</p>
-</blockquote>
-<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a><center>后记</center></h3><p>1.看glibc中的popen这些绕来绕去，调这个那个的函数，搞虚函数表这些，其实，说到底，在c里实现多态就是用函数指针，glibc的虚函数表也是，内核的vfs 各种驱动也是</p>
-<p>2.如之前所说，glibc看上去这么复杂，各种weak alias、strong alias等。weak alias的其中一个好处是可以允许用户自定义一些函数的实现来覆盖glibc的默认实现。一个典型例子是tcmalloc，在运行程序时通过LD_PRELOAD优先加载libtcmalloc.so，在调用malloc的时候就会去调用tcmalloc的malloc实现而不是glibc的。而实现这个的基础就是，glibc中的这些函数全是weak alias的。如下</p>
-<pre><code class="language-c">weak_alias (__libc_calloc, __calloc) weak_alias (__libc_calloc, calloc)
-weak_alias (__libc_free, __cfree) weak_alias (__libc_free, cfree)
-weak_alias (__libc_free, __free) weak_alias (__libc_free, free)
-weak_alias (__libc_malloc, __malloc) weak_alias (__libc_malloc, malloc)
-weak_alias (__libc_memalign, __memalign) weak_alias (__libc_memalign, memalign)
-weak_alias (__libc_realloc, __realloc) weak_alias (__libc_realloc, realloc)
-weak_alias (__libc_valloc, __valloc) weak_alias (__libc_valloc, valloc)
-weak_alias (__libc_pvalloc, __pvalloc) weak_alias (__libc_pvalloc, pvalloc)
-weak_alias (__libc_mallinfo, __mallinfo) weak_alias (__libc_mallinfo, mallinfo)
-weak_alias (__libc_mallopt, __mallopt) weak_alias (__libc_mallopt, mallopt)
+<pre><code class="language-shell">//创建一个10G大小的文件并查看du和df输出
+[root@yzwddsg tmp]# dd if=/dev/zero of=aaa bs=1M count=10240
+10240+0 records in
+10240+0 records out
+10737418240 bytes (11 GB) copied, 19.5824 s, 548 MB/s
+[root@yzwddsg tmp]# du -sh /tmp
+11G	/tmp
+[root@yzwddsg tmp]# df -h /
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda2       424G   32G  393G   8% /
+
+//压缩文件并删除原始文件，然后查看df和du
+[root@yzwddsg tmp]# tar zcvf aaa.tgz aaa
+aaa
+[root@yzwddsg tmp]# rm -rf aaa
+[root@yzwddsg tmp]# ls -lh aaa.tgz
+-rw-r--r-- 1 root root 10M Apr  7 17:13 aaa.tgz
+[root@yzwddsg tmp]# du -sh /tmp
+280M	/tmp
+[root@yzwddsg tmp]# df -h /
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda2       424G   22G  403G   6% /
 </code></pre>
+<p>最初创建10G文件，df和du的统计中都是增长了10G使用容量。压缩文件之后，du和df看到的都是压缩后的容量</p>
+<ul>
+<li>软硬链接</li>
+</ul>
+<pre><code class="language-shell">//创建一个文件，大小为1G
+dd if=/dev/zero of=aaa bs=1M count=1024
+
+//在其他目录制作一个指向aaa文件的软链接，查看df和du输出
+[root@yzwddsg tmp]# du -sh /tmp
+1.3G	/tmp
+[root@yzwddsg tmp]# df -h /
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda2       424G   23G  402G   6% /
+
+//在其他目录制作一个指向aaa文件的硬链接，查看df和du输出
+[root@yzwddsg tmp]# du -sh /tmp/
+1.3G	/tmp/
+[root@yzwddsg tmp]# df -h /
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda2       424G   23G  402G   6% /
+</code></pre>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a><center>总结</center></h3><ul>
+<li>所以df命令和du命令的区别是什么呢？</li>
+</ul>
+<p><img src="/img/56.png"></p>
+<p>df命令是读取文件系统的sb的信息，而du命令是遍历迭代读取目录下所有的文件。</p>
+<ul>
+<li>rm命令与fd的释放</li>
+</ul>
+<p>从实验中可以看到，rm删掉文件并不代表就清除了一切与该文件相关的信息了，至少在某个进程还持有fd的时候，sb中是还统计着这个文件的相关信息的。</p>
+<p>这就要看一下rm的过程了，strace看一下，主要的系统调用就是unlinkat</p>
+<pre><code class="language-shell">......
+newfstatat(AT_FDCWD, &quot;aaa&quot;, &#123;st_mode=S_IFREG|0644, st_size=1073741824, ...&#125;, AT_SYMLINK_NOFOLLOW) = 0
+unlinkat(AT_FDCWD, &quot;aaa&quot;, 0)            = 0
+lseek(0, 0, SEEK_CUR)                   = -1 ESPIPE (Illegal seek)
+close(0)                                = 0
+......
+</code></pre>
+<p>看一下unlinkat的主要实现流程：</p>
+<pre><code class="language-c">unlinkat系统调用
+  -&gt;filename_rmdir //用于删除目录
+  -&gt;filename_unlinkat //删除文件
+    -&gt;start_dirop	//获取锁相关、获取dentry等
+    -&gt;ihold(inode) //hold一下，防止操作期间被其他地方释放？
+    -&gt;vfs_unlink
+      -&gt;ext4_unlink
+        -&gt;__ext4_unlink
+          -&gt;ext4_delete_entry //删除对应的dentry
+          -&gt;drop_nlink	//inode的__i_nlink计数减1（如果减到0了，就标记为孤儿inode）
+    -&gt;end_dirop
+    -&gt;iput(inode)
+
+
+看一下iput的实现：
+void iput(struct inode *inode)
+&#123;
+        might_sleep();
+        if (unlikely(!inode))
+                return;
+
+......
+        //如果inode的引用计数不是1，则减1继续执行。如果不是1，就减1并return
+        if (atomic_add_unless(&amp;inode-&gt;i_count, -1, 1))
+                return;
+</code></pre>
+<p>所以过程就已经很明显了：inode的释放实际上是在iput判断inode的i_count引用计数为1（减1之后变为0）的情况下才去真正地执行删除inode相关操作的。如果没有进程持有fd的情况下，rm命令执行结束后会有一次iput操作，这里可以删掉inode。但是如果有进程持有inode引用计数的情况下，rm的iput将只是减少引用计数并不能删除inode，除非等持有inode引用计数的进程自己释放fd的时候调用iput删除。</p>
+<p><img src="/img/57.png"></p>
+<ul>
+<li>为什么挂载点覆盖会导致df和du命令显示的磁盘容量不一致？</li>
+</ul>
+<p>这个其实也好解释了：&#x2F;ssd下原本就是有内容的，这个在当前的sb中是记录了的。然而，没有把当前目录下的内容清空就mount到了nvme盘上，这样的话，&#x2F;ssd的dentry应该就指向一个新的inode了，这个新的inode就是这个新挂载的文件系统的根节点。df命令直接去找sb中的信息进行计算，未挂载前的&#x2F;ssd中是有内容的切并没有释放，所以在df命令中是能够统计出来的。而du命令是通过遍历所有dentry去找inode的信息并综合计算的，当前的&#x2F;ssd的dentry已经指向了新的inode，所以自然计算结果与df的不符合了。</p>
+<p><img src="/img/58.png"></p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
