@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>PCIE设备热插拔 | YZWDDSG</title>
+  <title>热插拔网卡导致的系统hung-task问题排查 | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="PCIE设备热插拔 | YZWDDSG">
+  <meta name="description" content="热插拔网卡导致的系统hung-task问题排查 | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta name="description" content="邮箱：857879363@qq.com bilibili：https:&#x2F;&#x2F;space.bilibili.com&#x2F;346090747 知乎：https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;zhong-ai-83-43 公众号： 本模板链接：3-hexo 本模板原作者：yelog">
@@ -751,9 +751,9 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="post-PCIE设备热插拔" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-热插拔网卡导致的系统hung-task问题排查" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">PCIE设备热插拔</h1>
+        <h1 class="article-title">热插拔网卡导致的系统hung-task问题排查</h1>
     
     <div class="article-meta">
         
@@ -763,7 +763,7 @@
             <i class="iconfont icon-category"></i>
             
             
-            <a  data-rel="硬件">硬件</a>
+            <a  data-rel="故障排查">故障排查</a>
             
         </span>
         
@@ -771,12 +771,12 @@
     </div>
     <div class="article-meta">
         
-            发布时间 : <time class="date" title='最后更新: 2025-04-05 22:18:36'>2025-04-05 22:00</time>
+            发布时间 : <time class="date" title='最后更新: 2026-05-28 21:40:30'>2026-05-28 21:26</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:4.4k</span>
+        <span>字数:3k</span>
         
         
         <span id="busuanzi_container_page_pv">
@@ -806,7 +806,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#PCIE%E7%A1%AC%E4%BB%B6%E6%94%AF%E6%8C%81"><span class="toc-text">PCIE硬件支持</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%83%AD%E6%8F%92%E6%8B%94%E6%96%B9%E6%B3%95"><span class="toc-text">热插拔方法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%80%9A%E7%9F%A5%E5%BC%8F%E7%83%AD%E6%8F%92%E6%8B%94"><span class="toc-text">通知式热插拔</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9A%B4%E5%8A%9B%E7%83%AD%E6%8F%92%E6%8B%94"><span class="toc-text">暴力热插拔</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%84%E6%88%90%E9%83%A8%E4%BB%B6"><span class="toc-text">组成部件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%83%AD%E6%8F%92%E6%8B%94%E8%BF%87%E7%A8%8B"><span class="toc-text">热插拔过程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E9%A9%B1%E5%8A%A8%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-text">相关驱动初始化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9C%9F%E6%AD%A3%E7%83%AD%E6%8F%92%E6%8B%94%E5%A4%84%E7%90%86"><span class="toc-text">真正热插拔处理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#virtio%E7%9A%84-attach-device%E5%92%8Cdetach-device%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-text">virtio的 attach device和detach device的实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E8%AE%B0"><span class="toc-text">后记</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-text">参考</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E5%90%8E%E8%AE%B0"><span class="toc-text">后后记</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF"><span class="toc-text">问题背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86"><span class="toc-text">相关知识</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%92%E6%9F%A5%E8%BF%87%E7%A8%8B"><span class="toc-text">排查过程</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -822,194 +822,375 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="PCIE硬件支持"><a href="#PCIE硬件支持" class="headerlink" title="PCIE硬件支持"></a><center>PCIE硬件支持</center></h3><p><img src="/img/23.png" alt="这是一张图片"></p>
-<p>如图所示，上面是一个pcie设备，下面是主板对应的pcie插槽。</p>
-<p>根据CEM标准，pcie设备金手指的两边有两个相对来说短一点的边带信号，PRSNT1#和PRSNT2#，这两个就是用来支持pcie设备热插拔的，可以看到这两个信号是直接相连的。</p>
-<p>而在pcie插槽上，在pcie设备PRSNT1#和PRSNT2#对应的位置也有两个信号。<font color="red">在不插设备时，pcie插槽上的PRSNT1#是一直接地的，也就是一直在低电平，而PRSNT2#由于PULL-UP（这个我搜了一下什么意思，大概就是把这个信号通过一个电阻直接接到电源上以保持高电平状态？）一直处于高电平。</font></p>
-<p>所以，当上面的pcie设备插入pcie插槽的时候，pcie插槽上的PRSNT1#和PRSNT2#短路连接，而PRSNT1#一直接地，<font color="red">所以pcie插槽上的PRSNT2#被短路从高电平变成低电平，主板上的hotplug control logic捕获到这个电平变化</font>，通知downstream port发现了一个presence detect 事件，downstream port发送中断消息给RC。然后到cpu，去处理设备热插。热拔pcie设备也就好理解了，pcie设备拔出时，pcie插槽上的PRSNT2#不再被短路，恢复高电平，hotplug control logic肯定能捕获到这个低电平到高电平的转换，就知道又发生了presence detect 事件。</p>
-<blockquote>
-<p>为什么pcie设备上的PRSNT1#和PRSNT2#信号要做的比金手指短一些呢？大佬们太有智慧了，我理解是这样的：设备热插的时候，PRSNT1#和PRSNT2#信号短一些能保证其他金手指彻底与pcie插槽连接上之后才短路PRSNT2#通知热插事件，防止出现向系统发出热插中断信号时设备还没彻底与pcie插槽连接的情况；设备热拔的时候，PRSNT1#和PRSNT2#信号能够先与pcie插槽断开连接，这时候PRSNT2#信号恢复高电平向系统发热拔中断，在这个时间点到其他金手指拔出的这个时间差，能够让系统去处理热拔中断，清理残留等内容。</p>
-</blockquote>
-<h3 id="热插拔方法"><a href="#热插拔方法" class="headerlink" title="热插拔方法"></a><center>热插拔方法</center></h3><p>我认为以下两种方法主要还是在热拔设备的时候有所区别</p>
-<h4 id="通知式热插拔"><a href="#通知式热插拔" class="headerlink" title="通知式热插拔"></a>通知式热插拔</h4><p>这个是一种比较温和的不会对系统或者设备造成伤害的方式。也就是在热插拔的时候需要先通知内核。</p>
-<p>这个我不知道理解的对不对，关于attention button和一个sys接口&#x2F;sys&#x2F;bus&#x2F;pci&#x2F;slots&#x2F;<SLOT_NUM>&#x2F;power，我觉得这俩的作用是一样的，都是为了在热插拔之前通知内核先进行处理，只不过一个是硬件实现一个是软件实现？</p>
-<pre><code class="language-c">##按下attetion button 
-##echo 0 &gt; /sys/bus/pci/slots/&lt;SLOT_NUM&gt;/power
+        <h3 id="问题背景"><a href="#问题背景" class="headerlink" title="问题背景"></a><center>问题背景</center></h3><p>有台centos8机器热插拔virtio网卡失败了，dmesg内显示有hung task的栈。机器使用的是4.18内核。</p>
+<h3 id="相关知识"><a href="#相关知识" class="headerlink" title="相关知识"></a><center>相关知识</center></h3><p>以前，网卡收发包都是通过中断触发去处理的，但是随着高性能网络时代的到来，如果每一次的网络收发包都依靠中断来通知处理，效率低下且会造成中断风暴，因此才出现了napi。简单来讲，napi就是一种中断+轮询混合模式。收发包时，触发中断，然后关闭该网卡的中断改为轮询模式，批量处理完网络包或者网络中没有包了的时候结束轮询，恢复中断模式。</p>
+<p>这里要简单说一下napi的使用和生命周期，由于这回排查的是virtio网卡，那我们就以virtio驱动为例来梳理，其他的网卡驱动类似(本想画个图来的，但是东西太多不好塞下，让ai总结一下吧):</p>
+<pre><code class="language-c">┌─────────────────────────────────────────────────────────────────────────┐
+│                          NAPI生命周期                                    │
+└─────────────────────────────────────────────────────────────────────────┘
+
+1. PROBE 阶段
+   ┌──────────────────────────────────────────────────────────────┐
+   │ netif_napi_add()                                             │
+   │   → 注册 napi_struct，绑定 poll 回调                           │
+   │   → 此时 NAPI 未使能，不参与调度                                 │
+   └──────────────────────────────────────────────────────────────┘
+
+2. OPEN 阶段
+   ┌──────────────────────────────────────────────────────────────┐
+   │ virtnet_open()                                               │
+   │   → virtnet_enable_queue_pair()                              │
+   │     → virtnet_napi_enable()                                  │
+   │       → napi_enable()  ← 使能 NAPI                            │
+   │       → virtqueue_napi_schedule()  ← 检查是否有待处理包         │
+   └──────────────────────────────────────────────────────────────┘
+
+3. 数据包到达 → 中断触发
+   ┌──────────────────────────────────────────────────────────────┐
+   │ skb_recv_done() (virtio 回调)                                 │
+   │   → virtqueue_napi_schedule()                                │
+   │     → napi_schedule_prep()  ← 检查是否可以调度                  │
+   │     → virtqueue_disable_cb()  ← 禁用 virtio 回调               │
+   │     → __napi_schedule()  ← 添加到软中断队列                     │
+   └──────────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+4. 软中断触发
+   ┌──────────────────────────────────────────────────────────────┐
+   │ NET_RX_SOFTIRQ                                               │
+   │   → virtnet_poll(napi, budget)                               │
+   │     → virtnet_receive()  ← 实际接收数据包                       │
+   │     → if received &lt; budget:                                  │
+   │         → virtqueue_napi_complete()                          │
+   │           → napi_complete_done()                             │
+   │           → virtqueue_enable_cb()  ← 重新使能中断              │
+   └──────────────────────────────────────────────────────────────┘
+
+5. CLOSE 阶段
+   ┌──────────────────────────────────────────────────────────────┐
+   │ virtnet_close()                                              │
+   │   → virtnet_disable_queue_pair()                             │
+   │     → virtnet_napi_disable()                                 │
+   │       → napi_disable()  ← 禁用 NAPI                           │
+   └──────────────────────────────────────────────────────────────┘
 </code></pre>
-<h4 id="暴力热插拔"><a href="#暴力热插拔" class="headerlink" title="暴力热插拔"></a>暴力热插拔</h4><p>这个就是字面上的意思，直接暴力拔出设备，也就是surprise remove。所以我觉得应该也就是上面说的，只能在PRSNT1#和PRSNT2#与pcie插槽断开而其他金手指还没与pcie插槽断开的这段时间处理设备拔出操作，而且因为没有提前通知，所以可能会有IO残留之类的东西，容易出现设备或者系统损坏。</p>
-<h3 id="组成部件"><a href="#组成部件" class="headerlink" title="组成部件"></a><center>组成部件</center></h3><p>为了支持pcie热插拔，pcie协议定义了一些列需要实现的组件，这个直接抄过大佬的过来了，倒不用记，看代码的时候做个参考就好</p>
-<table>
-<thead>
-<tr>
-<th><strong>组件</strong></th>
-<th><strong>目的</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>Indicator</strong></td>
-<td>show the power and attention state of the slot. 标准模型中定义两个 indicators 和一个 Attention Indicator。都会有三种状态：ON；OFF；Blinking。</td>
-</tr>
-<tr>
-<td></td>
-<td>Attention Indicator是黄色的灯，用来指示出现了操作的问题，或者表示 hotplug slot 已经被识别到了，手动操作可以很容易定位到。 • ON：表示热插拔槽位故障 • OFF：表示一切正常 • BLINKING：表示热插拔流程正在执行</td>
-</tr>
-<tr>
-<td></td>
-<td>Power Indicator是绿色的灯，表示在slot一个接口显示线对用户的操作产生了响应。 • OFF：表示槽位下电，可以进行设备的热插或热拔 • ON：表示热插拔操作已完成，槽位上电，不可以进行热插或热拔 • BLINKING：表示此时正在上电或下电槽位，或者此时 attention button 下，正在等待反馈，或者表示hot-plus操作的初始化 客户需求：表示槽位下电，可以进行设备的热插或热拔</td>
-</tr>
-<tr>
-<td><strong>Manually-operated Retention Latch (MRL)</strong></td>
-<td>Holds adds-in cards in place. Allows the Port and system software to detect the MRL being opened. MRL是一种手动操作保留机制。保持插入卡在slot上，防止用户移除卡。系统添加了一个MRI sensor，以便侦测每个port对应的 slotR的MRL。</td>
-</tr>
-<tr>
-<td><strong>Electromechanical Interlock</strong></td>
-<td>Prevents removal of add-in cards while slot is powered. 一种互斥机制，确保在热插拔流程都执行完成后 PCle PCle设备才可被物理移除。</td>
-</tr>
-<tr>
-<td><strong>Attention Button</strong></td>
-<td>Allows user to request Hot-Plug operations. 是 hotplug 中定义的一个开关按钮，一般会在 slot 上或者在卡片上，按一下表明要做一个 hotplug 动作或者 removal 动作。</td>
-</tr>
-<tr>
-<td><strong>Slot Numbering</strong></td>
-<td>Provides visual identification of slots. 槽位编号，由底板号（Classic Number）和物理槽位号（Physical Slot Number）组成，可在用户接口上显示。</td>
-</tr>
-</tbody></table>
-<h3 id="热插拔过程"><a href="#热插拔过程" class="headerlink" title="热插拔过程"></a><center>热插拔过程</center></h3><p>以使用pciehp驱动为例，必须打开CONFIG_HOTPLUG_PCI_PCIE才行</p>
-<h4 id="相关驱动初始化"><a href="#相关驱动初始化" class="headerlink" title="相关驱动初始化"></a>相关驱动初始化</h4><pre><code class="language-c">pcie_hp_init
-  -&gt;pcie_port_service_register	##注册一个hpdriver_portdrv，这是一个static的pcie_port_service_driver结构体，里面有一些probe remove函数,就是pciehp_probe、pciehp_remove
-    -&gt;设置hpdriver_portdrv-&gt;driver，也是一些probe remove之类的，然后看了下实现，实际上应该是去其实还是去调hpdriver_portdrv的probe、remove
-    -&gt;driver_register
-      -&gt;bus_add_driver
-        -&gt;driver_attach
-          ...-&gt;pciehp_probe	##一堆调用之后，会调到probe
-            -&gt;pcie_init	##初始化一个controller结构体
-            -&gt;init_slot	#初始化controller的hotplug_slot.ops，包括一些slot的操作，比如enable disable get_poer_status等
-              -&gt;__pci_hp_initialize
-                -&gt;pci_create_slot	#创建用于hotplug的slot
-            -&gt;pcie_init_notification
-              -&gt;pciehp_request_irq	#注册irq
-                -&gt;request_threaded_irq	#如果是pciehp_poll_mode就注册一个pciehp_poll内核线程，否则调用request_threaded_irq去注册线程化的irq
-                  -&gt;__setup_irq
-                    -&gt;setup_irq_thread	#创建内核线程，用于处理硬中断之后的任务
-              -&gt;pcie_enable_notification
-            -&gt;pci_hp_add	#发uevent通知userspace hotplug slot
+<h3 id="排查过程"><a href="#排查过程" class="headerlink" title="排查过程"></a><center>排查过程</center></h3><p>先看一下dmesg日志，这是最早hung的栈，后面还有很多。只能看到是在等锁了，至于谁在持有锁，只能触发kdump拿vmcore来看了。</p>
+<pre><code class="language-c">......
+[  615.640467] INFO: task kworker/218:2:4106 blocked for more than 120 seconds.
+[  615.647756]       Tainted: G           OE    --------- -  - 4.18.0-348.7.1.el8_5.x86_64 #1
+[  615.656038] &quot;echo 0 &gt; /proc/sys/kernel/hung_task_timeout_secs&quot; disables this message.
+[  615.663881] task:kworker/218:2   state:D stack:    0 pid: 4106 ppid:     2 flags:0x80004000
+[  615.672252] Workqueue: ipv6_addrconf addrconf_verify_work
+[  615.677665] Call Trace:
+[  615.680129]  __schedule+0x2bd/0x760
+[  615.683629]  schedule+0x37/0xa0
+[  615.686780]  schedule_preempt_disabled+0xa/0x10
+[  615.691325]  __mutex_lock.isra.6+0x2b5/0x4a0
+[  615.695604]  addrconf_verify_work+0xa/0x20
+[  615.699715]  process_one_work+0x1a7/0x360
+[  615.703743]  ? create_worker+0x1a0/0x1a0
+[  615.707675]  worker_thread+0x30/0x390
+[  615.711350]  ? create_worker+0x1a0/0x1a0
+[  615.715285]  kthread+0x116/0x130
+[  615.718528]  ? kthread_flush_work_fn+0x10/0x10
+[  615.722981]  ret_from_fork+0x1f/0x40
+.......
 </code></pre>
-<p>大概能知道，这块就是初始化相关结构体，创建slot通知userspace，申请线程化的irq，其中pciehp_isr用于处理硬中断，pciehp_ist是内核线程，处理硬中断之后的任务。</p>
-<p>（对pcie设备模型还不太了解，这些结构体有什么用，以及怎么组织管理，怎么串联起来，以及代表什么还不太清楚，后续还得看一下pcie设备模型这块）</p>
-<h4 id="真正热插拔处理"><a href="#真正热插拔处理" class="headerlink" title="真正热插拔处理"></a>真正热插拔处理</h4><p>如上所说，当热插拔一个设备的时候，由两边的信号电平变化产生中断，其实就是去执行的pciehp_isr</p>
-<pre><code class="language-c">pciehp_isr
-  -&gt;pm_runtime_get_noresume(parent);	#如果存在父设备，需要先保证父设备时active的
-  -&gt;pcie_capability_read_word	#获取设备状态，这些状态应该和组成部件提到的那些有关
-  -&gt;atomic_or(events, &amp;ctrl-&gt;pending_events);	#把状态保存到ctl中去，以便让irq线程处理
-  -&gt;return IRQ_WAKE_THREAD	#唤醒pciehp_ist
+<p>接下来是一步一步排查问题的过程：</p>
+<p>先看一下大体情况，有很多D进程</p>
+<pre><code class="language-c">crash&gt; ps |grep UN
+     2291       2 138  ffff9d9312741800  UN   0.0        0        0  [irq/103-pciehp]
+     4106       2 218  ffff9d93110d3000  UN   0.0        0        0  [kworker/218:2]
+    23180    5096 234  ffff9d9382b91800  UN   0.0   163784    10448  sshd
+   107852       1 210  ffff9d9312198000  UN   0.0     1764     1096  ethtool
+   107906       1 215  ffff9d93970c1800  UN   0.0     1764     1096  ethtool
+   107942  107927 223  ffff9d9e82421800  UN   0.0   163544     8080  curl
+   110122  110112 220  ffff9c9be4b30000  UN   0.0   163544     8068  curl
+   110159       1 239  ffff9d9b83d06000  UN   0.0    40788     4512  checknic
+   110195    5096 109  ffff9d9344796000  UN   0.0    74432     6792  sshd
+   ......
+crash&gt; ps |grep UN |wc -l
+352
 </code></pre>
-<p><font color="red">所以硬中断中做的就是：1.确保设备状态没问题，active的可以访问2.保存状态，到pciehp_ist线程中处理</font></p>
-<pre><code class="language-c">pciehp_ist
-  -&gt;pciehp_handle_button_press	#如果PCI_EXP_SLTSTA_ABP，由attention button被按下，去处理这个事件
-    -&gt;switch (ctrl-&gt;state)	#根据不同的状态去处理
-     -&gt;schedule_delayed_work(&amp;ctrl-&gt;button_work, 5 * HZ)	#如果是ON，说明要进行热拔，设置state为BLINKINGOFF_STATE，触发button work；state为OFF时相反。同时设置对应的Indicator
-       -&gt;pciehp_queue_pushbutton_work
-         -&gt;pciehp_request	#如果是BLINKINGOFF_STATE，则请求DISABLE_SLOT关掉slot；如果是BLINKINGON_STATE，则请求PCI_EXP_SLTSTA_PDC,也就是presence detect
-           -&gt;irq_wake_thread
-             -&gt;__irq_wake_thread
-               -&gt;wake_up_process	#其实还是去执行pciehp_ist，所以可以看出来，这就是一个状态机的维护
-     -&gt;cancel_delayed_work	#如果是BLINKINGOFF_STATE，说明正在掉电，取消这次请求，恢复ON_STATE；BLINKINGON_STATE相反。同时设置对应的Indicator
-  -&gt;pciehp_set_indicators	#监测到PCI_EXP_SLTSTA_PFD power fault，就设置一下indicators就不继续处理了
-  -&gt;pciehp_ignore_dpc_link_change	#忽略因为DPC引起的link up/down事件，如果有PCI_EXP_SLTSTA_DLLSC链路状态变化且是从DPC恢复的且此时设备状态是ON_STATE,说明是DPC引起的链路状态变化
-  -&gt;pciehp_handle_disable_request	#有DISABLE_SLOT事件,也就是attention button/软件通知热拔设备要做的disbale slot
-    -&gt;如果是在BLINKING状态，cancel_delayed_work取消delayed work，设置状态为POWEROFF
-    -&gt;pciehp_disable_slot
-      -&gt;__pciehp_disable_slot
-        -&gt;remove_board
-          -&gt;pciehp_unconfigure_device	#remove PCI devices below a hotplug bridge，第二个参数presence，true是safe remove，false是surprise remove
-            -&gt;如果是surprise remove，调用pci_walk_bus把设备标记为disconnected
-            -&gt;pci_lock_rescan_remove	#锁总线
-            -&gt;list_for_each_entry_safe_reverse	#反向遍历设备链表（这里是兼容SR-IOV的情况，确保先移除VF，然后再移除PF）
-              pci_stop_and_remove_bus_device	#remove a PCI device and any children
-                -&gt;pci_stop_bus_device	#停掉设备
-                  -&gt;list_for_each_entry_safe_reverse	#反向遍历设备链表，确保先移除VF，最后PF
-                    pci_stop_bus_device	#再去调用pci_stop_bus_device，这里就是一层层的去递归调用，从最底层的设备开始stop
-                  -&gt;pci_stop_dev
-                    -&gt;device_release_driver	#停掉驱动
-                      -&gt;device_release_driver_internal
-                        -&gt;__device_release_driver
-                          -&gt;driver_sysfs_remove	#清理驱动的sysfs接口
-                          -&gt;device_remove	#去调用驱动的.remove方法，这个不在这展开，后面研究下virtio的驱动学习一下
-                    -&gt;pci_proc_detach_device
-                      -&gt;proc_remove	#移除proc接口
-                    -&gt;pci_remove_sysfs_dev_files	#清理device的sysfs接口
-                    -&gt;pci_dev_assign_added	#移除设备的added状态，后续rescan的话可以重新探测到
-                -&gt;pci_remove_bus_device	#移除设备
-                  -&gt;list_for_each_entry_safe
-                    pci_remove_bus_device	#又是一次递归调用
-                  -&gt;pci_remove_bus	#移除bus相关的sysfs，调用bus的remove_bus方法，unregister bus上的device
-                  -&gt;pci_destroy_dev
-              如果是safe remove,向pci配置空间写入禁用PCI_COMMAND_MASTER | PCI_COMMAND_SERR，打开PCI_COMMAND_INTX_DISABLE，不再允许设备发送request
-            -&gt;pci_unlock_rescan_remove	#解锁总线
-          -&gt;pciehp_power_off_slot
-            -&gt;pcie_write_cmd	#向设备写PCI_EXP_SLTCTL_PWR_OFF，关闭电源
-          -&gt;pciehp_set_indicators	#设置indicator为PCI_EXP_SLTCTL_PWR_IND_OFF，指示此时电源已经关闭
-      -&gt;设置state为OFF_STATE  
-  -&gt;pciehp_handle_presence_or_link_change	#比DISABLE_SLOT事件优先级低（因为正经来说热拔需要先disable slot的），检测到PCI_EXP_SLTSTA_PDC | PCI_EXP_SLTSTA_DLLSC)，也就是检测到presence detect，而且链路状态又发生了改变，，很明显，是发生了热插拔
-    -&gt;如果state是BLINKINGOFF_STATE，cancel delayed work（应该是处理attention button/软件通知之后，正在处理的过程中把设备拔出了？）
-    -&gt;如果state是ON_STATE，说明暴力热拔了，state设置为POWEROFF_STATE，然后去调用pciehp_disable_slot，第二个参数为SURPRISE_REMOVAL
-    -&gt;如果是BLINKINGON_STATE，也cancel delayed work
-    -&gt;如果state是OFF_STATE，设置state为POWERON_STATE，然后pciehp_enable_slot
-      -&gt;pciehp_enable_slot
-        -&gt;board_added	#z这个就不再往下看了，估计就是remove_board的逆过程，添加sysfs proc，注册各种结构体注册设备之类的
+<p>切到kworker&#x2F;218:2看一下该进程的栈</p>
+<pre><code class="language-c">crash&gt; bt ffff9d93110d3000
+PID: 4106     TASK: ffff9d93110d3000  CPU: 218  COMMAND: &quot;kworker/218:2&quot;
+ #0 [ffffaaca6bb3fd98] __schedule at ffffffffa6b7a60d
+ #1 [ffffaaca6bb3fdf0] schedule at ffffffffa6b7aae7
+ #2 [ffffaaca6bb3fe00] schedule_preempt_disabled at ffffffffa6b7ae2a
+ #3 [ffffaaca6bb3fe08] __mutex_lock at ffffffffa6b7cb25
+ #4 [ffffaaca6bb3fe90] addrconf_verify_work at ffffffffa6aecdfa
+ #5 [ffffaaca6bb3fe98] process_one_work at ffffffffa6309777
+ #6 [ffffaaca6bb3fed8] worker_thread at ffffffffa6309e40
+ #7 [ffffaaca6bb3ff10] kthread at ffffffffa630f906
+ #8 [ffffaaca6bb3ff50] ret_from_fork at ffffffffa6c0023f
 </code></pre>
-<p>以上，可以简单总结一下：</p>
-<p><font color="red">其实pciehp_ist处理热插拔就是相当于维护一个状态机。</font></p>
-<p><font color="red">一个热插流程为：插入pcie设备-&gt;触发presence detect-&gt;enable slot；或者attention button pressed&#x2F;软件通知-&gt;enable slot</font></p>
-<p><font color="red">一个热拔流程为：attention button pressed&#x2F;软件通知-&gt;disable slot-&gt;触发presence detect（但这时候这个presence detect应该没什么用了吧，就是如果attention button热拔完成之后再把设备从插槽拔除，当然也可以不拔）。如果直接暴力热拔的话，就是检测到presence detect，然后到pciehp_ist状态机发现是暴力热拔，然后去disable_slot（这时候是surprise remove）</font></p>
-<blockquote>
-<p>注：</p>
-<p>1.可以看到，在pciehp_handle_button_press事件处理中，ON&#x2F;OFF的schedule_delayed_work是5秒后才执行的，也就是如果在着5秒内再次按下attention button的话，会取消上一次的操作。这也就是为什么如果已经处于BLINKING状态，再次检测到attention button pressed会恢复之前的状态了，过程是这样的，以热插设备为例，先按下attention button，表示这时候要进行热插了，走到pciehp_handle_button_press的ON_STATE的case那里，这时候把state切换为BLINKINGON_STATE，然后5秒钟后执行对应的button work，如果再5秒内有按下了attention button，会走到pciehp_handle_button_press的BLINKINGON_STATE（因为第一次按attention button的时候设置了状态）这里，这表示取消上一次的请求，于是把delayed work取消掉，然后把状态恢复为OFF_STATE（也就是热插之前的状态）。</p>
-<p>2.在pciehp_handle_button_press那里的处理可以看出，如果是BLINKINGOFF_STATE，就应该去diable slot了，当这些完成后，用户拔出pcie设备（也可以不拔），触发presence detect；如果是BLINKINGON_STATE，就去请求presence detect中断。这也符合之前看到的通知式热插拔的处理过程：热插的时候，应该是先检测到presence detect，或者attention button pressed&#x2F;软件通知，然后再去进行热插处理；热拔的时候，应该先attention button pressed&#x2F;软件通知，然后发presence detect。</p>
-<p>3.为什么在pciehp_unconfigure_device下有两次遍历设备操作？第一次是在pciehp_unconfigure_device中，第二次是在pci_stop_bus_device中。没太明白，猜测是不是pciehp_unconfigure_device下的遍历就是为了处理SR-IOV的情况，然后从反向遍历一直处理到VF，而pci_stop_bus_device就是真正处理stop行为的，而pci_stop_bus_device更抽象一点更通用一点，不论VF还是PF其他PCI设备都能处理，都执行一下递归处理？</p>
-</blockquote>
-<h3 id="virtio的-attach-device和detach-device的实现"><a href="#virtio的-attach-device和detach-device的实现" class="headerlink" title="virtio的 attach device和detach device的实现"></a><center>virtio的 attach device和detach device的实现</center></h3><p>大概了解了硬件pcie设备是怎么实现热插拔的，那就又来一个问题，虚拟化环境中的热插拔是怎么实现的？就比如virtio设备的热插拔？</p>
-<p>比如virsh attach这个过程</p>
-<pre><code class="language-c">#libvirt
-cmdAttachDevice
-  -&gt;virDomainAttachDevice
-    -&gt;qemuDomainAttachDevice
-      -&gt;qemuDomainAttachDeviceFlags
-        -&gt;qemuDomainAttachDeviceLiveAndConfig
-          -&gt;virCheckFlags	#这会检查flag，live是热插拔对当前活着的domain立即生效，config是持久化配置，估计是写到xml中，我主要想看libve热插拔怎么实现
-            -&gt;qemuDomainAttachDeviceLive	#就看一下网卡吧
-              -&gt;qemuDomainAttachNetDevice
-                -&gt;qemuMonitorAddNetdev	#发一个netdev_add的QMP，这里是只在虚机中创建一个网络设备
-              -&gt;qemuMonitorAddDevice	#这里发一个device_add的QMP
-#qemu
-qmp_device_add
-  -&gt;qdev_device_add	#这里获取dirver bus等
-    -&gt;qdev_new	#创建device
-      -&gt;qdev_realize	
-        -&gt;object_property_set_bool	#这里会把realized设置为true，这个在device_class_init中已经使用object_class_property_add_bool为relized绑定了回调，把他设置为true，会去调用device_set_realized
-          -&gt;hotplug_handler_plug	
-            -&gt;hdc-&gt;plug	#调对应的回调，pci_bridge_dev_plug_cb
-              -&gt;shpc_device_plug_cb
-                -&gt;shpc_set_status	#这里会设置presence detect这些
-                -&gt;shpc_interrupt_update	#发中断到虚机中
-                #然后虚机就可以处理热插拔了，不过走的是shpc
+<p>看一下这里的addrconf_verify_work函数，所以这里是一直在等rtnl_mutex锁</p>
+<pre><code class="language-c">crash&gt; dis -lr ffffffffa6aecdfa
+/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/ipv6/addrconf.c: 4553
+0xffffffffa6aecdf0 &lt;addrconf_verify_work&gt;:      nopl   0x0(%rax,%rax,1) [FTRACE NOP]
+/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/ipv6/addrconf.c: 4554
+0xffffffffa6aecdf5 &lt;addrconf_verify_work+5&gt;:    call   0xffffffffa69ce880 &lt;rtnl_lock&gt;
+/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/ipv6/addrconf.c: 4555
+0xffffffffa6aecdfa &lt;addrconf_verify_work+10&gt;:   call   0xffffffffa6aeca00 &lt;addrconf_verify_rtnl&gt;
+
+
+static void addrconf_verify_work(struct work_struct *w)
+&#123;
+        rtnl_lock();
+        addrconf_verify_rtnl();
+        rtnl_unlock();
+&#125;
+void rtnl_lock(void)
+&#123;
+        mutex_lock(&amp;rtnl_mutex);
+&#125;
 </code></pre>
-<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a><center>后记</center></h3><p><strong>Downstream Port Containment：</strong></p>
-<p>DPC（<a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=241689173&content_type=Article&match_order=1&q=Downstream+Port+Containment&zhida_source=entity">Downstream Port Containment</a>）是一种用于处理PCIe链路中错误情况的机制。当PCIe链路上的一个设备发送错误信号时，DPC机制允许系统采取相应的措施来隔离故障设备，以限制错误的传播范围，确保其他设备继续正常工作。DPC依赖于AER提供的错误信息来进行错误处理，是<a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=241689173&content_type=Article&match_order=1&q=PCIe%E6%9E%B6%E6%9E%84&zhida_source=entity">PCIe架构</a>中重要的错误处理机制之一。</p>
-<p><strong>attention button和presence detect：</strong></p>
-<p>很明显，presence detect就是指PRSNT1#和PRSNT2#电平变化触发的中断，attention button也容易理解，就是先通知系统进行热插拔操作。</p>
-<p>不过，不太理解的一点是，如果是热插怎么办？那不是presence detect比attention button事件更早嘛？噢，热插的话，其实就是这样的，先检测到presence detect，然后按下attention button才会触发后续的热插流程。那就有个疑问，没有attention button的pcie设备怎么做到的热插呢？看上面的过程，如果是热插的attention button pressed，其实也就是请求一个presence detect，那么就需要知道attention button请求的PDC和pcie设备插入产生的PDC处理有什么不同嘛？我的意思是，pcie设备热插的时候肯定需要先插入插槽，那这时候肯定就已经走PDC去进入热插流程了，为什么还需要按下attention button？看了下pciehp_handle_presence_or_link_change这块，其实对attention button和直接插入的PDC处理过程也就一点差异：attention button pressed会先把状态改为BLINKING，这时候会进行一些检查之类的，但是无论是attention button的PDC还是直接插入插槽触发的PDC，都会走pciehp_enable_slot去执行热插流程。</p>
-<p>可能，我觉得是这样。热插并不只有直接把pcie设备直接查到插槽上这一种方式。如果是通过attention button热拔掉的设备呢，这时候应该本来就可以还插在插槽上，这时候再按下attention button进行的热插就是走上面说的attention button pressed的PDC了，也就是会多一个BLINKING状态，加一些检查之类的。</p>
-<p>所以，其实我觉得怎么区分暴力热插拔和通知式热插拔呢（我没见过带attention button的pcie设备）？只要是直接插入插槽的，那就是暴力热插，不按attention button或者软件通知的直接把设备拔出插槽的就是暴力热拔；什么是通知式的呢？这个pcie设备本来就插在插槽上了，通过软件通知或者attention button pressed让他再重新被系统使用（这个过程不涉及物理上的插入插槽操作），或者从系统中除去。</p>
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a><center>参考</center></h3><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_22745707/article/details/144105800">https://blog.csdn.net/qq_22745707/article/details/144105800</a></p>
-<p><a target="_blank" rel="noopener" href="https://blog.51cto.com/u_56701/10914238">https://blog.51cto.com/u_56701/10914238</a></p>
-<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzkxNDUxNjI5MQ==&mid=2247486119&idx=1&sn=c508ad435d0e8e43705550ba20843559&chksm=c092f98eff09c043b5d9ff662fb12d2f247304e9340cfd0431225a88b22876da417e5d56540e#rd">https://mp.weixin.qq.com/s?__biz=MzkxNDUxNjI5MQ==&amp;mid=2247486119&amp;idx=1&amp;sn=c508ad435d0e8e43705550ba20843559&amp;chksm=c092f98eff09c043b5d9ff662fb12d2f247304e9340cfd0431225a88b22876da417e5d56540e#rd</a></p>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/691014216">https://zhuanlan.zhihu.com/p/691014216</a></p>
-<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU4MTczMDg1Nw==&mid=2247484548&idx=1&sn=836252ae1459fdfc1b261bac96975170&chksm=fcc71b8e3259de51dabf84e18c8ed6121f3c80129c3c36b77b185e25c62d4941d3b3af10e0c7#rd">https://mp.weixin.qq.com/s?__biz=MzU4MTczMDg1Nw==&amp;mid=2247484548&amp;idx=1&amp;sn=836252ae1459fdfc1b261bac96975170&amp;chksm=fcc71b8e3259de51dabf84e18c8ed6121f3c80129c3c36b77b185e25c62d4941d3b3af10e0c7#rd</a></p>
-<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzAwNTkwNzA1OA==&mid=2247485338&idx=1&sn=40c7d21e5ae9eade9cde2ec06500a546&chksm=9a2d0f8ab034a8d02556aea7a339b91576a5b9bdde4aa5b64713a32e4c0581f3fb5e59e7f707#rd">https://mp.weixin.qq.com/s?__biz=MzAwNTkwNzA1OA==&amp;mid=2247485338&amp;idx=1&amp;sn=40c7d21e5ae9eade9cde2ec06500a546&amp;chksm=9a2d0f8ab034a8d02556aea7a339b91576a5b9bdde4aa5b64713a32e4c0581f3fb5e59e7f707#rd</a></p>
-<h3 id="后后记"><a href="#后后记" class="headerlink" title="后后记"></a><center>后后记</center></h3><p>2025.4.4清明假期，晚上开始看这块内容，第二天又看了一天，眼睛好难受，还是只了解了一下大概过程，细节还不甚清楚，好几处地方还不太理解</p>
-<p>主要还是对pcie设备模型这块不太了解吧，后面需要再加强这块的学习</p>
-<p>太深了，学吧，学无止境</p>
+<p>查一下rtnl_mutex锁</p>
+<pre><code class="language-c">crash&gt; p rtnl_mutex -x
+rtnl_mutex = $2 = &#123;
+  owner = &#123;
+    counter = 0xffff9d9312741801
+  &#125;,
+  wait_lock = &#123;
+    &#123;
+      rlock = &#123;
+        raw_lock = &#123;
+          &#123;
+            val = &#123;
+              counter = 0x0
+.......
+</code></pre>
+<p>根据这个可以知道锁的owner是0xffff9d9312741801，不过这还不是真正的task_struct的地址，因为mutex的后几位可能是作为一些flags存在的，所以我们需要把这个0xffff9d9312741801进行一下地址对齐，得到的0xffff9d9312741800才是真正的task_struct地址。</p>
+<p>知道了持有锁的进程的task_struct，就可以看一下这是哪个进程，原来就是我们最开始ps出来的irq&#x2F;103-pciehp，这就是罪魁祸首了.</p>
+<pre><code class="language-c">crash&gt; task_struct.comm,tgid 0xffff9d9312741800
+  comm = &quot;irq/103-pciehp\000&quot;,
+  tgid = 2291,
+</code></pre>
+<p>看一下这个pciehp进程的栈，可以看出这就是典型的pcie热插拔的栈，但是这里为什么hung住呢？</p>
+<pre><code class="language-c">crash&gt; bt ffff9d9312741800
+PID: 2291     TASK: ffff9d9312741800  CPU: 138  COMMAND: &quot;irq/103-pciehp&quot;
+ #0 [ffffaaca74b9b9f0] __schedule at ffffffffa6b7a60d
+ #1 [ffffaaca74b9ba48] schedule at ffffffffa6b7aae7
+ #2 [ffffaaca74b9ba58] schedule_timeout at ffffffffa6b7f2c7
+ #3 [ffffaaca74b9baf0] msleep at ffffffffa637c9b9
+ #4 [ffffaaca74b9baf8] napi_disable at ffffffffa69b7dcb
+ #5 [ffffaaca74b9bb10] virtnet_close at ffffffffc0e1274d [virtio_net]
+ #6 [ffffaaca74b9bb30] __dev_close_many at ffffffffa69b70a1
+ #7 [ffffaaca74b9bb60] dev_close_many at ffffffffa69ba4af
+ #8 [ffffaaca74b9bba8] rollback_registered_many at ffffffffa69be898
+ #9 [ffffaaca74b9bc08] rollback_registered at ffffffffa69bedc6
+#10 [ffffaaca74b9bc38] unregister_netdevice_queue at ffffffffa69bee73
+#11 [ffffaaca74b9bc60] unregister_netdev at ffffffffa69beec8
+#12 [ffffaaca74b9bc70] virtnet_remove at ffffffffc0e148ca [virtio_net]
+#13 [ffffaaca74b9bc80] virtio_dev_remove at ffffffffa678ddc9
+#14 [ffffaaca74b9bca8] device_release_driver_internal at ffffffffa6813003
+#15 [ffffaaca74b9bcc8] bus_remove_device at ffffffffa6811647
+#16 [ffffaaca74b9bce8] device_del at ffffffffa680cd91
+#17 [ffffaaca74b9bd30] device_unregister at ffffffffa680d036
+#18 [ffffaaca74b9bd40] unregister_virtio_device at ffffffffa678dfe1
+#19 [ffffaaca74b9bd50] virtio_pci_remove at ffffffffa67920cf
+#20 [ffffaaca74b9bd70] pci_device_remove at ffffffffa66ec4cb
+#21 [ffffaaca74b9bd90] device_release_driver_internal at ffffffffa6813003
+#22 [ffffaaca74b9bdb0] pci_stop_bus_device at ffffffffa66e3249
+#23 [ffffaaca74b9bdd0] pci_stop_and_remove_bus_device at ffffffffa66e338e
+#24 [ffffaaca74b9bde0] pciehp_unconfigure_device at ffffffffa67042dc
+#25 [ffffaaca74b9be18] pciehp_disable_slot at ffffffffa670366b
+#26 [ffffaaca74b9be48] pciehp_handle_disable_request at ffffffffa670396b
+#27 [ffffaaca74b9be60] pciehp_ist at ffffffffa670532c
+#28 [ffffaaca74b9be98] irq_thread_fn at ffffffffa635adef
+#29 [ffffaaca74b9beb8] irq_thread at ffffffffa635b1e7
+#30 [ffffaaca74b9bf10] kthread at ffffffffa630f906
+#31 [ffffaaca74b9bf50] ret_from_fork at ffffffffa6c0023f
+</code></pre>
+<p>看一下上面，应该是在napi_disable这里，应该是在msleep。看一下napi_disable这个函数。通过对比汇编和代码的行号，可以知道是在while (test_and_set_bit(NAPI_STATE_SCHED, &amp;n-&gt;state))这个判断下面的msleep。</p>
+<pre><code class="language-c">crash&gt; dis -lr ffffffffa69b7dcb
+/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/core/dev.c: 6622
+0xffffffffa69b7da0 &lt;napi_disable&gt;:      nopl   0x0(%rax,%rax,1) [FTRACE NOP]
+/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/core/dev.c: 6623
+0xffffffffa69b7da5 &lt;napi_disable+5&gt;:    push   %rbp
+0xffffffffa69b7da6 &lt;napi_disable+6&gt;:    mov    %rdi,%rbp
+0xffffffffa69b7da9 &lt;napi_disable+9&gt;:    push   %rbx
+/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/core/dev.c: 6624
+0xffffffffa69b7daa &lt;napi_disable+10&gt;:   lea    0x10(%rbp),%rbx
+/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/core/dev.c: 6623
+0xffffffffa69b7dae &lt;napi_disable+14&gt;:   call   0xffffffffa6b7abb0 &lt;_cond_resched&gt;
+/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/./arch/x86/include/asm/bitops.h: 76
+0xffffffffa69b7db3 &lt;napi_disable+19&gt;:   lock orb $0x4,0x10(%rbp)
+/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/./arch/x86/include/asm/bitops.h: 220
+0xffffffffa69b7db8 &lt;napi_disable+24&gt;:   lock btsq $0x0,0x10(%rbp)
+0xffffffffa69b7dbf &lt;napi_disable+31&gt;:   jae    0xffffffffa69b7dd3 &lt;napi_disable+51&gt;
+/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/core/dev.c: 6627
+0xffffffffa69b7dc1 &lt;napi_disable+33&gt;:   mov    $0x1,%edi
+0xffffffffa69b7dc6 &lt;napi_disable+38&gt;:   call   0xffffffffa637c990 &lt;msleep&gt;
+/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/./arch/x86/include/asm/bitops.h: 220
+0xffffffffa69b7dcb &lt;napi_disable+43&gt;:   lock btsq $0x0,(%rbx)
+
+
+void napi_disable(struct napi_struct *n)
+&#123;
+        might_sleep();
+        set_bit(NAPI_STATE_DISABLE, &amp;n-&gt;state);
+
+        while (test_and_set_bit(NAPI_STATE_SCHED, &amp;n-&gt;state))
+                msleep(1);
+        while (test_and_set_bit(NAPI_STATE_NPSVC, &amp;n-&gt;state))
+                msleep(1);
+
+        hrtimer_cancel(&amp;n-&gt;timer);
+
+        clear_bit(NAPI_STATE_PREFER_BUSY_POLL, &amp;n-&gt;state);
+        clear_bit(NAPI_STATE_DISABLE, &amp;n-&gt;state);
+        clear_bit(NAPI_STATE_THREADED, &amp;n-&gt;state);
+&#125;
+</code></pre>
+<p>所以这时候就可以推断，应该是热插拔走到virtnet_close去disable每个队列上的napi，然后某个队列的napi一直不能被成功关闭（因为NAPI_STATE_SCHED的状态不对，期望是0，而现在是1），导致一直在while重试，而pciehp线程还持有rtnl_mutex锁，导致其他的一些curl ethtool这些的进程也没有办法执行完成，一直在等pciehp线程释放rtnl_mutex锁，如此系统变hung住了。</p>
+<p>那么我们查找一下这个napi结构体的地址，去看一下它的状态。</p>
+<p>可以看到上面的napi_disable函数的参数就是napi的指针，所以可以从这里去查找，napi_disable的上一个函数virtnet_close调用napi_disable的时候必然会准备napi参数。所以看一下virtnet_close的栈，可以看到得到rbx寄存器的值就可以知道napi的地址。然后我们看一下napi_disable的栈，这里push了rbx，所以我们可以通过bt -f查找到第二个压栈的数加0x8就是napi的地址了。也就是0xffff9c9a037e2d00+0x8</p>
+<pre><code class="language-c">crash&gt; dis -lr ffffffffc0e1274d
+......
+0xffffffffc0e12739 &lt;virtnet_close+89&gt;:  add    0xae0(%r12),%rbx
+0xffffffffc0e12741 &lt;virtnet_close+97&gt;:  mov    %rbx,%rdi                               ----&gt;rbx
+0xffffffffc0e12744 &lt;virtnet_close+100&gt;: add    $0x8,%rdi                               ----&gt;也就是rbx+8
+0xffffffffc0e12748 &lt;virtnet_close+104&gt;: call   0xffffffffa69b7da0 &lt;napi_disable&gt;
+0xffffffffc0e1274d &lt;virtnet_close+109&gt;: imul   $0x3b8,%rbp,%rdi
+
+crash&gt; dis -lr ffffffffa69b7dcb
+/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/core/dev.c: 6622
+0xffffffffa69b7da0 &lt;napi_disable&gt;:      nopl   0x0(%rax,%rax,1) [FTRACE NOP]
+/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/core/dev.c: 6623
+0xffffffffa69b7da5 &lt;napi_disable+5&gt;:    push   %rbp
+0xffffffffa69b7da6 &lt;napi_disable+6&gt;:    mov    %rdi,%rbp
+0xffffffffa69b7da9 &lt;napi_disable+9&gt;:    push   %rbx                                    ----&gt;push了rbx
+/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/core/dev.c: 6624
+
+
+crash&gt; bt -f
+......
+ #4 [ffffaaca74b9baf8] napi_disable at ffffffffa69b7dcb
+    ffffaaca74b9bb00: ffff9c9a037e2d00 000000000000000a
+    ffffaaca74b9bb10: ffffffffc0e1274d
+</code></pre>
+<p>根据上面得到的地址看一下napi的内容，去源码中找一下这些bit的含义，所以这里的state就是NAPIF_STATE_SCHED | NAPIF_STATE_MISSED | NAPIF_STATE_DISABLE | NAPIF_STATE_LISTED，符合之前看到的NAPIF_STATE_SCHED一直是1导致一直在死循环的情况。</p>
+<pre><code class="language-c">crash&gt; struct napi_struct 0xffff9c9a037e2d08 -x
+struct napi_struct &#123;
+  poll_list = &#123;
+    next = 0xffff9c9a037e2d08,
+    prev = 0xffff9c9a037e2d08
+  &#125;,
+  state = 0x17,
+  weight = 0x40,
+  gro_count = 0x0,
+  poll = 0xffffffffc0e185e0 &lt;virtnet_poll&gt;,
+  poll_owner = 0xffffffff,
+  dev = 0xffff9c9a03792000,
+  rh_reserved_gro_list = 0x0,
+  skb = 0x0,
+......
+
+
+
+enum &#123;
+        NAPIF_STATE_SCHED               = BIT(NAPI_STATE_SCHED),
+        NAPIF_STATE_MISSED              = BIT(NAPI_STATE_MISSED),
+        NAPIF_STATE_DISABLE             = BIT(NAPI_STATE_DISABLE),
+        NAPIF_STATE_NPSVC               = BIT(NAPI_STATE_NPSVC),
+        NAPIF_STATE_LISTED              = BIT(NAPI_STATE_LISTED),
+        NAPIF_STATE_NO_BUSY_POLL        = BIT(NAPI_STATE_NO_BUSY_POLL),
+        NAPIF_STATE_IN_BUSY_POLL        = BIT(NAPI_STATE_IN_BUSY_POLL),
+        NAPIF_STATE_PREFER_BUSY_POLL    = BIT(NAPI_STATE_PREFER_BUSY_POLL),
+        NAPIF_STATE_THREADED            = BIT(NAPI_STATE_THREADED),
+        NAPIF_STATE_SCHED_THREADED      = BIT(NAPI_STATE_SCHED_THREADED),
+&#125;;
+</code></pre>
+<p>而如果NAPIF_STATE_SCHED是1的话，也就是在调度中，那么为什么poll list是空的？这就说明，至少是存在race condition的，可能sched但是没有completion清除掉NAPIF_STATE_SCHED，或者可能设置的时候就有问题，或者可能是其他的race。</p>
+<p>总之，问题根因就是<font color="red">在pciehp热插拔网卡在virtnet_close中使用napi_disable去停止napi的时候，我们预期这时候napi的state中NAPIF_STATE_SCHED是0，也就是表示此时没有任何调度，当时当前的实际情况，NAPIF_STATE_SCHED是1，并且没有其他代码去set bit，导致napi_disable一直while msleep循环。而pciehp线程是持有rtnl_mutex锁的，它一直while msleep循环不能结束，也就一直持有锁，而其他需要加rtnl_mutex锁的进程就会一直等待，最终的表现就是hung task发生</font>。</p>
+<pre><code class="language-c">crash&gt; list 0xffff9c9a037e2d08
+ffff9c9a037e2d08
+</code></pre>
+<p>查了一下上游，应该是已经被修复了。</p>
+<pre><code class="language-c">commit 3765996e4f0b8a755cab215a08df744490c76052
+Author: Xuan Zhuo &lt;xuanzhuo@linux.alibaba.com&gt;
+Date:   Sat Sep 18 16:52:32 2021 +0800
+
+    napi: fix race inside napi_enable
+
+    The process will cause napi.state to contain NAPI_STATE_SCHED and
+    not in the poll_list, which will cause napi_disable() to get stuck.
+
+    The prefix &quot;NAPI_STATE_&quot; is removed in the figure below, and
+    NAPI_STATE_HASHED is ignored in napi.state.
+
+                          CPU0       |                   CPU1       | napi.state
+    ===============================================================================
+    napi_disable()                   |                              | SCHED | NPSVC
+    napi_enable()                    |                              |
+    &#123;                                |                              |
+        smp_mb__before_atomic();     |                              |
+        clear_bit(SCHED, &amp;n-&gt;state); |                              | NPSVC
+                                     | napi_schedule_prep()         | SCHED | NPSVC
+                                     | napi_poll()                  |
+                                     |   napi_complete_done()       |
+                                     |   &#123;                          |
+                                     |      if (n-&gt;state &amp; (NPSVC | | (1)
+                                     |               _BUSY_POLL)))  |
+                                     |           return false;      |
+                                     |     ................         |
+                                     |   &#125;                          | SCHED | NPSVC
+                                     |                              |
+        clear_bit(NPSVC, &amp;n-&gt;state); |                              | SCHED
+    &#125;                                |                              |
+                                     |                              |
+    napi_schedule_prep()             |                              | SCHED | MISSED (2)
+
+    (1) Here return direct. Because of NAPI_STATE_NPSVC exists.
+    (2) NAPI_STATE_SCHED exists. So not add napi.poll_list to sd-&gt;poll_list
+
+    Since NAPI_STATE_SCHED already exists and napi is not in the
+    sd-&gt;poll_list queue, NAPI_STATE_SCHED cannot be cleared and will always
+    exist.
+
+    1. This will cause this queue to no longer receive packets.
+    2. If you encounter napi_disable under the protection of rtnl_lock, it
+       will cause the entire rtnl_lock to be locked, affecting the overall
+       system.
+
+    This patch uses cmpxchg to implement napi_enable(), which ensures that
+    there will be no race due to the separation of clear two bits.
+
+    Fixes: 2d8bff12699abc (&quot;netpoll: Close race condition between poll_one_napi and napi_disable&quot;)
+    Signed-off-by: Xuan Zhuo &lt;xuanzhuo@linux.alibaba.com&gt;
+    Reviewed-by: Dust Li &lt;dust.li@linux.alibaba.com&gt;
+    Signed-off-by: David S. Miller &lt;davem@davemloft.net&gt;
+
+diff --git a/net/core/dev.c b/net/core/dev.c
+index 74fd402d26dd..7ee9fecd3aff 100644
+--- a/net/core/dev.c
++++ b/net/core/dev.c
+@@ -6923,12 +6923,16 @@ EXPORT_SYMBOL(napi_disable);
+  */
+ void napi_enable(struct napi_struct *n)
+ &#123;
+-       BUG_ON(!test_bit(NAPI_STATE_SCHED, &amp;n-&gt;state));
+-       smp_mb__before_atomic();
+-       clear_bit(NAPI_STATE_SCHED, &amp;n-&gt;state);
+-       clear_bit(NAPI_STATE_NPSVC, &amp;n-&gt;state);
+-       if (n-&gt;dev-&gt;threaded &amp;&amp; n-&gt;thread)
+-               set_bit(NAPI_STATE_THREADED, &amp;n-&gt;state);
++       unsigned long val, new;
++
++       do &#123;
++               val = READ_ONCE(n-&gt;state);
++               BUG_ON(!test_bit(NAPI_STATE_SCHED, &amp;val));
++
++               new = val &amp; ~(NAPIF_STATE_SCHED | NAPIF_STATE_NPSVC);
++               if (n-&gt;dev-&gt;threaded &amp;&amp; n-&gt;thread)
++                       new |= NAPIF_STATE_THREADED;
++       &#125; while (cmpxchg(&amp;n-&gt;state, val, new) != val);
+ &#125;
+ EXPORT_SYMBOL(napi_enable);
+</code></pre>
+<p>大佬的patch已经把race场景分析的很清晰了，就是napi_enable函数中clear NAPIF_STATE_SCHED和NAPIF_STATE_NPSVC之间，其他的cpu可能触发了schedule调度napi去执行，导致最后NAPIF_STATE_SCHED没有办法被clear掉。</p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
