@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>修改公版内核 | YZWDDSG</title>
+  <title>AI辅助下mlx驱动bug的快速定位与修复 | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="修改公版内核 | YZWDDSG">
+  <meta name="description" content="AI辅助下mlx驱动bug的快速定位与修复 | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta property="og:type" content="website">
@@ -756,9 +756,9 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="post-修改公版内核" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-AI辅助下mlx驱动bug的快速定位与修复" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">修改公版内核</h1>
+        <h1 class="article-title">AI辅助下mlx驱动bug的快速定位与修复</h1>
     
     <div class="article-meta">
         
@@ -768,7 +768,7 @@
             <i class="iconfont icon-category"></i>
             
             
-            <a  data-rel="OS">OS</a>
+            <a  data-rel="故障排查">故障排查</a>
             
         </span>
         
@@ -776,12 +776,12 @@
     </div>
     <div class="article-meta">
         
-            Created At : <time class="date" title='Updated At: 2025-03-10 22:56:49'>2025-03-10 22:13</time>
+            Created At : <time class="date" title='Updated At: 2026-06-12 20:56:33'>2026-06-12 20:41</time>
         
     </div>
     <div class="article-meta">
         
-        <span>Count:314</span>
+        <span>Count:3k</span>
         
         
         <span id="busuanzi_container_page_pv">
@@ -811,7 +811,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#centos"><span class="toc-text">centos</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ubuntu"><span class="toc-text">ubuntu</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-text">问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF%E7%9F%A5%E8%AF%86"><span class="toc-text">背景知识</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5"><span class="toc-text">问题排查</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E6%B7%B1%E7%A9%B6"><span class="toc-text">问题深究</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E4%BF%AE%E5%A4%8D"><span class="toc-text">问题修复</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -827,48 +827,385 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="centos"><a href="#centos" class="headerlink" title="centos"></a><center>centos</center></h3><ul>
-<li>下载对应的src.rpm包<a target="_blank" rel="noopener" href="http://ftp.iij.ad.jp/pub/linux/centos-vault/centos/8/BaseOS/Source/SPackages/">http://ftp.iij.ad.jp/pub/linux/centos-vault/centos/8/BaseOS/Source/SPackages/</a></li>
-<li>安装必要的包 得把repo源的powertool打开</li>
+        <h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a><center>问题</center></h3><p>近期遇到一起mlx网卡分sf失败的问题。</p>
+<p>本人对mlx驱动中sf的分配过程并没有详细研究过，因此借助大模型完成了这个问题的定位与修复。在此记录一下这个过程。</p>
+<h3 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a><center>背景知识</center></h3><p>让大模型先帮我总结了一下pf、vf和sf的区别。</p>
+<p>PCIe 设备中的 <strong>PF、VF、SF</strong> 是 I&#x2F;O 虚拟化中的核心概念。简单来说：</p>
+<ul>
+<li><strong>PF</strong>：设备的“大管家”，负责全局管理。</li>
+<li><strong>VF</strong>：由 PF 切出的“轻量级分身”，适合直接分配给虚拟机。</li>
+<li><strong>SF</strong>：一种更灵活的“轻量级功能单元”，旨在解决 VF 在大规模场景下的局限性。</li>
 </ul>
-<pre><code>sudo yum install -y asciidoc audit-libs-devel binutils-devel bison clang elfutils-devel flex git java-devel kabi-dw libcap-devel libcap-ng-devel libmnl-devel llvm ncurses-devel newt-devel nss-tools numactl-devel openssl-devel pciutils-devel perl-ExtUtils-Embed perl-devel perl-generators pesign python3-docutils xmlto xz-devel dwarves libbpf-devel libbabeltrace-devel -y
+<p>下面的表格可以帮你更直观地理解它们的区别：</p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>PF (Physical Function, 物理功能)</th>
+<th>VF (Virtual Function, 虚拟功能)</th>
+<th>SF (Scalable&#x2F;Sub Function, 可扩展功能)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>本质</strong></td>
+<td>一个完整、独立的 PCIe 设备</td>
+<td>主 PF 的轻量级“分身”，共享硬件资源</td>
+<td>从父设备上切出来的“一部分能力”，更接近于软件定义</td>
+</tr>
+<tr>
+<td><strong>核心功能</strong></td>
+<td><strong>管理</strong>与<strong>控制</strong>整个设备，如配置、创建 VF</td>
+<td><strong>数据转发</strong>与<strong>I&#x2F;O 处理</strong>，通常不参与管理</td>
+<td><strong>数据转发</strong>，支持动态创建与销毁，并可拥有部分专属资源</td>
+</tr>
+<tr>
+<td><strong>所需驱动</strong></td>
+<td>需要完整的、具备管理能力的驱动程序</td>
+<td>仅需要简单的、进行数据处理的“轻量级”驱动</td>
+<td>通常复用现有设备驱动模型，管理更依赖软件</td>
+</tr>
+<tr>
+<td><strong>典型应用</strong></td>
+<td>主机操作系统（如 Hypervisor）使用，管理硬件并创建 VF</td>
+<td>直接分配给虚拟机 (VM) 或容器，实现高性能网络</td>
+<td>云数据中心、SmartNIC、容器化环境，追求高密度和快速弹性伸缩</td>
+</tr>
+</tbody></table>
+<p>在mlx5驱动中，ctl irq (Control Interrupt) 和 comp irq (Completion Interrupt) 分别是用于<strong>控制平面</strong>（如设备命令）和<strong>数据平面</strong>（数据包收发完成）的两类硬件中断。</p>
+<p>它们的核心区别在于<strong>功能定位</strong>与<strong>优化目标</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th><strong>ctl irq (控制中断)</strong></th>
+<th><strong>comp irq (完成中断)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>中文别称</strong></td>
+<td>控制中断、异步事件中断 (Async EQ)</td>
+<td>完成中断、数据通路中断 (Completion EQ)</td>
+</tr>
+<tr>
+<td><strong>主要用途</strong></td>
+<td>处理设备的管理平面事件，如：命令完成通知、设备状态变更、错误报告等</td>
+<td>处理数据平面事件，即高速网络数据包（发送&#x2F;接收）的完成通知</td>
+</tr>
+<tr>
+<td><strong>性能特点</strong></td>
+<td>事件频率低，延迟敏感性不高</td>
+<td>事件频率极高，是网络吞吐和延迟的关键路径，对性能要求极高</td>
+</tr>
+<tr>
+<td><strong>硬件映射</strong></td>
+<td>使用MSI-X向量表中的一个专用向量，通常会被分配在向量表的特定位置（如最开始或最后）</td>
+<td>使用MSI-X向量表中除控制中断外的多个向量，实现多队列并行处理，提升性能</td>
+</tr>
+<tr>
+<td><strong>驱动设计</strong></td>
+<td>专门由<code>mlx5_ctrl_irq_request()</code>API申请</td>
+<td>由通用<code>mlx5_irq_request()</code>API申请，但驱动内部会进行区分和专门优化</td>
+</tr>
+<tr>
+<td><strong>中断处理</strong></td>
+<td>触发<code>mlx5_eq_async_int()</code>，主要处理异步事件</td>
+<td>触发<code>mlx5_eq_comp_int()</code>，核心处理数据路径完成事件</td>
+</tr>
+</tbody></table>
+<h3 id="问题排查"><a href="#问题排查" class="headerlink" title="问题排查"></a><center>问题排查</center></h3><p>基本的背景知识我们清楚了，接下来就开始问题排查。</p>
+<p>先看一下分配vf失败时候的栈：</p>
+<pre><code>[39236794.852198] mlx5_core.sf mlx5_core.sf.3: Rate limit: 127 rates are supported, range: 0Mbps to 97656Mbps
+[39236794.852830] mlx5_core 0000：0e:00.0: mlx5_irq_affinity_request:140:(pid 3058156)： Didn&#39;t find a matching IRQ. err= -87
+[39236794.852833] mlx5_core.sf mlx5_core.sf.3:mlx5_eq_table_create:1252:(pid 3058156)： Failed to create async EQs
+[39236794.852834] mlx5_core.sf mlx5_core.sf.3: mlx5_load:1649:(pid 3058156)： Failed to create EQs
+[39236795.304686] mlx5_core.sf mlx5_core.sf.3: mlx5_sf_dev_probe:69:(pid 3058156)： mlx5_init_one err=-87
+[39236795.304784] mlx5_core.sf: probe of mlx5_core.sf.3 failed with error -87
 </code></pre>
-<ul>
-<li>yum源打开powertool repo</li>
-<li>rpm -ivh kernel-4.18.0-348.7.1.el8_5.src.rpm安装</li>
-</ul>
-<p>​	内核源码包就在&#x2F;root&#x2F;rpmbuild&#x2F;SOURCES中</p>
-<p>​	cp linux-4.18.0-348.7.1.el8_5.tar.xz &#x2F;tmp 把源码cp一下</p>
-<p>​	解压修改，并替换</p>
-<ul>
-<li>cd到&#x2F;root&#x2F;rpmbuild下 执行rpmbuild -bb –target&#x3D;$(uname -m) SPECS&#x2F;kernel.spec</li>
-</ul>
-<h3 id="ubuntu"><a href="#ubuntu" class="headerlink" title="ubuntu"></a><center>ubuntu</center></h3><ul>
-<li><p>下载对应内核的源码包</p>
-</li>
-<li><p>解压并修改源码，把当前内核的config复制过来</p>
-</li>
-</ul>
-<p>​	sudo cp &#x2F;boot&#x2F;config-$(uname -r).config</p>
-<ul>
-<li>安装必要的包</li>
-</ul>
-<pre><code>sudo apt-get install libncurses5-dev openssl libssl-dev sudo apt-get install build-essential openssl sudo apt-get install pkg-config sudo apt-get install libc6-dev sudo apt-get install bison sudo apt-get install flex sudo apt-get install libelf-dev sudo apt-get install zlibc minizip sudo apt-get install libidn11-dev libidn11 apt install dwarves
+<p>看log，我们找到对应的出错的mlx5_irq_affinity_request函数</p>
+<pre><code>struct mlx5_irq *
+mlx5_irq_affinity_request(struct mlx5_core_dev *dev, struct mlx5_irq_pool *pool,
+                          struct irq_affinity_desc *af_desc)
+&#123;
+        struct mlx5_irq *least_loaded_irq, *new_irq;
+        int ret;
+
+        mutex_lock(&amp;pool-&gt;lock);
+        least_loaded_irq = irq_pool_find_least_loaded(pool, &amp;af_desc-&gt;mask);
+        if (least_loaded_irq &amp;&amp;
+            mlx5_irq_read_locked(least_loaded_irq) &lt; pool-&gt;min_threshold)
+                goto out;
+        /* We didn&#39;t find an IRQ with less than min_thres, try to allocate a new IRQ */
+        new_irq = irq_pool_request_irq(pool, af_desc);
+        if (IS_ERR(new_irq)) &#123;
+                if (!least_loaded_irq) &#123;
+                        //这里err日志在dmesg只是打印了出来的
+                        /* We failed to create an IRQ and we didn&#39;t find an IRQ */
+                        mlx5_core_err(pool-&gt;dev, &quot;Didn&#39;t find a matching IRQ. err = %pe\n&quot;,
+                                      new_irq);
+                        mutex_unlock(&amp;pool-&gt;lock);
+                        return new_irq;
+                &#125;
+                /* We failed to create a new IRQ for the requested affinity,
+                 * sharing existing IRQ.
+                 */
+                goto out;
+        &#125;
+.......
 </code></pre>
-<ul>
-<li>编译内核</li>
-</ul>
-<pre><code>sudo make -j4
-sudo make modules -j4
-sudo make modules_install -j4
+<p>看上面这段代码可以轻易知道，肯定是irq_pool_request_irq申请失败了。而且least_loaded_irq也是NULL，所以才能走到这里</p>
+<p>但是这里返回的-87是为什么呢？我追踪了irq_pool_request_irq里的函数，发现并没有会返回-87的地方</p>
+<p>原来，-87这里是一个乌龙，我查看的是上游的最新的mlx驱动代码，而出问题的内核版本是比较老的，mlx驱动也比较老，其实是应该挂在了这里</p>
+<pre><code>static struct mlx5_irq *
+irq_pool_request_irq(struct mlx5_irq_pool *pool, const struct cpumask *req_mask)
+&#123;
+        cpumask_var_t auto_mask;
+        struct mlx5_irq *irq;
+        u32 irq_index;
+        int err;
+
+        if (!zalloc_cpumask_var(&amp;auto_mask, GFP_KERNEL))
+                return ERR_PTR(-ENOMEM);
+        err = xa_alloc(&amp;pool-&gt;irqs, &amp;irq_index, NULL, pool-&gt;xa_num_irqs, GFP_KERNEL);
+        if (err) &#123;
+                if (err == -EBUSY)
+                        err = -EUSERS;
+                return ERR_PTR(err);
+        &#125;
+.......
+
+
+
+#define EUSERS          87      /* Too many users */
 </code></pre>
-<ul>
-<li>安装内核</li>
-</ul>
-<pre><code>sudo make install
-sudo mkinitramfs -o /boot/initrd.img-XXXX
-sudo update-initramfs -c -k XXXX
-sudo update-grub2
+<p>这里从irq pool中申请irq的时候，xa_alloc失败会返回EBUSY，而旧驱动里会把EBUSY改成EUSERS，EUSERS的错误码正是87</p>
+<p>然后这时候检查基础环境发现了一点异常，这台机器有一部分的核被offline了</p>
+<p>所以猜测就是因为关核导致了最后的分sf异常</p>
+<p>然而，添加一些debug日志之后，我发现：无论是否关核，irq_pool_request_irq其实都是失败的。</p>
+<p>也就是，问题的根因在于，关核之后，least_loaded_irq变成NULL了。添加debug日志测试之后发现确实如此。</p>
+<p>继续添加更多的debug日志之后发现了问题：mlx驱动使用irq_pool_find_least_loaded这个函数去找一个已经load的irq用于共享，在cpumask_subset中，原本req_mask是cpu_online_mask（没有offline之前的），而iter_mask是offline之后的cpumask，这就导致这个cpumask_subset判断子集失败了，因此irq_pool_find_least_loaded返回为NULL了。</p>
+<pre><code>static struct mlx5_irq *
+irq_pool_find_least_loaded(struct mlx5_irq_pool *pool, const struct cpumask *req_mask)
+&#123;
+        int start = pool-&gt;xa_num_irqs.min;
+        int end = pool-&gt;xa_num_irqs.max;
+        struct mlx5_irq *irq = NULL;
+        struct mlx5_irq *iter;
+        int irq_refcount = 0;
+        unsigned long index;
+
+        lockdep_assert_held(&amp;pool-&gt;lock);
+        xa_for_each_range(&amp;pool-&gt;irqs, index, iter, start, end) &#123;
+                struct cpumask *iter_mask = mlx5_irq_get_affinity_mask(iter);
+                int iter_refcount = mlx5_irq_read_locked(iter);
+
+                if (!cpumask_subset(iter_mask, req_mask))
+                        /* skip IRQs with a mask which is not subset of req_mask */
+                        continue;
+                if (iter_refcount &lt; pool-&gt;min_threshold)
+                        /* If we found an IRQ with less than min_thres, return it */
+                        return iter;
+                if (!irq || iter_refcount &lt; irq_refcount) &#123;
+                        /* In case we won&#39;t find an IRQ with less than min_thres,
+                         * keep a pointer to the least used IRQ
+                         */
+                        irq_refcount = iter_refcount;
+                        irq = iter;
+                &#125;
+        &#125;
+        return irq;
+&#125;
+</code></pre>
+<h3 id="问题深究"><a href="#问题深究" class="headerlink" title="问题深究"></a><center>问题深究</center></h3><p>以上我们其实已经定位出了问题产生的直接原因，但是还有一些问题并没有澄清。整个问题发生的流程是什么样的，为题根因是什么？为什么vf不会出现这样的问题呢？</p>
+<p>我们直接追一下分sf的流程，从probe驱动开始：可以看到，sf驱动probe的过程中，在执行mlx5_irq_table_create的时候，如果判断到这是一个sf，就直接跳过irq_table的创建，然后继续执行mlx5_eq_table_create去创建eq table，在这里最终会调用到导致失败的mlx5_irq_affinity_request函数。</p>
+<pre><code>mlx5_sf_dev_probe
+  -&gt;mlx5_init_one
+    -&gt;mlx5_load
+      -&gt;mlx5_irq_table_create
+      -&gt;mlx5_eq_table_create
+
+int mlx5_irq_table_create(struct mlx5_core_dev *dev)
+&#123;
+        int num_eqs = mlx5_max_eq_cap_get(dev);
+        bool dynamic_vec;
+        int total_vec;
+        int pcif_vec;
+        int req_vec;
+        int err;
+        int n;
+
+        if (mlx5_core_is_sf(dev))
+                return 0;
+.......
+
+
+//sf在mlx5_irq_table_create中跳过了irq table的创建，然后继续执行mlx5_eq_table_create
+mlx5_eq_table_create
+  -&gt;create_async_eqs
+    -&gt;mlx5_ctrl_irq_request
+      -&gt;mlx5_irq_affinity_request
+</code></pre>
+<p>那么为什么创建sf时要跳过irq table的创建呢，是那一步导致最终出现问题呢？</p>
+<p>我们来详细分析一下mlx5_ctrl_irq_request这个函数，这个函数主要是给mlx5设备申请一个ctl irq。函数逻辑很清晰。大体执行过程为：获取设备对应的irq pool，分配一个irq_affinity_desc结构体，给他的mask赋值为当前的online cpu mask，因为是sf，所以去执行mlx5_irq_affinity_request申请一个irq，这个irq必须要在af_desc内的，也就是必须指向当前的online cpu mask的。</p>
+<p>继续看，可以找到出现问题时候的代码，执行mlx5_irq_affinity_request去申请irq，这里想要调用irq_pool_find_least_loaded从irq pool中去找到一个可用的irq，但是失败了。</p>
+<pre><code>/**
+ * mlx5_ctrl_irq_request - request a ctrl IRQ for mlx5 device.
+ * @dev: mlx5 device that requesting the IRQ.
+ *
+ * This function returns a pointer to IRQ, or ERR_PTR in case of error.
+ */
+struct mlx5_irq *mlx5_ctrl_irq_request(struct mlx5_core_dev *dev)
+&#123;
+        struct mlx5_irq_pool *pool = ctrl_irq_pool_get(dev);
+        struct irq_affinity_desc *af_desc;
+        struct mlx5_irq *irq;
+
+        af_desc = kvzalloc_obj(*af_desc);
+        if (!af_desc)
+                return ERR_PTR(-ENOMEM);
+
+        cpumask_copy(&amp;af_desc-&gt;mask, cpu_online_mask);
+        af_desc-&gt;is_managed = false;
+        if (!mlx5_irq_pool_is_sf_pool(pool)) &#123;
+                /* In case we are allocating a control IRQ from a pci device&#39;s pool.
+                 * This can happen also for a SF if the SFs pool is empty.
+                 */
+                if (!pool-&gt;xa_num_irqs.max) &#123;
+                        cpumask_clear(&amp;af_desc-&gt;mask);
+                        /* In case we only have a single IRQ for PF/VF */
+                        cpumask_set_cpu(cpumask_first(cpu_online_mask), &amp;af_desc-&gt;mask);
+                &#125;
+                /* Allocate the IRQ in index 0. The vector was already allocated */
+                irq = irq_pool_request_vector(pool, 0, af_desc, NULL);
+        &#125; else &#123;
+                irq = mlx5_irq_affinity_request(dev, pool, af_desc);
+        &#125;
+
+        kvfree(af_desc);
+
+        return irq;
+&#125;
+
+
+
+struct mlx5_irq *
+mlx5_irq_affinity_request(struct mlx5_core_dev *dev, struct mlx5_irq_pool *pool,
+                          struct irq_affinity_desc *af_desc)
+&#123;
+        struct mlx5_irq *least_loaded_irq, *new_irq;
+        int ret;
+
+        mutex_lock(&amp;pool-&gt;lock);
+        least_loaded_irq = irq_pool_find_least_loaded(pool, &amp;af_desc-&gt;mask);
+......
+
+
+
+static struct mlx5_irq *
+irq_pool_find_least_loaded(struct mlx5_irq_pool *pool, const struct cpumask *req_mask)
+&#123;
+        int start = pool-&gt;xa_num_irqs.min;
+        int end = pool-&gt;xa_num_irqs.max;
+        struct mlx5_irq *irq = NULL;
+        struct mlx5_irq *iter;
+        int irq_refcount = 0;
+        unsigned long index;
+
+        lockdep_assert_held(&amp;pool-&gt;lock);
+        xa_for_each_range(&amp;pool-&gt;irqs, index, iter, start, end) &#123;
+                struct cpumask *iter_mask = mlx5_irq_get_affinity_mask(iter);
+                int iter_refcount = mlx5_irq_read_locked(iter);
+
+                if (!cpumask_subset(iter_mask, req_mask))
+                        /* skip IRQs with a mask which is not subset of req_mask */
+                        continue;
+......
+</code></pre>
+<p>所以就要看一下ctrl_irq_pool_get获取的irq pool是从哪来的？从下面这几个函数就可以看出来，如果是sf的话，返回的是他的parent这里也就是pf的irq_table，然后返回的是pf的irq_table中的sf_ctrl_pool作为这个sf的irq pool。</p>
+<pre><code>static struct mlx5_irq_pool *ctrl_irq_pool_get(struct mlx5_core_dev *dev)
+&#123;
+        struct mlx5_irq_table *irq_table = mlx5_irq_table_get(dev);
+        struct mlx5_irq_pool *pool = NULL;
+
+        if (mlx5_core_is_sf(dev))
+                pool = sf_ctrl_irq_pool_get(irq_table);
+
+        /* In some configs, there won&#39;t be a pool of SFs IRQs. Hence, returning
+         * the PF IRQs pool in case the SF pool doesn&#39;t exist.
+         */
+        return pool ? pool : irq_table-&gt;pcif_pool;
+&#125;
+
+
+struct mlx5_irq_table *mlx5_irq_table_get(struct mlx5_core_dev *dev)
+&#123;
+#ifdef CONFIG_MLX5_SF
+        if (mlx5_core_is_sf(dev))
+                return dev-&gt;priv.parent_mdev-&gt;priv.irq_table;
+#endif
+        return dev-&gt;priv.irq_table;
+&#125;
+
+static struct mlx5_irq_pool *sf_ctrl_irq_pool_get(struct mlx5_irq_table *irq_table)
+&#123;
+        return irq_table-&gt;sf_ctrl_pool;
+&#125;
+</code></pre>
+<p>所以我们就看一下pf的sf_ctrl_pool是什么时候创建的？这里可以看到，pf的sf_ctrl_pool是在probe mlx5驱动的时候就申请内存并初始化的，这里只是把sf_ctrl_pool这个irq pool给初始化了，并没有去实际的申请irq。</p>
+<pre><code>mlx5_core_driver-&gt;probe
+  -&gt;probe_one
+    -&gt;mlx5_init_one
+      -&gt;mlx5_init_one_devl_locked
+        -&gt;mlx5_load
+          -&gt;mlx5_irq_table_create
+            -&gt;irq_pools_init
+
+
+
+static int irq_pools_init(struct mlx5_core_dev *dev, int sf_vec, int pcif_vec,
+                          bool dynamic_vec)
+&#123;
+......
+        /* init sf_ctrl_pool */
+        num_sf_ctrl = DIV_ROUND_UP(mlx5_sf_max_functions(dev),
+                                   MLX5_SFS_PER_CTRL_IRQ);
+        num_sf_ctrl = min_t(int, MLX5_IRQ_CTRL_SF_MAX, num_sf_ctrl);
+        if (!dynamic_vec &amp;&amp; (num_sf_ctrl + 1) &gt; sf_vec_available) &#123;
+                mlx5_core_dbg(dev,
+                              &quot;Not enough IRQs for SFs control and completion pool, required=%d avail=%d\n&quot;,
+                              num_sf_ctrl + 1, sf_vec_available);
+                return 0;
+        &#125;
+        
+        table-&gt;sf_ctrl_pool = irq_pool_alloc(dev, pcif_vec, num_sf_ctrl,
+                                             &quot;mlx5_sf_ctrl&quot;,
+                                             MLX5_EQ_SHARE_IRQ_MIN_CTRL,
+                                             MLX5_EQ_SHARE_IRQ_MAX_CTRL);
+</code></pre>
+<p>真正的irq申请，是在sf初始化的时候。</p>
+<p>所以，事情到这里已经就非常清晰明了了，出现问题的过程应该是：</p>
+<p><font color="red">1.系统启动，probe mlx5驱动，创建sf_ctrl_pool。</font></p>
+<p><font color="red">2.请求创建sf，从sf_ctrl_pool中申请一个irq，这个irq的mask是当前的cpu_online_mask，假设是{0-191}。</font></p>
+<p><font color="red">3.把当前系统中的某个cpu offline，假设offline 20号cpu。</font></p>
+<p><font color="red">4.再次申请创建一个sf，调用mlx5_irq_affinity_request尝试申请一个irq，使用的af_desc-&gt;cpumask是现在的cpu_online_mask，即{0-19,21-191}，尝试去按照这个afdesc-&gt;cpumask去申请irq，irq_pool_find_least_loaded会遍历当前sf_ctrl_pool中的所有irq，先检查遍历的irq的cpumask是不是af_desc-&gt;cpumask的子集。很明显，在offline一个cpu之后，sf_ctrl_pool中的irq cpumask并不是其子集，因此不会使用。</font></p>
+<p><img src="/img/59.png"></p>
+<p>那么vf为什么没有这个问题呢？因为vf有自己的pci_dev，不使用pf的irq table，vf之间也不像sf一样共享ctl irq。</p>
+<h3 id="问题修复"><a href="#问题修复" class="headerlink" title="问题修复"></a><center>问题修复</center></h3><p>了解了问题产生的根因，问题修复也就显而易见了，只要遍历sf_ctrl_pool中的irq时使用他真正指向的cpumask去判断子集即可，而不是使用irq-&gt;mask。</p>
+<pre><code>--- a/drivers/net/ethernet/mellanox/mlx5/core/irq_affinity.c
++++ b/drivers/net/ethernet/mellanox/mlx5/core/irq_affinity.c
+@@ -105,9 +105,12 @@ irq_pool_find_least_loaded(struct mlx5_irq_pool *pool, const struct cpumask *req
+
+        lockdep_assert_held(&amp;pool-&gt;lock);
+        xa_for_each_range(&amp;pool-&gt;irqs, index, iter, start, end) &#123;
+-               struct cpumask *iter_mask = mlx5_irq_get_affinity_mask(iter);
+                int iter_refcount = mlx5_irq_read_locked(iter);
++               const struct cpumask *iter_mask;
+
++               iter_mask = irq_get_effective_affinity_mask(mlx5_irq_get_irq(iter));
++               if (!iter_mask)
++                       continue;
+                if (!cpumask_subset(iter_mask, req_mask))
+                        /* skip IRQs with a mask which is not subset of req_mask */
+                        continue;
 </code></pre>
 
       
