@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>热插拔网卡导致的系统hung-task问题排查 | YZWDDSG</title>
+  <title>修了linux一个存在12年的隐藏bug:Intel CPU离线再上线后，频率变了 | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="热插拔网卡导致的系统hung-task问题排查 | YZWDDSG">
+  <meta name="description" content="修了linux一个存在12年的隐藏bug:Intel CPU离线再上线后，频率变了 | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta name="description" content="邮箱：857879363@qq.com bilibili：https:&#x2F;&#x2F;space.bilibili.com&#x2F;346090747 知乎：https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;zhong-ai-83-43 公众号： 本模板链接：3-hexo 本模板原作者：yelog">
@@ -769,9 +769,9 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="post-热插拔网卡导致的系统hung-task问题排查" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-修了linux一个存在12年的隐藏bug-Intel-CPU离线再上线后，频率变了" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">热插拔网卡导致的系统hung-task问题排查</h1>
+        <h1 class="article-title">修了linux一个存在12年的隐藏bug:Intel CPU离线再上线后，频率变了</h1>
     
     <div class="article-meta">
         
@@ -781,7 +781,7 @@
             <i class="iconfont icon-category"></i>
             
             
-            <a  data-rel="故障排查">故障排查</a>
+            <a  data-rel="power">power</a>
             
         </span>
         
@@ -789,12 +789,12 @@
     </div>
     <div class="article-meta">
         
-            发布时间 : <time class="date" title='最后更新: 2026-05-28 22:03:54'>2026-05-28 21:26</time>
+            发布时间 : <time class="date" title='最后更新: 2026-06-15 20:24:27'>2026-06-15 20:09</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:3k</span>
+        <span>字数:2.1k</span>
         
         
         <span id="busuanzi_container_page_pv">
@@ -824,7 +824,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF"><span class="toc-text">问题背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86"><span class="toc-text">相关知识</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%92%E6%9F%A5%E8%BF%87%E7%A8%8B"><span class="toc-text">排查过程</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF"><span class="toc-text">问题背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86"><span class="toc-text">相关知识</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%BD%8D%E5%8F%8A%E8%A7%A3%E5%86%B3"><span class="toc-text">定位及解决</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%8E%92%E6%9F%A5%E8%BF%87%E7%A8%8B"><span class="toc-text">排查过程</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88offline-cpu%E8%A6%81%E8%AE%BE%E7%BD%AEMSR-IA32-PERF-CTL"><span class="toc-text">为什么offline cpu要设置MSR_IA32_PERF_CTL</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88onelin%E8%BF%87%E7%A8%8B%E6%B2%A1%E6%9C%89%E6%81%A2%E5%A4%8DMSR-IA32-PERF-CTL"><span class="toc-text">为什么onelin过程没有恢复MSR_IA32_PERF_CTL</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E6%A0%B9%E5%9B%A0"><span class="toc-text">问题根因</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%80%8E%E4%B9%88%E5%9C%A8%E9%A9%B1%E5%8A%A8%E4%BB%A3%E7%A0%81%E5%B1%82%E9%9D%A2%E8%A7%A3%E5%86%B3%E8%BF%99%E4%B8%AA%E9%97%AE%E9%A2%98"><span class="toc-text">怎么在驱动代码层面解决这个问题</span></a></li></ol></li></ol></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -840,375 +840,239 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="问题背景"><a href="#问题背景" class="headerlink" title="问题背景"></a><center>问题背景</center></h3><p>有台centos8机器热插拔virtio网卡失败了，dmesg内显示有hung task的栈。机器使用的是4.18内核。</p>
-<h3 id="相关知识"><a href="#相关知识" class="headerlink" title="相关知识"></a><center>相关知识</center></h3><p>以前，网卡收发包都是通过中断触发去处理的，但是随着高性能网络时代的到来，如果每一次的网络收发包都依靠中断来通知处理，效率低下且会造成中断风暴，因此才出现了napi。简单来讲，napi就是一种中断+轮询混合模式。收发包时，触发中断，然后关闭中断改为轮询模式，批量处理完网络包后结束轮询，恢复中断模式。</p>
-<p>这里要简单说一下napi的使用和生命周期，由于这回排查的是virtio网卡，那我们就以virtio驱动为例来梳理，其他的网卡驱动类似(本想画个图来的，但是东西太多不好塞下，让ai总结一下吧):</p>
-<pre><code class="language-c">┌─────────────────────────────────────────────────────────────────────────┐
-│                          NAPI生命周期                                    │
-└─────────────────────────────────────────────────────────────────────────┘
+        <h3 id="问题背景"><a href="#问题背景" class="headerlink" title="问题背景"></a><center>问题背景</center></h3><p>在一个intel的机器上做测试发现一个问题，该机器的相关配置如下：开启smt、使用intel_cpufreq驱动、不开启hwp、intel pstate驱动为passive模式、开启all-core turbo全核睿频、使用performance governor。</p>
+<p>如果把一个core对应的两个smt的cpu都offline一下然后重新oneline，这个core上的两个cpu的频率都维持在基频，而不是all-core turbo的频率。而如果只把这个core的其中一个smt cpu offline掉然后重新online，那么这个cpu还可以恢复all-core turbo的频率。这是因为什么呢？需要详细排查一下。</p>
+<h3 id="相关知识"><a href="#相关知识" class="headerlink" title="相关知识"></a><center>相关知识</center></h3><p>HWP(hardware-managed P-states)：硬件支持的p-state，intel pstae允许让硬件自己管理pstate状态</p>
+<p>intel_pstate的active模式和passive模式：active模式就是用intel_pstate内建的算法或者使用HWP硬件自己调节pstate。passive模式就还是使用那些通用的governor。</p>
+<p>一些msr：</p>
+<table>
+<thead>
+<tr>
+<th>MSR名字</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MSR_IA32_PERF_STATUS</td>
+<td>反应当前cpu所处的pstate状态</td>
+</tr>
+<tr>
+<td>MSR_IA32_PERF_CTL</td>
+<td>可以通过写入这个msr来向pstate驱动请求修改pstate状态</td>
+</tr>
+<tr>
+<td>MSR_IA32_MPERF</td>
+<td>以cpu标称基准频率递增的计数器，通常与MSR_IA32_APERF一起配合计算当前的实际cpu频率</td>
+</tr>
+<tr>
+<td>MSR_IA32_APERF</td>
+<td>以cpu当前运行的实际频率递增的计数器，通常与MSR_IA32_MPERF一起配合计算当前的实际cpu频率</td>
+</tr>
+</tbody></table>
+<p>更多详细内容可见Linux源码中:Documentation&#x2F;admin-guide&#x2F;pm&#x2F;intel_pstate.rst</p>
+<h3 id="定位及解决"><a href="#定位及解决" class="headerlink" title="定位及解决"></a><center>定位及解决</center></h3><h5 id="排查过程"><a href="#排查过程" class="headerlink" title="排查过程"></a><center>排查过程</center></h5><p>我们直接看一下echo 0 &gt; &#x2F;sys&#x2F;devices&#x2F;system&#x2F;cpu&#x2F;cpuXXX&#x2F;online之后，调用的intel_pstate的offline(也就是intel_cpufreq_cpu_offline)做了什么。</p>
+<pre><code class="language-c">static int intel_cpufreq_cpu_offline(struct cpufreq_policy *policy)
+&#123;
+        struct cpudata *cpu = all_cpu_data[policy-&gt;cpu];
 
-1. PROBE 阶段
-   ┌──────────────────────────────────────────────────────────────┐
-   │ netif_napi_add()                                             │
-   │   → 注册 napi_struct，绑定 poll 回调                           │
-   │   → 此时 NAPI 未使能，不参与调度                                 │
-   └──────────────────────────────────────────────────────────────┘
+        ......
+        if (hwp_active)
+                intel_pstate_hwp_offline(cpu);
+        else
+                intel_pstate_set_min_pstate(cpu);
 
-2. OPEN 阶段
-   ┌──────────────────────────────────────────────────────────────┐
-   │ virtnet_open()                                               │
-   │   → virtnet_enable_queue_pair()                              │
-   │     → virtnet_napi_enable()                                  │
-   │       → napi_enable()  ← 使能 NAPI                            │
-   │       → virtqueue_napi_schedule()  ← 检查是否有待处理包         │
-   └──────────────────────────────────────────────────────────────┘
+        intel_pstate_exit_perf_limits(policy);
 
-3. 数据包到达 → 中断触发
-   ┌──────────────────────────────────────────────────────────────┐
-   │ skb_recv_done() (virtio 回调)                                 │
-   │   → virtqueue_napi_schedule()                                │
-   │     → napi_schedule_prep()  ← 检查是否可以调度                  │
-   │     → virtqueue_disable_cb()  ← 禁用 virtio 回调               │
-   │     → __napi_schedule()  ← 添加到软中断队列                     │
-   └──────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-4. 软中断触发
-   ┌──────────────────────────────────────────────────────────────┐
-   │ NET_RX_SOFTIRQ                                               │
-   │   → virtnet_poll(napi, budget)                               │
-   │     → virtnet_receive()  ← 实际接收数据包                       │
-   │     → if received &lt; budget:                                  │
-   │         → virtqueue_napi_complete()                          │
-   │           → napi_complete_done()                             │
-   │           → virtqueue_enable_cb()  ← 重新使能中断              │
-   └──────────────────────────────────────────────────────────────┘
-
-5. CLOSE 阶段
-   ┌──────────────────────────────────────────────────────────────┐
-   │ virtnet_close()                                              │
-   │   → virtnet_disable_queue_pair()                             │
-   │     → virtnet_napi_disable()                                 │
-   │       → napi_disable()  ← 禁用 NAPI                           │
-   └──────────────────────────────────────────────────────────────┘
+        return 0;
+&#125;
 </code></pre>
-<h3 id="排查过程"><a href="#排查过程" class="headerlink" title="排查过程"></a><center>排查过程</center></h3><p>先看一下dmesg日志，这是最早hung的栈，后面还有很多。只能看到是在等锁了，至于谁在持有锁，只能触发kdump拿vmcore来看了。</p>
-<pre><code class="language-c">......
-[  615.640467] INFO: task kworker/218:2:4106 blocked for more than 120 seconds.
-[  615.647756]       Tainted: G           OE    --------- -  - 4.18.0-348.7.1.el8_5.x86_64 #1
-[  615.656038] &quot;echo 0 &gt; /proc/sys/kernel/hung_task_timeout_secs&quot; disables this message.
-[  615.663881] task:kworker/218:2   state:D stack:    0 pid: 4106 ppid:     2 flags:0x80004000
-[  615.672252] Workqueue: ipv6_addrconf addrconf_verify_work
-[  615.677665] Call Trace:
-[  615.680129]  __schedule+0x2bd/0x760
-[  615.683629]  schedule+0x37/0xa0
-[  615.686780]  schedule_preempt_disabled+0xa/0x10
-[  615.691325]  __mutex_lock.isra.6+0x2b5/0x4a0
-[  615.695604]  addrconf_verify_work+0xa/0x20
-[  615.699715]  process_one_work+0x1a7/0x360
-[  615.703743]  ? create_worker+0x1a0/0x1a0
-[  615.707675]  worker_thread+0x30/0x390
-[  615.711350]  ? create_worker+0x1a0/0x1a0
-[  615.715285]  kthread+0x116/0x130
-[  615.718528]  ? kthread_flush_work_fn+0x10/0x10
-[  615.722981]  ret_from_fork+0x1f/0x40
+<p>可以看到，如果没有开启hwp的话，则去调用intel_pstate_set_min_pstate，那么这个函数是干什么的？</p>
+<pre><code class="language-c">static void intel_pstate_set_min_pstate(struct cpudata *cpu)
+&#123;
+        intel_pstate_set_pstate(cpu, cpu-&gt;pstate.min_pstate);
+&#125;
+
+static void intel_pstate_set_pstate(struct cpudata *cpu, int pstate)
+&#123;
+        trace_cpu_frequency(pstate * cpu-&gt;pstate.scaling, cpu-&gt;cpu);
+        cpu-&gt;pstate.current_pstate = pstate;
+
+        wrmsrq_on_cpu(cpu-&gt;cpu, MSR_IA32_PERF_CTL,
+                      pstate_funcs.get_val(cpu, pstate));
+&#125;
+</code></pre>
+<p>显而易见，就是把通过wrmsrq_on_cpu设置MSR_IA32_PERF_CTL msr为最小的pstate的值。</p>
+<p>前面已经提到，withou HWP+performance的模式下，intel pstate驱动总是会选择允许使用的最大的p-state。而这里把MSR_IA32_PERF_CTL设置成了最小的pstate值，再联系背景中，只有把一个core中的两个smt cpu全都offline然后online之后才会复现这个问题，合理怀疑是不是offline cpu之后设置了MSR_IA32_PERF_CTL为最小pstate但是online之后没有恢复？</p>
+<p>做个实验看一下：</p>
+<pre><code class="language-c">//95和191号cpu是一个core中的两个smt
+
+# rdmsr -p 95 0x199
+2600
+# echo 0 &gt; /sys/devices/system/cpu/cpu95/online
+# echo 1 &gt; /sys/devices/system/cpu/cpu95/online
+# rdmsr -p 95 0x199
+800
+# cpupower monitor
+              | Nehalem                   || Mperf
+ PKG|CORE| CPU| C3   | C6   | PC3  | PC6   || C0   | Cx   | Freq
 .......
-</code></pre>
-<p>接下来是一步一步排查问题的过程：</p>
-<p>先看一下大体情况，有很多D进程</p>
-<pre><code class="language-c">crash&gt; ps |grep UN
-     2291       2 138  ffff9d9312741800  UN   0.0        0        0  [irq/103-pciehp]
-     4106       2 218  ffff9d93110d3000  UN   0.0        0        0  [kworker/218:2]
-    23180    5096 234  ffff9d9382b91800  UN   0.0   163784    10448  sshd
-   107852       1 210  ffff9d9312198000  UN   0.0     1764     1096  ethtool
-   107906       1 215  ffff9d93970c1800  UN   0.0     1764     1096  ethtool
-   107942  107927 223  ffff9d9e82421800  UN   0.0   163544     8080  curl
-   110122  110112 220  ffff9c9be4b30000  UN   0.0   163544     8068  curl
-   110159       1 239  ffff9d9b83d06000  UN   0.0    40788     4512  checknic
-   110195    5096 109  ffff9d9344796000  UN   0.0    74432     6792  sshd
-   ......
-crash&gt; ps |grep UN |wc -l
-352
-</code></pre>
-<p>切到kworker&#x2F;218:2看一下该进程的栈</p>
-<pre><code class="language-c">crash&gt; bt ffff9d93110d3000
-PID: 4106     TASK: ffff9d93110d3000  CPU: 218  COMMAND: &quot;kworker/218:2&quot;
- #0 [ffffaaca6bb3fd98] __schedule at ffffffffa6b7a60d
- #1 [ffffaaca6bb3fdf0] schedule at ffffffffa6b7aae7
- #2 [ffffaaca6bb3fe00] schedule_preempt_disabled at ffffffffa6b7ae2a
- #3 [ffffaaca6bb3fe08] __mutex_lock at ffffffffa6b7cb25
- #4 [ffffaaca6bb3fe90] addrconf_verify_work at ffffffffa6aecdfa
- #5 [ffffaaca6bb3fe98] process_one_work at ffffffffa6309777
- #6 [ffffaaca6bb3fed8] worker_thread at ffffffffa6309e40
- #7 [ffffaaca6bb3ff10] kthread at ffffffffa630f906
- #8 [ffffaaca6bb3ff50] ret_from_fork at ffffffffa6c0023f
-</code></pre>
-<p>看一下这里的addrconf_verify_work函数，所以这里是一直在等rtnl_mutex锁</p>
-<pre><code class="language-c">crash&gt; dis -lr ffffffffa6aecdfa
-/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/ipv6/addrconf.c: 4553
-0xffffffffa6aecdf0 &lt;addrconf_verify_work&gt;:      nopl   0x0(%rax,%rax,1) [FTRACE NOP]
-/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/ipv6/addrconf.c: 4554
-0xffffffffa6aecdf5 &lt;addrconf_verify_work+5&gt;:    call   0xffffffffa69ce880 &lt;rtnl_lock&gt;
-/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/ipv6/addrconf.c: 4555
-0xffffffffa6aecdfa &lt;addrconf_verify_work+10&gt;:   call   0xffffffffa6aeca00 &lt;addrconf_verify_rtnl&gt;
+   1|  47|  95|  0.00|  0.00|  0.00|  0.00||  1.35| 98.65|  3098
+   1|  47| 191|  0.00|  0.00|  0.00|  0.00||  1.20| 98.80|  3098
 
 
-static void addrconf_verify_work(struct work_struct *w)
-&#123;
-        rtnl_lock();
-        addrconf_verify_rtnl();
-        rtnl_unlock();
-&#125;
-void rtnl_lock(void)
-&#123;
-        mutex_lock(&amp;rtnl_mutex);
-&#125;
-</code></pre>
-<p>查一下rtnl_mutex锁</p>
-<pre><code class="language-c">crash&gt; p rtnl_mutex -x
-rtnl_mutex = $2 = &#123;
-  owner = &#123;
-    counter = 0xffff9d9312741801
-  &#125;,
-  wait_lock = &#123;
-    &#123;
-      rlock = &#123;
-        raw_lock = &#123;
-          &#123;
-            val = &#123;
-              counter = 0x0
+# rdmsr -p 191 0x199
+2600
+# echo 0 &gt; /sys/devices/system/cpu/cpu191/online
+# echo 1 &gt; /sys/devices/system/cpu/cpu191/online
+# rdmsr -p 191 0x199
+800
+# rdmsr -p 95 0x199
+800
+# cpupower monitor
+              | Nehalem                   || Mperf
+ PKG|CORE| CPU| C3   | C6   | PC3  | PC6   || C0   | Cx   | Freq
 .......
+   1|  47|  95|  0.00|  0.00|  0.00|  0.00||  2.60| 97.40|   799
+   1|  47| 191|  0.00|  0.00|  0.00|  0.00||  3.95| 96.05|   799
 </code></pre>
-<p>根据这个可以知道锁的owner是0xffff9d9312741801，不过这还不是真正的task_struct的地址，因为mutex的后几位可能是作为一些flags存在的，所以我们需要把这个0xffff9d9312741801进行一下地址对齐，得到的0xffff9d9312741800才是真正的task_struct地址。</p>
-<p>知道了持有锁的进程的task_struct，就可以看一下这是哪个进程，原来就是我们最开始ps出来的irq&#x2F;103-pciehp，这就是罪魁祸首了.</p>
-<pre><code class="language-c">crash&gt; task_struct.comm,tgid 0xffff9d9312741800
-  comm = &quot;irq/103-pciehp\000&quot;,
-  tgid = 2291,
+<p>这里可以看到，如果我先offline 95号cpu然后online，这个cpu的MSR_IA32_PERF_CTL确实从2600变成了800，而cpupower monitor的结果中，95号cpu的频率依旧是3100Khz。然后我又把同core的另一个191号cpu执行了一遍offline和online，191号cpu和95号cpu的MSR_IA32_PERF_CTL都变成了800，cpupower monitor中的频率变成了800Khz。</p>
+<p>所以，这里差不多就可以实锤是intel_cpufreq_cpu_offline中设置了MSR_IA32_PERF_CTL为最小pstate值但是online没有恢复。</p>
+<p>那么我们手动设置95或191号cpu中的其中任何一个cpu的MSR_IA32_PERF_CTL为2600是不是就好了？试一下</p>
+<pre><code class="language-c"># wrmsr -p 95 0x199 0x2300
+# rdmsr -p 95 0x199
+2300
+# cpupower monitor
+              | Nehalem                   || Mperf
+ PKG|CORE| CPU| C3   | C6   | PC3  | PC6   || C0   | Cx   | Freq
+ ......
+   1|  47|  95|  0.00|  0.00|  0.00|  0.00||  1.35| 98.65|  3098
+   1|  47| 191|  0.00|  0.00|  0.00|  0.00||  1.14| 98.86|  3098
 </code></pre>
-<p>看一下这个pciehp进程的栈，可以看出这就是典型的pcie热插拔的栈，但是这里为什么hung住呢？</p>
-<pre><code class="language-c">crash&gt; bt ffff9d9312741800
-PID: 2291     TASK: ffff9d9312741800  CPU: 138  COMMAND: &quot;irq/103-pciehp&quot;
- #0 [ffffaaca74b9b9f0] __schedule at ffffffffa6b7a60d
- #1 [ffffaaca74b9ba48] schedule at ffffffffa6b7aae7
- #2 [ffffaaca74b9ba58] schedule_timeout at ffffffffa6b7f2c7
- #3 [ffffaaca74b9baf0] msleep at ffffffffa637c9b9
- #4 [ffffaaca74b9baf8] napi_disable at ffffffffa69b7dcb
- #5 [ffffaaca74b9bb10] virtnet_close at ffffffffc0e1274d [virtio_net]
- #6 [ffffaaca74b9bb30] __dev_close_many at ffffffffa69b70a1
- #7 [ffffaaca74b9bb60] dev_close_many at ffffffffa69ba4af
- #8 [ffffaaca74b9bba8] rollback_registered_many at ffffffffa69be898
- #9 [ffffaaca74b9bc08] rollback_registered at ffffffffa69bedc6
-#10 [ffffaaca74b9bc38] unregister_netdevice_queue at ffffffffa69bee73
-#11 [ffffaaca74b9bc60] unregister_netdev at ffffffffa69beec8
-#12 [ffffaaca74b9bc70] virtnet_remove at ffffffffc0e148ca [virtio_net]
-#13 [ffffaaca74b9bc80] virtio_dev_remove at ffffffffa678ddc9
-#14 [ffffaaca74b9bca8] device_release_driver_internal at ffffffffa6813003
-#15 [ffffaaca74b9bcc8] bus_remove_device at ffffffffa6811647
-#16 [ffffaaca74b9bce8] device_del at ffffffffa680cd91
-#17 [ffffaaca74b9bd30] device_unregister at ffffffffa680d036
-#18 [ffffaaca74b9bd40] unregister_virtio_device at ffffffffa678dfe1
-#19 [ffffaaca74b9bd50] virtio_pci_remove at ffffffffa67920cf
-#20 [ffffaaca74b9bd70] pci_device_remove at ffffffffa66ec4cb
-#21 [ffffaaca74b9bd90] device_release_driver_internal at ffffffffa6813003
-#22 [ffffaaca74b9bdb0] pci_stop_bus_device at ffffffffa66e3249
-#23 [ffffaaca74b9bdd0] pci_stop_and_remove_bus_device at ffffffffa66e338e
-#24 [ffffaaca74b9bde0] pciehp_unconfigure_device at ffffffffa67042dc
-#25 [ffffaaca74b9be18] pciehp_disable_slot at ffffffffa670366b
-#26 [ffffaaca74b9be48] pciehp_handle_disable_request at ffffffffa670396b
-#27 [ffffaaca74b9be60] pciehp_ist at ffffffffa670532c
-#28 [ffffaaca74b9be98] irq_thread_fn at ffffffffa635adef
-#29 [ffffaaca74b9beb8] irq_thread at ffffffffa635b1e7
-#30 [ffffaaca74b9bf10] kthread at ffffffffa630f906
-#31 [ffffaaca74b9bf50] ret_from_fork at ffffffffa6c0023f
+<p>确实恢复了。</p>
+<p>到这里，我们就发现了一个bug及其os层面上的解决方法。但是，还有一些问题我们没有查明原因，还需要深挖：为什么intel_cpufreq_cpu_offline中要把MSR_IA32_PERF_CTL设置成最小pstate？online过程中为什么没有恢复？怎么在代码层面解决这个问题？</p>
+<h5 id="为什么offline-cpu要设置MSR-IA32-PERF-CTL"><a href="#为什么offline-cpu要设置MSR-IA32-PERF-CTL" class="headerlink" title="为什么offline cpu要设置MSR_IA32_PERF_CTL"></a><center>为什么offline cpu要设置MSR_IA32_PERF_CTL</center></h5><p>其实这个问题在intel_cpufreq_cpu_offline函数中的一段注释中可以找到原因</p>
+<pre><code class="language-c">        /*
+         * If the CPU is an SMT thread and it goes offline with the performance
+         * settings different from the minimum, it will prevent its sibling
+         * from getting to lower performance levels, so force the minimum
+         * performance on CPU offline to prevent that from happening.
+         */
 </code></pre>
-<p>看一下上面，应该是在napi_disable这里，应该是在msleep。看一下napi_disable这个函数。通过对比汇编和代码的行号，可以知道是在while (test_and_set_bit(NAPI_STATE_SCHED, &amp;n-&gt;state))这个判断下面的msleep。</p>
-<pre><code class="language-c">crash&gt; dis -lr ffffffffa69b7dcb
-/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/core/dev.c: 6622
-0xffffffffa69b7da0 &lt;napi_disable&gt;:      nopl   0x0(%rax,%rax,1) [FTRACE NOP]
-/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/core/dev.c: 6623
-0xffffffffa69b7da5 &lt;napi_disable+5&gt;:    push   %rbp
-0xffffffffa69b7da6 &lt;napi_disable+6&gt;:    mov    %rdi,%rbp
-0xffffffffa69b7da9 &lt;napi_disable+9&gt;:    push   %rbx
-/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/core/dev.c: 6624
-0xffffffffa69b7daa &lt;napi_disable+10&gt;:   lea    0x10(%rbp),%rbx
-/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/core/dev.c: 6623
-0xffffffffa69b7dae &lt;napi_disable+14&gt;:   call   0xffffffffa6b7abb0 &lt;_cond_resched&gt;
-/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/./arch/x86/include/asm/bitops.h: 76
-0xffffffffa69b7db3 &lt;napi_disable+19&gt;:   lock orb $0x4,0x10(%rbp)
-/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/./arch/x86/include/asm/bitops.h: 220
-0xffffffffa69b7db8 &lt;napi_disable+24&gt;:   lock btsq $0x0,0x10(%rbp)
-0xffffffffa69b7dbf &lt;napi_disable+31&gt;:   jae    0xffffffffa69b7dd3 &lt;napi_disable+51&gt;
-/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/core/dev.c: 6627
-0xffffffffa69b7dc1 &lt;napi_disable+33&gt;:   mov    $0x1,%edi
-0xffffffffa69b7dc6 &lt;napi_disable+38&gt;:   call   0xffffffffa637c990 &lt;msleep&gt;
-/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/./arch/x86/include/asm/bitops.h: 220
-0xffffffffa69b7dcb &lt;napi_disable+43&gt;:   lock btsq $0x0,(%rbx)
-
-
-void napi_disable(struct napi_struct *n)
+<p>这一段就很明显了，如果当前cpu是一个某个core上的一个smt的话，如果在offline的时候不把他设置成最小的pstate值，那么他会阻止这个core上的其他的smt cpu进入更低的pstate级别。</p>
+<p>我们简单画个图理解一下：</p>
+<p><img src="/img/60.png"></p>
+<p>根本原因在于：<font color="red">intel_pstate的频率调节是per-core的。</font>也就是，一个core上的两个smt cpu具有相同的频率，这个频率是intel_pstate驱动根据两个cpu的MSR_IA32_PERF_CTL综合计算来的。在offline一个cpu的时候，如果不把该cpu的MSR_IA32_PERF_CTL显式设置成最小的pstate值，那么他就有可能是任何值，有可能就是最大值。那么该core中的另一个cpu尝试通过cpupower frequency-set之类的命令去降低一下频率的话，是无法实现的，因为offline的cpu中的MSR_IA32_PERF_CTL可能是最大值，intel_pstate驱动可能一直根据这个值来设置这个core上的cpu频率。这样的话，一个cpu虽然offline了，但是他曾经设置的MSR_IA32_PERF_CTL还会一直影响在线的cpu。</p>
+<h5 id="为什么onelin过程没有恢复MSR-IA32-PERF-CTL"><a href="#为什么onelin过程没有恢复MSR-IA32-PERF-CTL" class="headerlink" title="为什么onelin过程没有恢复MSR_IA32_PERF_CTL"></a><center>为什么onelin过程没有恢复MSR_IA32_PERF_CTL</center></h5><p>上面我们知道了为什么offline cpu的过程中会把MSR_IA32_PERF_CTL设置成最小pstate，接下来我们研究一下cpu online的过程，看一下为什么online过程中为什么没有恢复MSR_IA32_PERF_CTL？</p>
+<p>看一下cpu online的过程中cpufreq相关的处理，会调用到cpufreq_online函数：查看当前这个cpu是否已经存在一个policy了，如果存在的话，则直接去调用cpufreq_add_policy_cpu就好</p>
+<pre><code class="language-c">static int cpufreq_online(unsigned int cpu)
 &#123;
-        might_sleep();
-        set_bit(NAPI_STATE_DISABLE, &amp;n-&gt;state);
+        struct cpufreq_policy *policy;
+        bool new_policy;
+        int ret;
 
-        while (test_and_set_bit(NAPI_STATE_SCHED, &amp;n-&gt;state))
-                msleep(1);
-        while (test_and_set_bit(NAPI_STATE_NPSVC, &amp;n-&gt;state))
-                msleep(1);
+        pr_debug(&quot;%s: bringing CPU%u online\n&quot;, __func__, cpu);
 
-        hrtimer_cancel(&amp;n-&gt;timer);
-
-        clear_bit(NAPI_STATE_PREFER_BUSY_POLL, &amp;n-&gt;state);
-        clear_bit(NAPI_STATE_DISABLE, &amp;n-&gt;state);
-        clear_bit(NAPI_STATE_THREADED, &amp;n-&gt;state);
+        /* Check if this CPU already has a policy to manage it */
+        //offline后又重新online的cpu，policy是已经存在的
+        policy = per_cpu(cpufreq_cpu_data, cpu);
+        if (policy) &#123;
+                WARN_ON(!cpumask_test_cpu(cpu, policy-&gt;related_cpus));
+                if (!policy_is_inactive(policy))
+                        return cpufreq_add_policy_cpu(policy, cpu);
+......
+</code></pre>
+<p>cpufreq_add_policy_cpu中判断如果对应的pstate驱动有target函数指针的话，则调用cpufreq_start_governor函数</p>
+<pre><code class="language-c">static int cpufreq_add_policy_cpu(struct cpufreq_policy *policy, unsigned int cpu)
+&#123;
+......
+        if (has_target()) &#123;
+                ret = cpufreq_start_governor(policy);
+                if (ret)
+                        pr_err(&quot;%s: Failed to start governor\n&quot;, __func__);
+        &#125;
+        ......
+</code></pre>
+<p>cpufreq_start_governor函数中，判断如果governor有limits函数指针的话，则去调用驱动对应的limit函数，对于我们的performance模式的话，则是去调用cpufreq_gov_performance_limits函数</p>
+<pre><code class="language-c">int cpufreq_start_governor(struct cpufreq_policy *policy)
+&#123;
+......
+        if (policy-&gt;governor-&gt;limits)
+                policy-&gt;governor-&gt;limits(policy);
+                ......
+</code></pre>
+<p>cpufreq_gov_performance_limits实际上就是调用__cpufreq_driver_target函数</p>
+<pre><code class="language-c">static void cpufreq_gov_performance_limits(struct cpufreq_policy *policy)
+&#123;
+        pr_debug(&quot;setting to %u kHz\n&quot;, policy-&gt;max);
+        __cpufreq_driver_target(policy, policy-&gt;max, CPUFREQ_RELATION_H);
 &#125;
 </code></pre>
-<p>所以这时候就可以推断，应该是热插拔走到virtnet_close去disable每个队列上的napi，然后某个队列的napi一直不能被成功关闭（因为NAPI_STATE_SCHED的状态不对，期望是0，而现在是1），导致一直在while重试，而pciehp线程还持有rtnl_mutex锁，导致其他的一些curl ethtool这些的进程也没有办法执行完成，一直在等pciehp线程释放rtnl_mutex锁，如此系统变hung住了。</p>
-<p>那么我们查找一下这个napi结构体的地址，去看一下它的状态。</p>
-<p>可以看到上面的napi_disable函数的参数就是napi的指针，所以可以从这里去查找，napi_disable的上一个函数virtnet_close调用napi_disable的时候必然会准备napi参数。所以看一下virtnet_close的栈，可以看到得到rbx寄存器的值就可以知道napi的地址。然后我们看一下napi_disable的栈，这里push了rbx，所以我们可以通过bt -f查找到第二个压栈的数加0x8就是napi的地址了。也就是0xffff9c9a037e2d00+0x8</p>
-<pre><code class="language-c">crash&gt; dis -lr ffffffffc0e1274d
+<p>__cpufreq_driver_target函数中可以看到，如果target_freq &#x3D;&#x3D; policy-&gt;cur且后面一并判断条件成立的话，则直接return，就不再去尝试调用intel_pstate对应的target函数了，也就是intel_cpufreq_target函数，而intel_cpufreq_target函数中的intel_cpufreq_update_pstate函数正是去写msr去更新MSR_IA32_PERF_CTL的。</p>
+<pre><code class="language-c">int __cpufreq_driver_target(struct cpufreq_policy *policy,
+                            unsigned int target_freq,
+                            unsigned int relation)
+&#123;
 ......
-0xffffffffc0e12739 &lt;virtnet_close+89&gt;:  add    0xae0(%r12),%rbx
-0xffffffffc0e12741 &lt;virtnet_close+97&gt;:  mov    %rbx,%rdi                               ----&gt;rbx
-0xffffffffc0e12744 &lt;virtnet_close+100&gt;: add    $0x8,%rdi                               ----&gt;也就是rbx+8
-0xffffffffc0e12748 &lt;virtnet_close+104&gt;: call   0xffffffffa69b7da0 &lt;napi_disable&gt;
-0xffffffffc0e1274d &lt;virtnet_close+109&gt;: imul   $0x3b8,%rbp,%rdi
+        if (target_freq == policy-&gt;cur &amp;&amp;
+            !(cpufreq_driver-&gt;flags &amp; CPUFREQ_NEED_UPDATE_LIMITS))
+                return 0;
 
-crash&gt; dis -lr ffffffffa69b7dcb
-/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/core/dev.c: 6622
-0xffffffffa69b7da0 &lt;napi_disable&gt;:      nopl   0x0(%rax,%rax,1) [FTRACE NOP]
-/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/core/dev.c: 6623
-0xffffffffa69b7da5 &lt;napi_disable+5&gt;:    push   %rbp
-0xffffffffa69b7da6 &lt;napi_disable+6&gt;:    mov    %rdi,%rbp
-0xffffffffa69b7da9 &lt;napi_disable+9&gt;:    push   %rbx                                    ----&gt;push了rbx
-/usr/src/debug/kernel-4.18.0-348.7.1.el8_5/linux-4.18.0-348.7.1.el8_5.x86_64/net/core/dev.c: 6624
+        if (cpufreq_driver-&gt;target) &#123;
+                if (!policy-&gt;efficiencies_available)
+                        relation &amp;= ~CPUFREQ_RELATION_E;
+
+                return cpufreq_driver-&gt;target(policy, target_freq, relation);
+        &#125;
+        ......
 
 
-crash&gt; bt -f
-......
- #4 [ffffaaca74b9baf8] napi_disable at ffffffffa69b7dcb
-    ffffaaca74b9bb00: ffff9c9a037e2d00 000000000000000a
-    ffffaaca74b9bb10: ffffffffc0e1274d
+
+static int intel_cpufreq_target(struct cpufreq_policy *policy,
+                                unsigned int target_freq,
+                                unsigned int relation)
+&#123;
+        struct cpudata *cpu = all_cpu_data[policy-&gt;cpu];
+        struct cpufreq_freqs freqs;
+        int target_pstate;
+
+        freqs.old = policy-&gt;cur;
+        freqs.new = target_freq;
+
+        cpufreq_freq_transition_begin(policy, &amp;freqs);
+
+        target_pstate = intel_pstate_freq_to_hwp_rel(cpu, freqs.new, relation);
+        target_pstate = intel_cpufreq_update_pstate(policy, target_pstate, false);
+
+        freqs.new = target_pstate * cpu-&gt;pstate.scaling;
+
+        cpufreq_freq_transition_end(policy, &amp;freqs, false);
+
+        return 0;
+&#125;
 </code></pre>
-<p>根据上面得到的地址看一下napi的内容，去源码中找一下这些bit的含义，所以这里的state就是NAPIF_STATE_SCHED | NAPIF_STATE_MISSED | NAPIF_STATE_DISABLE | NAPIF_STATE_LISTED，符合之前看到的NAPIF_STATE_SCHED一直是1导致一直在死循环的情况。</p>
-<pre><code class="language-c">crash&gt; struct napi_struct 0xffff9c9a037e2d08 -x
-struct napi_struct &#123;
-  poll_list = &#123;
-    next = 0xffff9c9a037e2d08,
-    prev = 0xffff9c9a037e2d08
-  &#125;,
-  state = 0x17,
-  weight = 0x40,
-  gro_count = 0x0,
-  poll = 0xffffffffc0e185e0 &lt;virtnet_poll&gt;,
-  poll_owner = 0xffffffff,
-  dev = 0xffff9c9a03792000,
-  rh_reserved_gro_list = 0x0,
-  skb = 0x0,
-......
-
-
-
-enum &#123;
-        NAPIF_STATE_SCHED               = BIT(NAPI_STATE_SCHED),
-        NAPIF_STATE_MISSED              = BIT(NAPI_STATE_MISSED),
-        NAPIF_STATE_DISABLE             = BIT(NAPI_STATE_DISABLE),
-        NAPIF_STATE_NPSVC               = BIT(NAPI_STATE_NPSVC),
-        NAPIF_STATE_LISTED              = BIT(NAPI_STATE_LISTED),
-        NAPIF_STATE_NO_BUSY_POLL        = BIT(NAPI_STATE_NO_BUSY_POLL),
-        NAPIF_STATE_IN_BUSY_POLL        = BIT(NAPI_STATE_IN_BUSY_POLL),
-        NAPIF_STATE_PREFER_BUSY_POLL    = BIT(NAPI_STATE_PREFER_BUSY_POLL),
-        NAPIF_STATE_THREADED            = BIT(NAPI_STATE_THREADED),
-        NAPIF_STATE_SCHED_THREADED      = BIT(NAPI_STATE_SCHED_THREADED),
-&#125;;
+<h5 id="问题根因"><a href="#问题根因" class="headerlink" title="问题根因"></a><center>问题根因</center></h5><p>综上，我们可以用一张图来展示这个bug产生的根因：</p>
+<p><img src="/img/61.png"></p>
+<p>一句话总结：<font color="red">offline cpu的时候只设置了MSR_IA32_PERF_CTL为最小pstate，但是没有同步更新该cpu对应的policy。online该cpu的时候，就因为目标target_freq与之前没有更新的policy-&gt;cur相同而直接return，不再去更新该cpu的MSR_IA32_PERF_CTL，故导致该cpu的pstate一直处于最小pstate状态。</font></p>
+<h5 id="怎么在驱动代码层面解决这个问题"><a href="#怎么在驱动代码层面解决这个问题" class="headerlink" title="怎么在驱动代码层面解决这个问题"></a><center>怎么在驱动代码层面解决这个问题</center></h5><p>只需要在offline cpu设置MSR_IA32_PERF_CTL为最小pstate的时候同步更新一下policy就好了</p>
+<pre><code class="language-c">diff --git a/drivers/cpufreq/intel_pstate.c b/drivers/cpufreq/intel_pstate.c
+index 1292da53e5fc..11db1c887c80 100644
+--- a/drivers/cpufreq/intel_pstate.c
++++ b/drivers/cpufreq/intel_pstate.c
+@@ -2984,10 +2984,12 @@ static int intel_cpufreq_cpu_offline(struct cpufreq_policy *policy)
+ 	 * from getting to lower performance levels, so force the minimum
+ 	 * performance on CPU offline to prevent that from happening.
+ 	 */
+-	if (hwp_active)
++	if (hwp_active) &#123;
+ 		intel_pstate_hwp_offline(cpu);
+-	else
++	&#125; else &#123;
+ 		intel_pstate_set_min_pstate(cpu);
++		policy-&gt;cur = cpu-&gt;pstate.min_freq;
++	&#125;
+ 
+ 	intel_pstate_exit_perf_limits(policy);
 </code></pre>
-<p>而如果NAPIF_STATE_SCHED是1的话，也就是在调度中，那么为什么poll list是空的？这就说明，至少是存在race condition的，可能sched但是没有completion清除掉NAPIF_STATE_SCHED，或者可能设置的时候就有问题，或者可能是其他的race。</p>
-<p>总之，问题根因就是<font color="red">在pciehp热插拔网卡在virtnet_close中使用napi_disable去停止napi的时候，我们预期这时候napi的state中NAPIF_STATE_SCHED是0，也就是表示此时没有任何调度，当时当前的实际情况，NAPIF_STATE_SCHED是1，并且没有其他代码去set bit，导致napi_disable一直while msleep循环。而pciehp线程是持有rtnl_mutex锁的，它一直while msleep循环不能结束，也就一直持有锁，而其他需要加rtnl_mutex锁的进程就会一直等待，最终的表现就是hung task发生</font>。</p>
-<pre><code class="language-c">crash&gt; list 0xffff9c9a037e2d08
-ffff9c9a037e2d08
-</code></pre>
-<p>查了一下上游，应该是已经被修复了。</p>
-<pre><code class="language-c">commit 3765996e4f0b8a755cab215a08df744490c76052
-Author: Xuan Zhuo &lt;xuanzhuo@linux.alibaba.com&gt;
-Date:   Sat Sep 18 16:52:32 2021 +0800
-
-    napi: fix race inside napi_enable
-
-    The process will cause napi.state to contain NAPI_STATE_SCHED and
-    not in the poll_list, which will cause napi_disable() to get stuck.
-
-    The prefix &quot;NAPI_STATE_&quot; is removed in the figure below, and
-    NAPI_STATE_HASHED is ignored in napi.state.
-
-                          CPU0       |                   CPU1       | napi.state
-    ===============================================================================
-    napi_disable()                   |                              | SCHED | NPSVC
-    napi_enable()                    |                              |
-    &#123;                                |                              |
-        smp_mb__before_atomic();     |                              |
-        clear_bit(SCHED, &amp;n-&gt;state); |                              | NPSVC
-                                     | napi_schedule_prep()         | SCHED | NPSVC
-                                     | napi_poll()                  |
-                                     |   napi_complete_done()       |
-                                     |   &#123;                          |
-                                     |      if (n-&gt;state &amp; (NPSVC | | (1)
-                                     |               _BUSY_POLL)))  |
-                                     |           return false;      |
-                                     |     ................         |
-                                     |   &#125;                          | SCHED | NPSVC
-                                     |                              |
-        clear_bit(NPSVC, &amp;n-&gt;state); |                              | SCHED
-    &#125;                                |                              |
-                                     |                              |
-    napi_schedule_prep()             |                              | SCHED | MISSED (2)
-
-    (1) Here return direct. Because of NAPI_STATE_NPSVC exists.
-    (2) NAPI_STATE_SCHED exists. So not add napi.poll_list to sd-&gt;poll_list
-
-    Since NAPI_STATE_SCHED already exists and napi is not in the
-    sd-&gt;poll_list queue, NAPI_STATE_SCHED cannot be cleared and will always
-    exist.
-
-    1. This will cause this queue to no longer receive packets.
-    2. If you encounter napi_disable under the protection of rtnl_lock, it
-       will cause the entire rtnl_lock to be locked, affecting the overall
-       system.
-
-    This patch uses cmpxchg to implement napi_enable(), which ensures that
-    there will be no race due to the separation of clear two bits.
-
-    Fixes: 2d8bff12699abc (&quot;netpoll: Close race condition between poll_one_napi and napi_disable&quot;)
-    Signed-off-by: Xuan Zhuo &lt;xuanzhuo@linux.alibaba.com&gt;
-    Reviewed-by: Dust Li &lt;dust.li@linux.alibaba.com&gt;
-    Signed-off-by: David S. Miller &lt;davem@davemloft.net&gt;
-
-diff --git a/net/core/dev.c b/net/core/dev.c
-index 74fd402d26dd..7ee9fecd3aff 100644
---- a/net/core/dev.c
-+++ b/net/core/dev.c
-@@ -6923,12 +6923,16 @@ EXPORT_SYMBOL(napi_disable);
-  */
- void napi_enable(struct napi_struct *n)
- &#123;
--       BUG_ON(!test_bit(NAPI_STATE_SCHED, &amp;n-&gt;state));
--       smp_mb__before_atomic();
--       clear_bit(NAPI_STATE_SCHED, &amp;n-&gt;state);
--       clear_bit(NAPI_STATE_NPSVC, &amp;n-&gt;state);
--       if (n-&gt;dev-&gt;threaded &amp;&amp; n-&gt;thread)
--               set_bit(NAPI_STATE_THREADED, &amp;n-&gt;state);
-+       unsigned long val, new;
-+
-+       do &#123;
-+               val = READ_ONCE(n-&gt;state);
-+               BUG_ON(!test_bit(NAPI_STATE_SCHED, &amp;val));
-+
-+               new = val &amp; ~(NAPIF_STATE_SCHED | NAPIF_STATE_NPSVC);
-+               if (n-&gt;dev-&gt;threaded &amp;&amp; n-&gt;thread)
-+                       new |= NAPIF_STATE_THREADED;
-+       &#125; while (cmpxchg(&amp;n-&gt;state, val, new) != val);
- &#125;
- EXPORT_SYMBOL(napi_enable);
-</code></pre>
-<p>大佬的patch已经把race场景分析的很清晰了，就是napi_enable函数中clear NAPIF_STATE_SCHED和NAPIF_STATE_NPSVC之间，其他的cpu可能触发了schedule调度napi去执行，导致最后NAPIF_STATE_SCHED没有办法被clear掉。</p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
