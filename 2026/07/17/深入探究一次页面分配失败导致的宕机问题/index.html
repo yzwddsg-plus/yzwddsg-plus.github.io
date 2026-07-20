@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>/proc/cpuinfo显示频率原理 | YZWDDSG</title>
+  <title>深入探究一次页面分配失败导致的宕机问题 | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="/proc/cpuinfo显示频率原理 | YZWDDSG">
+  <meta name="description" content="深入探究一次页面分配失败导致的宕机问题 | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta property="og:type" content="website">
@@ -774,9 +774,9 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="post-proc-cpuinfo显示频率原理" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-深入探究一次页面分配失败导致的宕机问题" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">/proc/cpuinfo显示频率原理</h1>
+        <h1 class="article-title">深入探究一次页面分配失败导致的宕机问题</h1>
     
     <div class="article-meta">
         
@@ -786,7 +786,7 @@
             <i class="iconfont icon-category"></i>
             
             
-            <a  data-rel="power">power</a>
+            <a  data-rel="故障排查">故障排查</a>
             
         </span>
         
@@ -794,12 +794,12 @@
     </div>
     <div class="article-meta">
         
-            发布时间 : <time class="date" title='最后更新: 2025-03-09 22:05:12'>2025-03-09 22:00</time>
+            发布时间 : <time class="date" title='最后更新: 2026-07-20 23:32:44'>2026-07-17 22:26</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:1.7k</span>
+        <span>字数:3.4k</span>
         
         
         <span id="busuanzi_container_page_pv">
@@ -829,7 +829,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0"><span class="toc-text">学习</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%E9%A2%91%E7%8E%87%E5%8E%9F%E7%90%86"><span class="toc-text">计算频率原理</span></a></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF"><span class="toc-text">问题背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF%E7%9F%A5%E8%AF%86"><span class="toc-text">背景知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%92%E6%9F%A5%E8%BF%87%E7%A8%8B"><span class="toc-text">排查过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E6%AD%A5%E5%88%A4%E6%96%AD"><span class="toc-text">初步判断</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#vmcore%E5%88%86%E6%9E%90"><span class="toc-text">vmcore分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AE%BA"><span class="toc-text">结论</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="toc-text">解决方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-text">参考</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -845,120 +845,389 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h3><p>众所周知，现在&#x2F;proc&#x2F;cpuinfo可以显示cpu的运行频率，而虚机中&#x2F;proc&#x2F;cpuinfo显示的cpu频率一直是一个固定的值</p>
-<h3 id="学习"><a href="#学习" class="headerlink" title="学习"></a><center>学习</center></h3><h4 id="计算频率原理"><a href="#计算频率原理" class="headerlink" title="计算频率原理"></a>计算频率原理</h4><p>先不管虚拟化那一套，就先看看内核是怎么计算cpu频率的呢？</p>
-<p>先了解一下相关背景：</p>
-<blockquote>
-<p>APERF：是一个MSR寄存器，它总是以当前的CPU的实际工作频率按比例增加数值，每个cpu上都有一个。比如一个CPU主频2.6GHz，然后睿频到了3.4GHz，那APERF就按照3.4GHz的比例去增加数值。</p>
-<p>MPERF：也是一个MSR寄存器，也是每个CPU都有一个。这个是按照最大CPU频率按比例增加，一般也就是CPU的主频，也就是标称频率，也就是p0状态下的频率。比如一颗cpu的主频是2.6GHz，那它就是去按照2.6GHz的比例去增加。</p>
-</blockquote>
-<blockquote>
-<p>到这差不多就能猜到了，就是通过这俩msr去计算cpu运行频率的。当然，其实频率这块还涉及到别的msr，以及怎么设置调节频率这块，还和驱动有关系，有些麻烦，到时候再细看一下再单开一篇，现在只看这俩msr足够。</p>
-</blockquote>
-<p>再看一下是怎么计算cpu频率的，以&#x2F;proc&#x2F;cpuinfo为例，现在的&#x2F;proc&#x2F;cpuinfo已经支持显示实时cpu频率了（有时候不会，后面会说到）</p>
-<pre><code>##cat /proc/cpuinfo时，会调到show_cpuinfo，直接来看显示cpu频率的部分
-##其实就在这，如果开了tsc的话，就对freq格式化输出，那freq其实就是频率咯
-##freq是arch_freq_get_on_cpu返回的，看一下这个函数
-if (cpu_has(c, X86_FEATURE_TSC)) &#123;
-    unsigned int freq = arch_freq_get_on_cpu(cpu);
-    seq_printf(m, &quot;cpu MHz\t\t: %u.%03u\n&quot;, freq / 1000, (freq % 1000));
-&#125;
-
-##看一下怎么返回cpu频率的
-unsigned int arch_freq_get_on_cpu(int cpu)
-&#123;
-    ##这个cpu_samples就是一个percpu的aperfmperf结构体
-    ##里面主要有acnt mcnt aperf mperf
-	struct aperfmperf *s = per_cpu_ptr(&amp;cpu_samples, cpu);
-	unsigned int seq, freq;
-	unsigned long last;
-	u64 acnt, mcnt;
-
-    ##如果没有aperfmperf这个feature就跳到fallback了，这个后面还会提到
-	if (!cpu_feature_enabled(X86_FEATURE_APERFMPERF))
-		goto fallback;
-
-    ##这里就是一些赋值acnt mcnt last_update，这些作用后面说
-	do &#123;
-		seq = raw_read_seqcount_begin(&amp;s-&gt;seq);
-		last = s-&gt;last_update;
-		acnt = s-&gt;acnt;
-		mcnt = s-&gt;mcnt;
-	&#125; while (read_seqcount_retry(&amp;s-&gt;seq, seq));
-
-	/*
-	 * Bail on invalid count and when the last update was too long ago,
-	 * which covers idle and NOHZ full CPUs.
-	 */
-    ##如果mcnt为0或jiffies-last大于MAX_SAMPLE_AGE也去fallback
-    ##到这就知道了，last_update也就是last其实就是上次更新时的jiffies
-    ##而MAX_SAMPLE_AGE时HZ/50，一般内核默认时250HZ，也就是MAX_SAMPLE_AGE时20ms
-    ##也就是如果这次采样和上次采样间隔超过20ms，就不继续计算了，去fallback了
-	if (!mcnt || (jiffies - last) &gt; MAX_SAMPLE_AGE)
-		goto fallback;
-
-    ##最后走到这是真正的计算频率，其实就是cpu_khz*acnt/mcnt
-    ##cpu_khz其实一般就是cpu主频了，也是tsc的频率
-    ##acnt mcnt是什么呢？先说答案，其实就是两次采样间隔中aperf mperf的差值，后面还会看到
-    ##所以频率计算公式是什么？主频*(Δaperf)/(Δmperf),联系之前说的aperf mperf的作用就很好理解了
-    ##也许有人会有疑问，为什么直接不是返回mperf就好了，还得乘主频再除aperf呢？aperf不就是按主频增长的嘛？
-    ##原因在于aperf和mperf并不是按照频率增长，而是和频率成一个倍数关系的增长
-    ##所以aperf mperf只能反应一个倍数关系，而不能反应真实的频率，所以最后还要乘tsc，因为tsc一直是按照主频增长的
-	return div64_u64((cpu_khz * acnt), mcnt);
-
-fallback:
-    ##这里就是没有成功计算频率，但是最要返回一个值
-    ##先尝试去cpufreq_quick_get获取，貌似要走驱动那块来着，有些忘了，写下一篇时再看
-	freq = cpufreq_quick_get(cpu);
-    ##如果quick也没获取到，那就只能返回cpu_khz了，一般也就是主频值了
-	return freq ? freq : cpu_khz;
-&#125;
-
-
-##到这基本就完全知道是怎么计算频率的了，但是还有个问题没有解释清楚
-##acmt mcnt是谁更新的？什么时候更新的？其实就在下面这个函数
-void arch_scale_freq_tick(void)
-&#123;
-	struct aperfmperf *s = this_cpu_ptr(&amp;cpu_samples);
-	u64 acnt, mcnt, aperf, mperf;
-    ##还是必须要支持X86_FEATURE_APERFMPERF才行
-	if (!cpu_feature_enabled(X86_FEATURE_APERFMPERF))
-		return;
-
-    ##读MSR_IA32_APERF的值到aperf中
-	rdmsrl(MSR_IA32_APERF, aperf);
-    ##读MSR_IA32_MPERF到mperf中
-	rdmsrl(MSR_IA32_MPERF, mperf);
-    ##这就出来啦，下面四条连起来看
-    ##acnt和mcnt就是当前采样的aperf和mperf的值和上次采样的值的差
-    ##然后把cpu_samples中的aperf mperf重新赋值成当前采样的值
-	acnt = aperf - s-&gt;aperf;
-	mcnt = mperf - s-&gt;mperf;
-
-	s-&gt;aperf = aperf;
-	s-&gt;mperf = mperf;
-    ##然后更新last_update为当前jiffies，更新acnt和mcnt
-	raw_write_seqcount_begin(&amp;s-&gt;seq);
-	s-&gt;last_update = jiffies;
-	s-&gt;acnt = acnt;
-	s-&gt;mcnt = mcnt;
-	raw_write_seqcount_end(&amp;s-&gt;seq);
-
-	scale_freq_tick(acnt, mcnt);
-&#125;
-
-##那这个arch_scale_freq_tick函数什么时候会调用到呢？搜一下就看到了
-scheduler_tick
+        <h2 id="问题背景"><a href="#问题背景" class="headerlink" title="问题背景"></a><center>问题背景</center></h2><p>某台机器hardlockup导致宕机，需要排查宕机原因。<br>如果没有AI辅助，本次排查问题的学习成本+时间成本+排查难度都将翻倍，因此，Assisted-by: GPT-5.6。</p>
+<h2 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h2><ul>
+<li><span style="color: rgba(255, 69, 0, 1)">hardlockup</span><br>内核态一直执行超过XXX秒，不能触发调度和响应中断，watchdog检测到后触发宕机。</li>
+<li><span style="color: rgba(255, 69, 0, 1)">console_sem的handover机制</span><br>当CPU A持有console_sem时，它会先将自身标记为console_owner，然后开始打印。若此时CPU B也想打印并发现锁被占用，它会将console_waiter置为true并进入关中断自旋等待。A在每次写操作后都会检查console_waiter，一旦发现B在等待，A便立即清除console_waiter并直接退出（但不释放console_sem）。B检测到console_waiter被清除后随即停止自旋，并直接继承锁的控制权，成为新的console_owner，继续完成后续打印工作。</li>
+<li><span style="color: rgba(255, 69, 0, 1)">printk_cpu_sync</span><br>用于在多 CPU 间串行化打印操作的专用同步机制，具有cpu可重入性并且可以在任意上下文中使用。最早叫printk_cpulock，可参见faebd693c593 (“printk: rename cpulock functions”)。</li>
+<li><span style="color: rgba(255, 69, 0, 1)">fb_flashcursor</span><br>delayed_work周期性触发，管理控制台的光标闪烁等状态。</li>
+</ul>
+<h2 id="排查过程"><a href="#排查过程" class="headerlink" title="排查过程"></a><center>排查过程</center></h2><h3 id="初步判断"><a href="#初步判断" class="headerlink" title="初步判断"></a><center>初步判断</center></h3><p>首先看一下宕机前的log，发现有创建很多pod的操作，创建pod就会创建veth，创建并初始化veth的时候需要向内核申请页面。<br>log中有多条页面分配失败的信息。</p>
+<pre><code>[10365589.875168] cptp: page allocation failure: order:7, mode:0x40dc0(GFP_KERNEL|__GFP_COMP|__GFP_ZERO), nodemask=(null),cpuset=containerd.service,mems_allowed=0-1
+[10368797.966935] cptp: page allocation failure: order:7, mode:0x40dc0(GFP_KERNEL|__GFP_COMP|__GFP_ZERO), nodemask=(null),cpuset=containerd.service,mems_allowed=0-1
+[10368813.289827] cptp: page allocation failure: order:7, mode:0x40dc0(GFP_KERNEL|__GFP_COMP|__GFP_ZERO), nodemask=(null),cpuset=containerd.service,mems_allowed=0-1
+[yzwddsg@XXXXX 5.14.0-427.42.1.el9_4.x86_64]$ cat vmcore-dmesg.txt |grep &#39;age allocation failure&#39; |wc -l
+334
 </code></pre>
-<p><font color="red">所以这块应该就可以恍然大明白了，假如一个默认启动的内核时250HZ的，那每隔4ms就会发起一次tick，就会调到scheduler_tick，然后scheduler_tick里就会调到arch_scale_freq_tick去采样，然后更新acnt mcnt，当用户执行cat &#x2F;proc&#x2F;cpuinfo的时候就自然直接利用acnt和mcnt计算出当前频率了</font></p>
-<p>但是，其实还有两个问题存在：1.有些cpu上并不显示实时频率，为什么？2.虚拟化情况下为什么只返回主频？</p>
-<p><strong>1.有些cpu上并不显示实时频率，为什么？</strong></p>
-<p>实测发现，有些cpu上cat &#x2F;prco&#x2F;cpuinfo的话并不会显示实时的cpu频率，而是一个固定的值</p>
-<p>其实arch_freq_get_on_cpu函数中也说明了，如果设置了nohz或者nohz_full或者cpu一直在idle的话就可能因为采样间隔太大跳到fallback去了</p>
-<p>其实还是没有负载搞得，只要你把cpu的负载稍微打上去一点，就能显示了</p>
-<p><strong>2.虚拟化情况下为什么只返回主频？</strong></p>
-<p>其实这个就更好理解了，可以看一下lscpu是不是没有aperfmperf这个feature，因为没有这个feature，也就是不支持X86_FEATURE_APERFMPERF，那也就不能去读aperf mperf去计算cpu频率了，所以只能返回固定的值了，也就是cpu主频</p>
-<p>这其实又能引申出一个问题，虚拟化情况下不能访问apermperf的话，怎么估算cpu频率呢？其实应该可以使用perf之类的工具，比如使用perf state sleep 1会得到cycles和task-clock，cycles就是这一秒cpu运行了多少个周期，task-clock就是实际运行了多少时间。比如我得到了cycles是800000，task-clock是1ms。那么就可以计算800000&#x2F;1*1000&#x2F;10^9&#x3D;0.8GHz，后面两个是换算单位，*1000是换算成秒，&#x2F;10^9是换算成GHz</p>
+<p>看一下当时确实没有多少高阶内存了.</p>
+<pre><code>[10368798.554198] Node 0 DMA: 0*4kB 0*8kB 0*16kB 0*32kB 0*64kB 0*128kB 0*256kB 0*512kB 1*1024kB (U) 1*2048kB (M) 2*4096
+kB (M) = 11264kB
+[10368798.568724] Node 0 DMA32: 12*4kB (UM) 5*8kB (M) 7*16kB (M) 7*32kB (M) 9*64kB (M) 4*128kB (M) 8*256kB (M) 7*512kB
+(M) 6*1024kB (M) 6*2048kB (UM) 445*4096kB (M) = 1848296kB
+[10368798.587239] Node 0 Normal: 50484*4kB (UME) 44379*8kB (UME) 21282*16kB (UMEH) 47195*32kB (UMEH) 5*64kB (MH) 0*128k
+B 0*256kB 0*512kB 0*1024kB 0*2048kB 0*4096kB = 2408040kB
+[10368798.605858] Node 1 Normal: 41969*4kB (UMEH) 72919*8kB (UMEH) 41149*16kB (UMEH) 30135*32kB (UMEH) 404*64kB (UME) 5
+*128kB (U) 0*256kB 0*512kB 0*1024kB 0*2048kB 0*4096kB = 2400428kB
+</code></pre>
+<p>然后看一下宕机前的栈(NMI后面的就不贴了节省空间)，这里可以大概看出，初始化veth的时候，申请页面，走了慢路径，然后warn_alloc打印一些警告信息，然后就宕机了。那么哪怕是分配不出页面也不至于造成hardlockup宕机吧？</p>
+<pre><code>[10368956.210951]  &lt;TASK&gt;
+[10368956.210951]  _printk+0x58/0x73
+[10368956.210953]  dump_stack_print_info+0x7c/0xb0
+[10368956.210954]  dump_stack_lvl+0x28/0x48
+[10368956.210956]  warn_alloc+0x138/0x160
+[10368956.210957]  ? __alloc_pages_direct_compact+0x1f1/0x280
+[10368956.210958]  __alloc_pages_slowpath.constprop.0+0x8ac/0x960
+[10368956.210959]  ? get_page_from_freelist+0x2ab/0x530
+[10368956.210961]  ? veth_dev_init+0x78/0xf0 [veth]
+[10368956.210963]  __alloc_pages+0x21d/0x250
+[10368956.210964]  __kmalloc_large_node+0x79/0x100
+[10368956.210965]  __kmalloc+0xca/0x140
+[10368956.210966]  veth_dev_init+0x78/0xf0 [veth]
+[10368956.210967]  register_netdevice+0x10d/0x620
+[10368956.210969]  veth_newlink+0x169/0x3e0 [veth]
+[10368956.210973]  __rtnl_newlink+0x722/0x9e0
+[10368956.210975]  ? update_sg_lb_stats+0x7e/0x450
+[10368956.210977]  ? xas_load+0x9/0xa0
+[10368956.210977]  ? xas_load+0x9/0xa0
+[10368956.210978]  ? xa_load+0x70/0xb0
+[10368956.210981]  rtnl_newlink+0x44/0x70
+[10368956.210982]  rtnetlink_rcv_msg+0x159/0x3d0
+[10368956.210983]  ? rmqueue+0x7d3/0xd40
+[10368956.210984]  ? pick_link+0x24b/0x430
+[10368956.210985]  ? task_dump_owner+0x9e/0x100
+[10368956.210986]  ? __pfx_rtnetlink_rcv_msg+0x10/0x10
+[10368956.210987]  netlink_rcv_skb+0x54/0x100
+[10368956.210990]  netlink_unicast+0x23b/0x360
+[10368956.210991]  netlink_sendmsg+0x24c/0x4c0
+[10368956.210993]  __sys_sendto+0x1dc/0x1f0
+[10368956.210994]  ? do_anonymous_page+0x27a/0x4c0
+[10368956.210996]  __x64_sys_sendto+0x20/0x30
+[10368956.210997]  do_syscall_64+0x59/0x90
+[10368956.210998]  ? do_user_addr_fault+0x1d6/0x6a0
+[10368956.210999]  ? do_syscall_64+0x69/0x90
+[10368956.211000]  ? exc_page_fault+0x62/0x150
+[10368956.211001]  entry_SYSCALL_64_after_hwframe+0x77/0xe1
+[10368956.211002] RIP: 0033:0x40328e
+[10368956.211004] Code: 48 89 6c 24 38 48 8d 6c 24 38 e8 0d 00 00 00 48 8b 6c 24 38 48 83 c4 40 c3 cc cc cc 49 89 f2 48
+ 89 fa 48 89 ce 48 89 df 0f 05 &lt;48&gt; 3d 01 f0 ff ff 76 15 48 f7 d8 48 89 c1 48 c7 c0 ff ff ff ff 48
+[10368956.211005] RSP: 002b:000000c00040ee40 EFLAGS: 00000206 ORIG_RAX: 000000000000002c
+[10368956.211006] RAX: ffffffffffffffda RBX: 000000000000000a RCX: 000000000040328e
+[10368956.211006] RDX: 000000000000008c RSI: 000000c000592000 RDI: 000000000000000a
+[10368956.211007] RBP: 000000c00040ee80 R08: 000000c00058e01c R09: 000000000000000c
+[10368956.211007] R10: 0000000000000000 R11: 0000000000000206 R12: 0000000000000000
+[10368956.211008] R13: 0000000000000040 R14: 000000c000585d40 R15: 000000c000780000
+[10368956.211009]  &lt;/TASK&gt;
+</code></pre>
+<h3 id="vmcore分析"><a href="#vmcore分析" class="headerlink" title="vmcore分析"></a><center>vmcore分析</center></h3><p>首先看一下当前hardlockup导致宕机的栈，可以看到最后在执行kernel&#x2F;printk&#x2F;printk.c: 2046。</p>
+<pre><code>crash&gt; bt
+PID: 3365527  TASK: ff1634946440c680  CPU: 334  COMMAND: &quot;cptp&quot;
+ #0 [fffffe122c54fa90] machine_kexec at ffffffff87a782e7
+ #1 [fffffe122c54fae8] __crash_kexec at ffffffff87bef95a
+ #2 [fffffe122c54fba8] panic at ffffffff8862b8b1
+ #3 [fffffe122c54fc30] watchdog_overflow_callback at ffffffff87c32a6f
+ #4 [fffffe122c54fc48] __perf_event_overflow at ffffffff87d11982
+ #5 [fffffe122c54fc78] amd_pmu_v2_handle_irq at ffffffff87a09a6f
+ #6 [fffffe122c54fe48] perf_event_nmi_handler at ffffffff87a04c98
+ #7 [fffffe122c54fe68] nmi_handle at ffffffff87a3005b
+ #8 [fffffe122c54feb0] default_do_nmi at ffffffff88682fc0
+ #9 [fffffe122c54fed0] exc_nmi at ffffffff886831bf
+#10 [fffffe122c54fef0] end_repeat_nmi at ffffffff888016e9
+    [exception RIP: vprintk_emit+436]
+    RIP: ffffffff87b93174  RSP: ff49b5b4e83870b8  RFLAGS: 00000002
+    RAX: 0000000000000001  RBX: 0000000000000046  RCX: 000000000001c5a2
+    RDX: ff1634946440c680  RSI: 0000000000000002  RDI: ffffffff8a4a8f58
+    RBP: 00000000ffffffff   R8: 8000000100009736   R9: ff16353f79902f27
+    R10: ffffffffffffffff  R11: 000000000000007a  R12: 0000000000000000
+    R13: 0000000000000000  R14: ffffffff88f87460  R15: 0000000000000078
+    ORIG_RAX: ffffffffffffffff  CS: 0010  SS: 0018
+--- &lt;NMI exception stack&gt; ---
+#11 [ff49b5b4e83870b8] vprintk_emit at ffffffff87b93174
+#12 [ff49b5b4e83870f8] _printk at ffffffff88631e18
+#13 [ff49b5b4e8387158] dump_stack_print_info at ffffffff880594ac
+#14 [ff49b5b4e83871a0] dump_stack_lvl at ffffffff8864a0b9
+#15 [ff49b5b4e83871b8] warn_alloc at ffffffff87daadb8
+#16 [ff49b5b4e8387260] __alloc_pages_slowpath.constprop.0 at ffffffff87dab69c
+#17 [ff49b5b4e8387330] __alloc_pages at ffffffff87dab97d
+#18 [ff49b5b4e8387390] __kmalloc_large_node at ffffffff87d69499
+#19 [ff49b5b4e83873c8] __kmalloc at ffffffff87d6997a
+#20 [ff49b5b4e83873f8] veth_dev_init at ffffffffc16d9e48 [veth]
+#21 [ff49b5b4e8387410] register_netdevice at ffffffff8840653d
+#22 [ff49b5b4e8387448] veth_newlink at ffffffffc16daa89 [veth]
+#23 [ff49b5b4e83876b8] __rtnl_newlink at ffffffff88417352
+#24 [ff49b5b4e8387b20] rtnl_newlink at ffffffff88417664
+#25 [ff49b5b4e8387b48] rtnetlink_rcv_msg at ffffffff884142a9
+#26 [ff49b5b4e8387bd8] netlink_rcv_skb at ffffffff8847e454
+#27 [ff49b5b4e8387cb8] netlink_unicast at ffffffff8847dbab
+#28 [ff49b5b4e8387d08] netlink_sendmsg at ffffffff8847df2c
+#29 [ff49b5b4e8387d80] __sys_sendto at ffffffff883d274c
+#30 [ff49b5b4e8387ec0] __x64_sys_sendto at ffffffff883d2790
+#31 [ff49b5b4e8387ec8] do_syscall_64 at ffffffff88681459
+#32 [ff49b5b4e8387f50] entry_SYSCALL_64_after_hwframe at ffffffff8880012f
+    RIP: 000000000040328e  RSP: 000000c00040ee40  RFLAGS: 00000206
+    RAX: ffffffffffffffda  RBX: 000000000000000a  RCX: 000000000040328e
+    RDX: 000000000000008c  RSI: 000000c000592000  RDI: 000000000000000a
+    RBP: 000000c00040ee80   R8: 000000c00058e01c   R9: 000000000000000c
+    R10: 0000000000000000  R11: 0000000000000206  R12: 0000000000000000
+    R13: 0000000000000040  R14: 000000c000585d40  R15: 000000c000780000
+    ORIG_RAX: 000000000000002c  CS: 0033  SS: 002b
+
+
+
+crash&gt; dis -lr ffffffff87b93174 |tail
+0xffffffff87b9315b &lt;vprintk_emit+411&gt;:	call   0xffffffff88697d80 &lt;_raw_spin_unlock&gt;
+/usr/src/debug/kernel-5.14.0-427.42.1.el9_4/linux-5.14.0-427.42.1.el9_4.x86_64/kernel/printk/printk.c: 2046
+0xffffffff87b93160 &lt;vprintk_emit+416&gt;:	movzbl 0x2915de8(%rip),%eax        # 0xffffffff8a4a8f4f &lt;console_waiter&gt;
+0xffffffff87b93167 &lt;vprintk_emit+423&gt;:	test   %al,%al
+0xffffffff87b93169 &lt;vprintk_emit+425&gt;:	je     0xffffffff87b93178 &lt;vprintk_emit+440&gt;
+/usr/src/debug/kernel-5.14.0-427.42.1.el9_4/linux-5.14.0-427.42.1.el9_4.x86_64/./arch/x86/include/asm/vdso/processor.h: 13
+0xffffffff87b9316b &lt;vprintk_emit+427&gt;:	pause
+/usr/src/debug/kernel-5.14.0-427.42.1.el9_4/linux-5.14.0-427.42.1.el9_4.x86_64/kernel/printk/printk.c: 2046
+0xffffffff87b9316d &lt;vprintk_emit+429&gt;:	movzbl 0x2915ddb(%rip),%eax        # 0xffffffff8a4a8f4f &lt;console_waiter&gt;
+0xffffffff87b93174 &lt;vprintk_emit+436&gt;:	test   %al,%al
+</code></pre>
+<p>找到对应的源码看一下，就是卡在了这个console_trylock_spinning函数的的while循环中。<br>根据背景知识中的内容我们可以知道这是一直在尝试死循环读console_waiter，直到handover把锁转移过来把console_waiter置为false，而在这之前的printk_safe_enter_irqsave中正好关闭了中断。<br>所以可以合理推断是之前持有sem锁的owner一直没有handover写console_waiter，所以这里就关了中断之后一直循环等待最终导致hardlockup。</p>
+<pre><code>static int console_trylock_spinning(void)
+&#123;
+......
+
+        printk_safe_enter_irqsave(flags);
+
+        raw_spin_lock(&amp;console_owner_lock);
+        owner = READ_ONCE(console_owner);
+        waiter = READ_ONCE(console_waiter);
+        if (!waiter &amp;&amp; owner &amp;&amp; owner != current) &#123;
+        WRITE_ONCE(console_waiter, true);
+                spin = true;
+        &#125;
+        raw_spin_unlock(&amp;console_owner_lock);
+
+        if (!spin) &#123;
+                printk_safe_exit_irqrestore(flags);
+                return 0;
+        &#125;
+
+        while (READ_ONCE(console_waiter))
+                cpu_relax();
+        spin_release(&amp;console_owner_dep_map, _THIS_IP_);
+        printk_safe_exit_irqrestore(flags);
+        /*
+         * The owner passed the console lock to us.
+         * Since we did not spin on console lock, annotate
+         * this as a trylock. Otherwise lockdep will
+         * complain.
+         */
+        mutex_acquire(&amp;console_lock_dep_map, 0, 1, _THIS_IP_);
+
+        return 1;
+&#125;
+</code></pre>
+<p>可以通过以下操作验证我们上述的猜测：<br>console_waiter一直是true，然后console_sem中的counter是0说明现在sem确实被别人持有，然后wait_list指向自己，说明没有别的waiter，符合使用handover的特征。</p>
+<pre><code>crash&gt; p console_waiter
+console_waiter = $1 = true
+
+crash&gt; p console_sem
+console_sem = $2 = &#123;
+  lock = &#123;
+    raw_lock = &#123;
+      &#123;
+        val = &#123;
+          counter = 0
+        &#125;,
+        &#123;
+          locked = 0 &#39;\000&#39;,
+          pending = 0 &#39;\000&#39;
+        &#125;,
+        &#123;
+          locked_pending = 0,
+          tail = 0
+        &#125;
+      &#125;
+    &#125;
+  &#125;,
+  count = 0,
+  wait_list = &#123;
+    next = 0xffffffff899e7ae8 &lt;console_sem+8&gt;,
+    prev = 0xffffffff899e7ae8 &lt;console_sem+8&gt;
+  &#125;
+&#125;
+</code></pre>
+<p>然后我们查看一下这个sem的owner，是一个kwoker。</p>
+<pre><code>crash&gt; p console_owner
+console_owner = $3 = (struct task_struct *) 0xff16347e4de04680
+crash&gt; struct task_struct.tgid,pid,comm 0xff16347e4de04680
+  tgid = 1463052,
+  pid = 1463052,
+  comm = &quot;kworker/290:1\000\000&quot;,
+
+crash&gt; bt 1463052
+PID: 1463052  TASK: ff16347e4de04680  CPU: 290  COMMAND: &quot;kworker/290:1&quot;
+ #0 [ff49b5b50ea37e90] process_one_work at ffffffff87b2d292
+ #1 [ff49b5b50ea37ed8] worker_thread at ffffffff87b2d860
+ #2 [ff49b5b50ea37f18] kthread at ffffffff87b35a2d
+ #3 [ff49b5b50ea37f50] ret_from_fork at ffffffff87a02c69
+</code></pre>
+<p>但是这个kworker执行了什么任务呢？看不到了。<br>这里我想了几种别的方式来尝试找一下蛛丝马迹来着，比如既然是查console_sem被谁持有，那么持有console_sem的函数会不会大概率打印一些log呢，从dmesg中可不可以找到一些信息？或者bf -f中有没有可能还存有一些信息呢？很遗憾，没找到什么。大模型还是厉害，给找到了方法：通过kwoker的task_struct找到kthread结构体，然后通过kthread结构体找到woker结构体，进而找到执行的func，可以看到是在执行fb_flashcursor函数。</p>
+<pre><code>crash&gt; struct task_struct.worker_private ff16347e4de04680
+  worker_private = 0xff163480e89abc00,
+crash&gt; struct kthread.data 0xff163480e89abc00
+  data = 0xff16347f36eba6c0,
+crash&gt; struct worker.current_work,current_func,current_pwq,current_start,desc 0xff16347f36eba6c0
+  current_work = 0xff1633bf5a41dcd8,
+  current_func = 0xffffffff880ea1a0 &lt;fb_flashcursor&gt;,
+  current_pwq = 0xff16353e7b4b8d00,
+struct: invalid data structure reference: worker.current_start
+</code></pre>
+<p>看一下fb_flashcursor函数，console_trylock尝试加锁，然后执行完一些逻辑之后，执行console_unlock解锁。<br>这里，其实bt -r打印栈上所有内容后可以看到是执行到console_unlock了，所以其实是console_unlock内部执行出现了问题？</p>
+<pre><code>static void fb_flashcursor(struct work_struct *work)
+&#123;
+        struct fbcon_ops *ops = container_of(work, struct fbcon_ops, cursor_work.work);
+        struct fb_info *info;
+        struct vc_data *vc = NULL;
+        int c;
+        int mode;
+        int ret;
+
+        /* FIXME: we should sort out the unbind locking instead */
+        /* instead we just fail to flash the cursor if we can&#39;t get
+         * the lock instead of blocking fbcon deinit */
+        ret = console_trylock();
+        if (ret == 0)
+                return;
+
+        /* protected by console_lock */
+        info = ops-&gt;info;
+
+        if (ops-&gt;currcon != -1)
+                vc = vc_cons[ops-&gt;currcon].d;
+
+        if (!vc || !con_is_visible(vc) ||
+            fbcon_info_from_console(vc-&gt;vc_num) != info ||
+            vc-&gt;vc_deccm != 1) &#123;
+                console_unlock();
+                return;
+        &#125;
+
+        c = scr_readw((u16 *) vc-&gt;vc_pos);
+        mode = (!ops-&gt;cursor_flash || ops-&gt;cursor_state.enable) ?
+                CM_ERASE : CM_DRAW;
+        ops-&gt;cursor(vc, info, mode, get_color(vc, info, c, 1),
+                    get_color(vc, info, c, 0));
+        console_unlock();
+
+        queue_delayed_work(system_power_efficient_wq, &amp;ops-&gt;cursor_work,
+                           ops-&gt;cur_blink_jiffies);
+&#125;
+</code></pre>
+<p>然后看一下console_unlock函数，重点是如果如果buffer里面有内容，则先flush，如果没有handover机制，则unlock，如果有handover，则在console_flush_all函数里面处理。</p>
+<pre><code>void console_unlock(void)
+&#123;
+        bool do_cond_resched;
+        bool handover;
+        bool flushed;
+        u64 next_seq;
+
+        if (console_suspended) &#123;
+                up_console_sem();
+                return;
+        &#125;
+
+        do_cond_resched = console_may_schedule;
+
+        do &#123;
+                console_may_schedule = 0;
+
+                flushed = console_flush_all(do_cond_resched, &amp;next_seq, &amp;handover);
+                if (!handover)
+                        __console_unlock();
+
+                if (!flushed)
+                        break;
+                        
+        &#125; while (prb_read_valid(prb, next_seq, NULL) &amp;&amp; console_trylock());
+&#125;
+</code></pre>
+<p>如果有handover的话，则在console_flush_all的流程里调用到console_lock_spinning_disable_and_check里对handover进行处理，包括sem的移交和console_waiter的写入等。<br>所以很明显，还没有执行到console_lock_spinning_disable_and_check的逻辑。</p>
+<pre><code>console_flush_all
+  -&gt;console_emit_next_record_transferable
+    -&gt;console_emit_next_record
+      -&gt;__console_emit_next_record
+        -&gt;console_lock_spinning_disable_and_check
+</code></pre>
+<p>通过bt -r看一下栈上还有哪些内容，发现有个serial8250_console_write+865。看一下__console_emit_next_record函数的片段。<br>所以其实就是执行到call_console_driver里面了。call_console_driver里面是遍历调用各个console的write函数。</p>
+<pre><code>       if (handover) &#123;
+                printk_safe_enter_irqsave(flags);
+                console_lock_spinning_enable();
+
+                /* don&#39;t trace irqsoff print latency */
+                stop_critical_timings();
+        &#125;
+
+        call_console_driver(con, write_text, len, dropped_text, atomic_printing);
+
+        write_console_seq(con, seq + 1, atomic_printing);
+
+        if (handover) &#123;
+                start_critical_timings();
+                *handover = console_lock_spinning_disable_and_check();
+                printk_safe_exit_irqrestore(flags);
+        &#125;
+</code></pre>
+<p>然后看一下serial8250_console_write+865附近。</p>
+<pre><code>0xffffffff881b9b80 &lt;serial8250_console_write+816&gt;:      call   *%rax
+0xffffffff881b9b82 &lt;serial8250_console_write+818&gt;:      nopl   (%rax)
+/usr/src/debug/kernel-5.14.0-427.42.1.el9_4/linux-5.14.0-427.42.1.el9_4.x86_64/drivers/tty/serial/8250/8250.h: 286
+0xffffffff881b9b85 &lt;serial8250_console_write+821&gt;:      mov    0x240(%r15),%rdi
+0xffffffff881b9b8c &lt;serial8250_console_write+828&gt;:      test   %rdi,%rdi
+0xffffffff881b9b8f &lt;serial8250_console_write+831&gt;:      je     0xffffffff881b9b9b &lt;serial8250_console_write+843&gt;
+/usr/src/debug/kernel-5.14.0-427.42.1.el9_4/linux-5.14.0-427.42.1.el9_4.x86_64/drivers/tty/serial/8250/8250.h: 287
+0xffffffff881b9b91 &lt;serial8250_console_write+833&gt;:      mov    $0x6,%esi
+0xffffffff881b9b96 &lt;serial8250_console_write+838&gt;:      call   0xffffffff881c05d0 &lt;mctrl_gpio_set&gt;
+/usr/src/debug/kernel-5.14.0-427.42.1.el9_4/linux-5.14.0-427.42.1.el9_4.x86_64/drivers/tty/serial/8250/8250_port.c: 3452
+0xffffffff881b9b9b &lt;serial8250_console_write+843&gt;:      movb   $0x0,0x238(%r15)
+0xffffffff881b9ba3 &lt;serial8250_console_write+851&gt;:      jmp    0xffffffff881b9916 &lt;serial8250_console_write+198&gt;
+/usr/src/debug/kernel-5.14.0-427.42.1.el9_4/linux-5.14.0-427.42.1.el9_4.x86_64/drivers/tty/serial/8250/8250.h: 182
+0xffffffff881b9ba8 &lt;serial8250_console_write+856&gt;:      mov    0x220(%r15),%ebp
+0xffffffff881b9baf &lt;serial8250_console_write+863&gt;:      jmp    0xffffffff881b9bbc &lt;serial8250_console_write+876&gt;
+/usr/src/debug/kernel-5.14.0-427.42.1.el9_4/linux-5.14.0-427.42.1.el9_4.x86_64/./arch/x86/include/asm/irqflags.h: 122
+0xffffffff881b9bb1 &lt;serial8250_console_write+865&gt;:      and    $0x2,%bh
+/usr/src/debug/kernel-5.14.0-427.42.1.el9_4/linux-5.14.0-427.42.1.el9_4.x86_64/./arch/x86/include/asm/irqflags.h: 134
+0xffffffff881b9bb4 &lt;serial8250_console_write+868&gt;:      je     0xffffffff881b9bb7 &lt;serial8250_console_write+871&gt;
+/usr/src/debug/kernel-5.14.0-427.42.1.el9_4/linux-5.14.0-427.42.1.el9_4.x86_64/./arch/x86/include/asm/irqflags.h: 42
+0xffffffff881b9bb6 &lt;serial8250_console_write+870&gt;:      sti
+/usr/src/debug/kernel-5.14.0-427.42.1.el9_4/linux-5.14.0-427.42.1.el9_4.x86_64/drivers/tty/serial/8250/8250.h: 186
+0xffffffff881b9bb7 &lt;serial8250_console_write+871&gt;:      call   0xffffffff87b8ed30 &lt;__printk_cpu_sync_wait&gt;
+/usr/src/debug/kernel-5.14.0-427.42.1.el9_4/linux-5.14.0-427.42.1.el9_4.x86_64/./arch/x86/include/asm/irqflags.h: 26
+0xffffffff881b9bbc &lt;serial8250_console_write+876&gt;:      pushf
+0xffffffff881b9bbd &lt;serial8250_console_write+877&gt;:      pop    %rbx
+/usr/src/debug/kernel-5.14.0-427.42.1.el9_4/linux-5.14.0-427.42.1.el9_4.x86_64/./arch/x86/include/asm/irqflags.h: 37
+0xffffffff881b9bbe &lt;serial8250_console_write+878&gt;:      cli
+/usr/src/debug/kernel-5.14.0-427.42.1.el9_4/linux-5.14.0-427.42.1.el9_4.x86_64/drivers/tty/serial/8250/8250.h: 186
+0xffffffff881b9bbf &lt;serial8250_console_write+879&gt;:      call   0xffffffff87b8fd60 &lt;__printk_cpu_sync_try_get&gt;
+0xffffffff881b9bc4 &lt;serial8250_console_write+884&gt;:      test   %eax,%eax
+0xffffffff881b9bc6 &lt;serial8250_console_write+886&gt;:      je     0xffffffff881b9bb1 &lt;serial8250_console_write+865&gt;
+/usr/src/debug/kernel-5.14.0-427.42.1.el9_4/linux-5.14.0-427.42.1.el9_4.x86_64/drivers/tty/serial/8250/8250.h: 115
+</code></pre>
+<p>这里，附近看到有调用__printk_cpu_sync_try_get，难道是在等printk_cpu_sync？<br>看一下printk_cpu_sync_owner,正好是334号cpu。看一下最开始hardlockup宕机的栈，正好就发生在334号cpu。恰好形成了ABBA死锁。</p>
+<pre><code>crash&gt; p printk_cpu_sync_owner
+printk_cpu_sync_owner = $1 = &#123;
+  counter = 334
+&#125;
+</code></pre>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a><center>结论</center></h2><p>如图，fbcon周期性触发，获取console_sem然后在console_unlock路径中尝试获取printk_cpu_sync。而创建veth初始化的时候需要分配页面，快速分配失败走慢路径warn_alloc打印警告日志，它会先持有printk_cpu_sync，然后又尝试获取console_sem，因此两者互相等待形成死锁。</p>
+<p><img src="/img/62.png"></p>
+<h2 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a><center>解决方法</center></h2><p>上游中这个patch可以缓解这个问题，是在创建veth的时候使用kvmalloc来代替kcalloc，也就是不再强制去分配很大的连续的物理页面。</p>
+<pre><code>commit 1ce7d306ea63f3e379557c79abd88052e0483813
+Author: Jakub Kicinski &lt;kuba@kernel.org&gt;
+Date: Fri Feb 23 15:59:08 2024 -0800
+ veth: try harder when allocating queue memory
+</code></pre>
+<p>而这个patch应该可以彻底解决这个问题，也就是在设计上，持有printk_cpu_sync的owner不应该等待其他锁，所以持有printk_cpu_sync的代码会把log延迟打印，这样就不会形成死锁了。</p>
+<pre><code>commit 0161e2d6950fe66cf6ac1c10d945bae971f33667
+Author: John Ogness &lt;john.ogness@linutronix.de&gt;
+Date: Mon Dec 9 12:23:46 2024 +0106
+ printk: Defer legacy printing when holding printk_cpu_sync
+</code></pre>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a><center>参考</center></h2><p>[1] <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=Mzk3NTMzMTA4MA==&mid=2247483657&idx=1&sn=6c522cf0fdb47f5431d36acbba35ce0a&chksm=c5c628c78f56451565678de9ee5da15477d373780da295fc661f46ed40c0da2b568b51a5aab1&sessionid=1784368699&scene=305&subscene=10000&clicktime=1784368709&enterid=1784368709&ascene=3&fasttmpl_type=0&fasttmpl_fullversion=8349583-zh_CN-zip&fasttmpl_flag=0&realreporttime=1784368709794&poc_token=HIZOW2qj4lttowoSkaG1wmu5vsRzyFH6GvRzth93">https://mp.weixin.qq.com/s?__biz=Mzk3NTMzMTA4MA==&amp;mid=2247483657&amp;idx=1&amp;sn=6c522cf0fdb47f5431d36acbba35ce0a&amp;chksm=c5c628c78f56451565678de9ee5da15477d373780da295fc661f46ed40c0da2b568b51a5aab1&amp;sessionid=1784368699&amp;scene=305&amp;subscene=10000&amp;clicktime=1784368709&amp;enterid=1784368709&amp;ascene=3&amp;fasttmpl_type=0&amp;fasttmpl_fullversion=8349583-zh_CN-zip&amp;fasttmpl_flag=0&amp;realreporttime=1784368709794&amp;poc_token=HIZOW2qj4lttowoSkaG1wmu5vsRzyFH6GvRzth93</a></p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
