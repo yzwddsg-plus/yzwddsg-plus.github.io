@@ -794,7 +794,7 @@
     </div>
     <div class="article-meta">
         
-            Created At : <time class="date" title='Updated At: 2026-07-20 23:41:07'>2026-07-17 22:26</time>
+            Created At : <time class="date" title='Updated At: 2026-07-20 23:59:06'>2026-07-17 22:26</time>
         
     </div>
     <div class="article-meta">
@@ -846,7 +846,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h2 id="问题背景"><a href="#问题背景" class="headerlink" title="问题背景"></a><center>问题背景</center></h2><p>某台机器hardlockup导致宕机，需要排查宕机原因。<br>如果没有AI辅助，本次排查问题的学习成本+时间成本+排查难度都将翻倍，因此，Assisted-by: GPT-5.6。</p>
-<h2 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h2><ul>
+<h2 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a><center>背景知识</center></h2><ul>
 <li><span style="color: rgba(255, 69, 0, 1)">hardlockup</span><br>内核态一直执行超过XXX秒，不能触发调度和响应中断，watchdog检测到后触发宕机。</li>
 <li><span style="color: rgba(255, 69, 0, 1)">console_sem的handover机制</span><br>当CPU A持有console_sem时，它会先将自身标记为console_owner，然后开始打印。若此时CPU B也想打印并发现锁被占用，它会将console_waiter置为true并进入关中断自旋等待。A在每次写操作后都会检查console_waiter，一旦发现B在等待，A便立即清除console_waiter并直接退出（但不释放console_sem）。B检测到console_waiter被清除后随即停止自旋，并直接继承锁的控制权，成为新的console_owner，继续完成后续打印工作。</li>
 <li><span style="color: rgba(255, 69, 0, 1)">printk_cpu_sync</span><br>用于在多 CPU 间串行化打印操作的专用同步机制，具有cpu可重入性并且可以在任意上下文中使用。最早叫printk_cpulock，可参见faebd693c593 (“printk: rename cpulock functions”)。</li>
