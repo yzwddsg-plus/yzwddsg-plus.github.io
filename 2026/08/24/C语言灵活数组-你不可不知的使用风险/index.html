@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>内核中的guard宏 | YZWDDSG</title>
+  <title>C语言灵活数组---你不可不知的使用风险 | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="内核中的guard宏 | YZWDDSG">
+  <meta name="description" content="C语言灵活数组---你不可不知的使用风险 | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta name="description" content="邮箱：857879363@qq.com bilibili：https:&#x2F;&#x2F;space.bilibili.com&#x2F;346090747 知乎：https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;zhong-ai-83-43 公众号： 本模板链接：3-hexo 本模板原作者：yelog">
@@ -787,9 +787,9 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="post-内核中的guard宏" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-C语言灵活数组-你不可不知的使用风险" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">内核中的guard宏</h1>
+        <h1 class="article-title">C语言灵活数组---你不可不知的使用风险</h1>
     
     <div class="article-meta">
         
@@ -807,12 +807,12 @@
     </div>
     <div class="article-meta">
         
-            Created At : <time class="date" title='Updated At: 2025-11-02 23:01:26'>2025-11-02 22:49</time>
+            Created At : <time class="date" title='Updated At: 2026-08-26 22:09:15'>2026-08-24 21:37</time>
         
     </div>
     <div class="article-meta">
         
-        <span>Count:2.5k</span>
+        <span>Count:1.7k</span>
         
         
         <span id="busuanzi_container_page_pv">
@@ -842,7 +842,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8Egcc%E7%9A%84cleanup%E5%B1%9E%E6%80%A7%E5%BC%80%E5%A7%8B"><span class="toc-text">从gcc的cleanup属性开始</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E4%B8%AD%E7%9A%84guard"><span class="toc-text">内核中的guard</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-text">参考</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-text">引言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-text">问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A2%E7%B4%A2%E5%8E%9F%E5%9B%A0"><span class="toc-text">探索原因</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%A7%E7%BB%AD%E6%80%9D%E8%80%83"><span class="toc-text">继续思考</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -858,281 +858,186 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a><center>背景</center></h3><p>最近看内核代码的时候，注意到之前不少加锁的地方都替换成了guard()</p>
-<p>比如，我们看一下曾经某个commit的改动，很明显，这里就是把成对的preempt_{en,dis}able替换成了一个guard()。</p>
-<pre><code class="language-c">@@ -2417,10 +2404,9 @@ void migrate_disable(void)
-                return;
-        &#125;
-
--       preempt_disable();
-+       guard(preempt)();
-        this_rq()-&gt;nr_pinned++;
-        p-&gt;migration_disabled = 1;
--       preempt_enable();
+        <h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>在 C 语言中，数组的长度在编译期固定，例如 int a[5]。</p>
+<p>为了支持运行时可变大小的数据块，C99 引入了柔性数组&#x2F;灵活数组（Flexible Array Member），允许在结构体的最后一个成员声明一个不完整数组类型，比如int a[];，再通过 malloc动态分配足够的连续空间。</p>
+<p>但是灵活数组在实际使用中，也有一些需要注意的风险点。</p>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>看linux调度器负载均衡代码的时候发现sched_domain结构体中的变量span被注释掉了，这个span就是sched_domain结构体的最后一个成员，是一个灵活数组，用来表示这个调度域中可以负载均衡的cpu的mask。</p>
+<p>现在变成了这样，看注释的意思，貌似灵活数组在这里有问题？</p>
+<pre><code class="language-c">struct sched_domain &#123;
+.......
+        unsigned int span_weight;
+        /*
+         * See sched_domain_span(), on why flex arrays are broken.
+         *
+        unsigned long span[];
+         */
+&#125;;
 </code></pre>
-<p>但是，为什么可以这么替换？这个guard是怎么实现的？作用是什么？我们需要看一看，研究一下。</p>
-<h3 id="从gcc的cleanup属性开始"><a href="#从gcc的cleanup属性开始" class="headerlink" title="从gcc的cleanup属性开始"></a><center>从gcc的cleanup属性开始</center></h3><p>在<a target="_blank" rel="noopener" href="https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html">https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html</a> 中，我们可以看到gcc支持cleanup这么一个属性</p>
-<p>这里我没有查到具体哪个gcc版本引入的这个属性支持，但是我们可以明确，很早之前的版本就有了，<a target="_blank" rel="noopener" href="https://gcc.gnu.org/onlinedocs/gcc-4.0.0/gcc/Variable-Attributes.html#index-g_t_0040code_007bcleanup_007d-attribute-1768">https://gcc.gnu.org/onlinedocs/gcc-4.0.0/gcc/Variable-Attributes.html#index-g_t_0040code_007bcleanup_007d-attribute-1768</a>  可以看到gcc 4.0.0就支持了这个属性，关于它的解释如下：</p>
-<pre><code class="language-c">cleanup (cleanup_function)
-The cleanup attribute runs a function when the variable goes out of scope. This attribute
-can only be applied to auto function scope variables; it may not be applied to parameters
-or variables with static storage duration. The function must take one parameter, a pointer
-to a type compatible with the variable. The return value of the function (if any) is ignored.
-
-When multiple variables in the same scope have cleanup attributes, at exit from the scope
-their associated cleanup functions are run in reverse order of definition (last defined,
-first cleanup).
+<p>然后我们看一下注释中提到的sched_domain_span函数就恍然大悟了，原来这里使用灵活数组的话会导致over-write。</p>
+<pre><code class="language-c">static inline struct cpumask *sched_domain_span(struct sched_domain *sd)
+&#123;
+        /*
+         * Turns out that C flexible arrays are fundamentally broken since it
+         * is allowed for offsetof(*sd, span) &lt; sizeof(*sd), this means that
+         * structure initialzation *sd = &#123; ... &#125;; which writes every byte
+         * inside sizeof(*type), will over-write the start of the flexible
+         * array.
+         *
+         * Luckily, the way we allocate sched_domain is by:
+         *
+         *   sizeof(*sd) + cpumask_size()
+         *
+         * this means that we have sufficient space for the whole flex array
+         * *outside* of sizeof(*sd). So use that, and avoid using sd-&gt;span.
+         */
+        unsigned long *bitmap = (void *)sd + sizeof(*sd);
+        return to_cpumask(bitmap);
+&#125;
 </code></pre>
-<p>什么意思呢？<font color="red">cleanup这个属性会在一个变量离开它的作用域后自动调用一个释放函数</font>。注意：本属性只能作用域function auto scope的变量，也就是说函数中定义的栈上分配的在函数作用域中的变量，参数或者static变量是不行的。自动调用的函数必须有一个参数，该参数是一个指向与该变量类型兼容的指针。如果某个作用域内有多个变量定义了cleanup属性，从作用域离开时，这些cleanup的函数的执行顺序是与变量的定义顺序相反的。看到这个是不是立刻想到了cpp的析构函数。</p>
-<p>怎么使用呢？直接上一段代码看看：</p>
+<h3 id="探索原因"><a href="#探索原因" class="headerlink" title="探索原因"></a>探索原因</h3><p>为什么sched_domain中的灵活数组会导致over-write呢？虽然注释中已经说的很清楚了，但是我们还是来做一些小实验实际验证一下吧。</p>
+<p>首先我们写这样一个结构体：</p>
+<pre><code class="language-c">struct A &#123;
+        long long a;
+        int b;
+        int c[];
+&#125;;
+</code></pre>
+<p>容易知道在64位系统上这个sizeof(struct A)的大小应该是16，因为long long占8个字节，int占4个字节，然后因为结构体对齐的原因，int b后面还要填充4个字节。（可以自己写个简单的程序验证一下）</p>
+<p>那么这时候这个灵活数组c的偏移是多大呢？是0xc也就是12个字节处：</p>
+<pre><code class="language-c">struct A *aa = 0x0;
+printf(&quot;%p\n&quot;, &amp;aa-&gt;c);
+
+//结果
+c offset is 0xc
+</code></pre>
+<p>那么我如果写这么一个程序的话：</p>
 <pre><code class="language-c">#include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
-#include &lt;string.h&gt;
+
+struct A &#123;
+        long long a;
+        int b;
+        int c[];
+&#125;;
 
 int main()
 &#123;
-    char *A = malloc(8);
+        struct A *aa;
 
-    strncpy(A, &quot;yzwddsg&quot;, 7);
-    A[7] = &#39;\0&#39;;
+        aa = malloc(sizeof(*aa) + 3 * sizeof(int));
 
-    printf(&quot;%s\n&quot;, A);
-    free(A);
-    printf(&quot;%s\n&quot;, A);
+        aa-&gt;c[0] = 1;
+        aa-&gt;c[1] = 2;
+        aa-&gt;c[2] = 3;
+
+        printf(&quot;aa-&gt;c[0]:%d aa-&gt;c[1]:%d aa-&gt;c[2]:%d\n&quot;,
+                aa-&gt;c[0], aa-&gt;c[1], aa-&gt;c[2]);
+
+        *aa = (struct A) &#123;
+                .a = 100,
+        &#125;;
+
+        printf(&quot;aa-&gt;c[0]:%d aa-&gt;c[1]:%d aa-&gt;c[2]:%d\n&quot;,
+                aa-&gt;c[0], aa-&gt;c[1], aa-&gt;c[2]);
+
+        free(aa);
 &#125;
 </code></pre>
-<p>运行结果如下：</p>
-<pre><code class="language-c">[root@yzwddsg tmp]# ./a
-yzwddsg
-        //这里其实有内容，是空，不建议这么写，测试用
+<p>编译出bin后执行，将得到以下输出：</p>
+<pre><code class="language-c">aa-&gt;c[0]:1 aa-&gt;c[1]:2 aa-&gt;c[2]:3
+aa-&gt;c[0]:0 aa-&gt;c[1]:2 aa-&gt;c[2]:3
 </code></pre>
-<p>上面的代码，我们申请了malloc的内存之后，需要手动使用free释放，否则就会发生内存泄漏。当然，上面的代码片段很简单，我们肯定不会忘记free，但是在复杂的大型的项目中，尤其是判断分支多的情况下，其实很在该释放内存的时候忘记使用free，如果改成下面这样，即使main中有大量判断分支，编译器也不会忘记在char *A离开作用域时自动调用free_A去释放内存。</p>
+<p>进行了一次结构体赋值之后，灵活数组的内容被覆盖掉了！</p>
+<p>这是因为刚才说的，结构体赋值会把sizeof这个结构体置0，而灵活数组c的偏移是0xc，与sizeof(struct A)重叠了4个字节。</p>
+<h3 id="继续思考"><a href="#继续思考" class="headerlink" title="继续思考"></a>继续思考</h3><p>如果我把上面代码中的的：</p>
+<pre><code class="language-c">        *aa = (struct A) &#123;
+                .a = 100,
+        &#125;;
+</code></pre>
+<p>修改为：</p>
+<pre><code class="language-c">        *aa = (struct A) &#123;
+                .a = 100,
+                .b = 200,
+        &#125;;
+</code></pre>
+<p>重新编译bin并运行，我们得到的结果又不一样了，变成了：</p>
+<pre><code class="language-c">aa-&gt;c[0]:1 aa-&gt;c[1]:2 aa-&gt;c[2]:3
+aa-&gt;c[0]:1 aa-&gt;c[1]:2 aa-&gt;c[2]:3
+</code></pre>
+<p>这个后面解释，我们继续修改，如果我们把上面代码中的struct A的内容修改为：</p>
+<pre><code class="language-c">struct A &#123;
+        long long a;
+        int b;
+        int d;
+        int c[];
+&#125;;
+</code></pre>
+<p>那么在结构体赋值的时候无论是是否把a、b、d变量全部赋值，aa灵活数组的内容都不会被覆写！</p>
+<p>接下来我们把代码精简一下：</p>
 <pre><code class="language-c">#include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
-#include &lt;string.h&gt;
 
-void free_A (char **A)
-&#123;
-    free(*A);
-&#125;
-
-int main()
-&#123;
-    __attribute__((cleanup(free_A))) char *A = malloc(8);
-
-    strncpy(A, &quot;yzwddsg&quot;, 7);
-    A[7] = &#39;\0&#39;;
-
-    printf(&quot;%s\n&quot;, A);
-&#125;
-
-//运行结果如下
-[root@yzwddsg tmp]# ./a
-yzwddsg
-</code></pre>
-<p>我们把上面两段没用的代码都去掉，只留主要的malloc</p>
-<pre><code class="language-c">//第一段
-#include &lt;stdio.h&gt;
-#include &lt;stdlib.h&gt;
+struct A &#123;
+        long long a;
+        int b;
+        int c[];
+&#125;;
 
 int main()
 &#123;
-    char *A = malloc(8);
+        struct A *aa;
 
-    free(A);
-&#125;
+        aa = malloc(sizeof(struct A) + 3 * sizeof(int));
 
-//第二段
-#include &lt;stdio.h&gt;
-#include &lt;stdlib.h&gt;
-
-void free_A(char **A)
-&#123;
-    free(*A);
-&#125;
-
-int main()
-&#123;
-    __attribute__((cleanup(free_A))) char *A = malloc(8);
+        *aa = (struct A) &#123;
+                .a = 100,
+                .b = 200,
+        &#125;;
 &#125;
 </code></pre>
-<p>然后我们分别反汇编第一段和第二段代码，查看其main函数</p>
-<pre><code class="language-c">//第一段
-00000000004011a5 &lt;main&gt;:
-  4011a5:	55                   	push   %rbp
-  4011a6:	48 89 e5             	mov    %rsp,%rbp
-  4011a9:	48 83 ec 10          	sub    $0x10,%rsp
-  4011ad:	bf 08 00 00 00       	mov    $0x8,%edi
-  4011b2:	e8 a9 fe ff ff       	callq  401060 &lt;malloc@plt&gt;
-  4011b7:	48 89 45 f8          	mov    %rax,-0x8(%rbp)
-  4011bb:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
-  4011bf:	48 89 c7             	mov    %rax,%rdi
-  4011c2:	e8 79 fe ff ff       	callq  401040 &lt;free@plt&gt;
-  4011c7:	b8 00 00 00 00       	mov    $0x0,%eax
-  4011cc:	c9                   	leaveq
-  4011cd:	c3                   	retq
-  4011ce:	66 90                	xchg   %ax,%ax
-
-
-//第二段
-00000000004011c3 &lt;main&gt;:
-  4011c3:	55                   	push   %rbp
-  4011c4:	48 89 e5             	mov    %rsp,%rbp
-  4011c7:	48 83 ec 10          	sub    $0x10,%rsp
-  4011cb:	bf 08 00 00 00       	mov    $0x8,%edi
-  4011d0:	e8 8b fe ff ff       	callq  401060 &lt;malloc@plt&gt;
-  4011d5:	48 89 45 f8          	mov    %rax,-0x8(%rbp)
-  4011d9:	48 8d 45 f8          	lea    -0x8(%rbp),%rax
-  4011dd:	48 89 c7             	mov    %rax,%rdi
-  4011e0:	e8 c0 ff ff ff       	callq  4011a5 &lt;free_A&gt;
-  4011e5:	b8 00 00 00 00       	mov    $0x0,%eax
-  4011ea:	c9                   	leaveq
-  4011eb:	c3                   	retq
-  4011ec:	0f 1f 40 00          	nopl   0x0(%rax)
+<p>(会有内存泄漏，不过我们先不关注这方面了)</p>
+<p>使用gcc编译出一个bin来，然后我们使用objdump反汇编看一下main函数的内容：</p>
+<pre><code class="language-c">0000000000401195 &lt;main&gt;:
+  401195:	55                   	push   %rbp
+  401196:	48 89 e5             	mov    %rsp,%rbp
+  401199:	48 83 ec 10          	sub    $0x10,%rsp
+  40119d:	bf 1c 00 00 00       	mov    $0x1c,%edi
+  4011a2:	e8 a9 fe ff ff       	callq  401050 &lt;malloc@plt&gt;
+  4011a7:	48 89 45 f8          	mov    %rax,-0x8(%rbp)
+  4011ab:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  4011af:	48 c7 00 64 00 00 00 	movq   $0x64,(%rax)
+  4011b6:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  4011ba:	c7 40 08 c8 00 00 00 	movl   $0xc8,0x8(%rax)
+  4011c1:	b8 00 00 00 00       	mov    $0x0,%eax
+  4011c6:	c9                   	leaveq
+  4011c7:	c3                   	retq
+  4011c8:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+  4011cf:	00
 </code></pre>
-<p>可以看到，使用cleanup属性之后，gcc编译器会自动在cleanup修饰的变量离开作用域的地方插入一个函数调用，指向我们自己写的free函数。不错，其实就是相当于<font color="red">我们自己手动写一个释放函数，然后在初始化变量的时候使用cleanup属性带上这个释放函数，编译器在编译时就会自动在所有需要释放的地方插入对改函数的掉调用以正确释放该变量，防止内存泄漏</font>。</p>
-<h3 id="内核中的guard"><a href="#内核中的guard" class="headerlink" title="内核中的guard"></a><center>内核中的guard</center></h3><p>内核作为一个极其复杂的超超超大型c项目，一直都是需要手动在每个return或者goto去处理资源释放之类的操作，如果能用上cleanup岂不是美滋滋。</p>
-<p>哎，<a target="_blank" rel="noopener" href="https://lwn.net/Articles/934679/">https://lwn.net/Articles/934679/</a> ，guard就是用上了这个属性。</p>
-<p>我们直接看最初的commit吧，54da6a092431 (“locking: Introduce __cleanup() based infrastructure”)，看看这个实现过程：</p>
-<ul>
-<li><strong><strong>attribute</strong>((__cleanup()))与清理函数的封装</strong></li>
-</ul>
-<pre><code class="language-c">+#define DEFINE_FREE(_name, _type, _free) \
-+       static inline void __free_##_name(void *p) &#123; _type _T = *(_type *)p; _free; &#125;
-+
-+#define __free(_name)  __cleanup(__free_##_name)
-+
-//这里解释下为什么这样封装一下
-//如果需要封装一个指针变量，那么返回的时候是不是就自动释放了呢？
-//为了防止上面这种情况，需要先把该指针赋值给一个新变量，然后返回这个新的变量，旧的指针置NULL
-//这样，return的时候就返回了新的指针,cleanup调用函数去释放旧的NULL
-+#define no_free_ptr(p) \
-+       (&#123; __auto_type __ptr = (p); (p) = NULL; __ptr; &#125;)
-+
-+#define return_ptr(p)  return no_free_ptr(p)
-
-
-
-+#define __cleanup(func)                        __attribute__((__cleanup__(func)))
+<p>然后我们把代码中的结构体赋值中的.b &#x3D; 200去掉然后再次编译并反汇编，得到的main函数的汇编如下：</p>
+<pre><code class="language-c">0000000000401195 &lt;main&gt;:
+  401195:	55                   	push   %rbp
+  401196:	48 89 e5             	mov    %rsp,%rbp
+  401199:	48 83 ec 10          	sub    $0x10,%rsp
+  40119d:	bf 1c 00 00 00       	mov    $0x1c,%edi
+  4011a2:	e8 a9 fe ff ff       	callq  401050 &lt;malloc@plt&gt;
+  4011a7:	48 89 45 f8          	mov    %rax,-0x8(%rbp)
+  4011ab:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  4011af:	48 c7 00 00 00 00 00 	movq   $0x0,(%rax)
+  4011b6:	48 c7 40 08 00 00 00 	movq   $0x0,0x8(%rax)
+  4011bd:	00
+  4011be:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  4011c2:	48 c7 00 64 00 00 00 	movq   $0x64,(%rax)
+  4011c9:	b8 00 00 00 00       	mov    $0x0,%eax
+  4011ce:	c9                   	leaveq
+  4011cf:	c3                   	retq
 </code></pre>
-<p>上面先定义了一些宏，使用这些宏，我们可以很容易构造出一个自动释放的函数（就是cleanup属性自动调用的释放函数，比如上面例子中的free_A）</p>
-<p>比如，还是我们之前的例子：</p>
-<pre><code class="language-c">//之前是这样写的
-void free_A(char **A)
-&#123;
-    free(*A);
-&#125;
-
-int main()
-&#123;
-    __attribute__((cleanup(free_A))) char *A = malloc(8);
-&#125;
-
-
-//使用这些封装之后，在内核里可以这样写(举个例子，其实不能直接写到内核中)
-DEFINE_FREE(free_A, char *, free(_T))  //注意这里是char *，不是char **了，已经对类型做了封装
-
-int main()
-&#123;
-    __cleanup(free_A) char *A = malloc(8);   //这里直接使用__cleanup就把__attribute__((__cleanup__(XXX)))封装了
-&#125;
-</code></pre>
-<ul>
-<li><strong>class的实现</strong></li>
-</ul>
-<p>能不能再抽象一点呢？搞一个类，为一个类型定义destructor和constructor</p>
-<pre><code class="language-c">+#define DEFINE_CLASS(_name, _type, _exit, _init, _init_args...)                \
-+typedef _type class_##_name##_t;                                       \
-+static inline void class_##_name##_destructor(_type *p)                        \
-+&#123; _type _T = *p; _exit; &#125;                                              \
-+static inline _type class_##_name##_constructor(_init_args)            \
-+&#123; _type t = _init; return t; &#125;
-+
-+#define EXTEND_CLASS(_name, ext, _init, _init_args...)                 \
-+typedef class_##_name##_t class_##_name##ext##_t;                      \
-+static inline void class_##_name##ext##_destructor(class_##_name##_t *p)\
-+&#123; class_##_name##_destructor(p); &#125;                                     \
-+static inline class_##_name##_t class_##_name##ext##_constructor(_init_args) \
-+&#123; class_##_name##_t t = _init; return t; &#125;
-+
-+#define CLASS(_name, var)                                              \
-+       class_##_name##_t var __cleanup(class_##_name##_destructor) =   \
-+               class_##_name##_constructor
-
-//比如，这样使用
-//DEFINE_CLASS中，为struct fd定义了一个别名class_fdget_t类型
-//定一个一个class_fdget_destructor函数，执行fdput(_T)
-//定义了一个class_fdget_constructor函数，执行fdget(fd)函数
-//CLASS则直接初始化了一个class_fdget_t类型的f变量，并附带上了cleanup属性，也就是离开作用域自动释放
-//这样，使用f的时候就不用担心有忘记释放的情况了
-+ * DEFINE_CLASS(fdget, struct fd, fdput(_T), fdget(fd), int fd)
-+ *
-+ *     CLASS(fdget, f)(fd);
-+ *     if (!f.file)
-+ *             return -EBADF;
-+ *
-+ *     // use &#39;f&#39; without concern
-+ */
-</code></pre>
-<ul>
-<li><strong>在内核中用起来</strong></li>
-</ul>
-<p>上面虽然实现了对cleanup的封装和更高层的抽象，但是我们总不想每次使用都这么麻烦吧，而且用在哪里呢？有什么使用场景呢？</p>
-<p>下面是对lock的一层封装的实现</p>
-<pre><code class="language-c">+#define DEFINE_GUARD(_name, _type, _lock, _unlock) \
-+       DEFINE_CLASS(_name, _type, _unlock, (&#123; _lock; _T; &#125;), _type _T)
-+
-+#define guard(_name) \
-+       CLASS(_name, __UNIQUE_ID(guard))     //这里的__UNIQUE_ID是为了生成唯一的标识符名称，不做展开
-+
-+#define scoped_guard(_name, args...)                                   \
-+       for (CLASS(_name, scope)(args),                                 \
-+            *done = NULL; !done; done = (void *)1)
-
-
-//所以，这里可以明白，只要再对一些类型的锁做一层DEFINE_GUARD的封装，就可以使用起来了
-//比如，我们看看最开始提到的guard(preempt)();，看看它是怎么实现的
-//我们看最开始就是使用DEFINE_LOCK_GUARD_0把preempt、preempt_disable(), preempt_enable()进行了封装
-//DEFINE_LOCK_GUARD_0会调用__DEFINE_UNLOCK_GUARD宏和__DEFINE_LOCK_GUARD_0宏
-//__DEFINE_UNLOCK_GUARD宏定义了一个class_preempt_t类型，然后定义了class_preempt_destructor函数，执行的其实就是preempt_enable()
-//__DEFINE_LOCK_GUARD_0就是定义一个 class_preempt_constructor函数，初始化class_preempt_t结构体，其实里面就一个把void *lock赋值一下，然后执行preempt_disable()
-
-//然后，当我们再去调用guard(preempt)();的时候，其实就是初始化了一个class_preempt_t结构体(在这里没什么用)，然后执行preempt_disable()
-//然后因为初始化的时候带上了cleanup属性，所以在离开class_preempt_t结构体变量的作用域的时候，就自动调用preempt_enable()
-
-+#define DEFINE_LOCK_GUARD_0(_name, _lock, _unlock, ...)                        \
-+__DEFINE_UNLOCK_GUARD(_name, void, _unlock, __VA_ARGS__)               \
-+__DEFINE_LOCK_GUARD_0(_name, _lock)
-
-+#define __DEFINE_UNLOCK_GUARD(_name, _type, _unlock, ...)              \
-+typedef struct &#123;                                                       \
-+       _type *lock;                                                    \
-+       __VA_ARGS__;                                                    \
-+&#125; class_##_name##_t;                                                   \
-+                                                                       \
-+static inline void class_##_name##_destructor(class_##_name##_t *_T)   \
-+&#123;                                                                      \
-+       if (_T-&gt;lock) &#123; _unlock; &#125;                                      \
-+&#125;
-
-+#define __DEFINE_LOCK_GUARD_0(_name, _lock)                            \
-+static inline class_##_name##_t class_##_name##_constructor(void)      \
-+&#123;                                                                      \
-+       class_##_name##_t _t = &#123; .lock = (void*)1 &#125;,                    \
-+                        *_T __maybe_unused = &amp;_t;                      \
-+       _lock;                                                          \
-+       return _t;                                                      \
-+&#125;
-
-
-DEFINE_LOCK_GUARD_0(preempt, preempt_disable(), preempt_enable())
-</code></pre>
-<p>所以，其实guard就是对一些变量(并不一定局限于变量，比如上面这个preempt_{en,dis}able这种，其实就在class的封装下可以使用上cleanup的特性)做一下封装，主要是带上cleanup属性，能够让我们避免在goto return等复杂函数体中自己维护这些变量的初始化及释放等操作。</p>
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a><center>参考</center></h3><p><a target="_blank" rel="noopener" href="https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html">https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html</a></p>
-<p><a target="_blank" rel="noopener" href="https://echorand.me/site/notes/articles/c_cleanup/cleanup_attribute_c.html">https://echorand.me/site/notes/articles/c_cleanup/cleanup_attribute_c.html</a></p>
-<p><a target="_blank" rel="noopener" href="https://omeranson.github.io/blog/2022/06/12/cleanup-attribute-in-C">https://omeranson.github.io/blog/2022/06/12/cleanup-attribute-in-C</a></p>
-<p><a target="_blank" rel="noopener" href="https://matteocroce.it/blog/c-cleanups/">https://matteocroce.it/blog/c-cleanups/</a></p>
-<p><a target="_blank" rel="noopener" href="https://lwn.net/Articles/934679/">https://lwn.net/Articles/934679/</a></p>
+<p>我们可以清楚地看到：</p>
+<p>在结构体中（除了灵活数组外）只有两个结构体成员a和b的情况下，在使用{}初始化列表形式进行结构体赋值的时候如果把两个变量全部都进行初始化，则在汇编中会直接把相应的值赋值给这两个变量。</p>
+<p>而如果使用{}初始化列表进行结构体赋值的时候只把（a、b）其中一个变量进行赋值的话，在汇编中会先把整个sizeof覆盖的区间全部清零，然后再对对应的变量进行初始化。</p>
+<p>所以，在使用灵活数组的时候就应该注意以下情况：如果使用{}初始化列表形式赋值结构体；如果灵活数组的赋值在结构体初始化列表赋值之前；如果结构体最后一个结构体成员后面还需要填充字节。</p>
+<p>以上条件全部满足时，应该注意是否存在以上的覆写情况。</p>
+<p>最后，留一个小问题，上面的反汇编中我们可以看到，结构体区域清零的时候是使用movq   $0x0,(%rax)来做的，那如果结构体特别大的话，还会使用mov指令去清零嘛？</p>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
