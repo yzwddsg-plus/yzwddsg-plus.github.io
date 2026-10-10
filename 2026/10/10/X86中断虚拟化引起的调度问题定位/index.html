@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>一次busybox溢出导致的kdump失败问题 | YZWDDSG</title>
+  <title>X86中断虚拟化引起的调度问题定位 | YZWDDSG</title>
   <meta name="keywords" content="">
-  <meta name="description" content="一次busybox溢出导致的kdump失败问题 | YZWDDSG">
+  <meta name="description" content="X86中断虚拟化引起的调度问题定位 | YZWDDSG">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="google-site-verification" content="xxJB9SNPOytyUXCA2HZ6ZgNbI5iEx6C2GX3XuMKlBv0" />
 <meta property="og:type" content="website">
@@ -792,9 +792,9 @@
 </aside>
 <div id="post">
     <div class="pjax">
-        <article id="post-一次busybox溢出导致的kdump失败问题" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-X86中断虚拟化引起的调度问题定位" class="article article-type-post" itemscope itemprop="blogPost">
     
-        <h1 class="article-title">一次busybox溢出导致的kdump失败问题</h1>
+        <h1 class="article-title">X86中断虚拟化引起的调度问题定位</h1>
     
     <div class="article-meta">
         
@@ -804,7 +804,7 @@
             <i class="iconfont icon-category"></i>
             
             
-            <a  data-rel="故障排查">故障排查</a>
+            <a  data-rel="虚拟化">虚拟化</a>
             
         </span>
         
@@ -812,12 +812,12 @@
     </div>
     <div class="article-meta">
         
-            发布时间 : <time class="date" title='最后更新: 2026-03-04 23:07:27'>2026-03-04 22:27</time>
+            发布时间 : <time class="date" title='最后更新: 2026-10-10 20:52:19'>2026-10-10 20:24</time>
         
     </div>
     <div class="article-meta">
         
-        <span>字数:1.3k</span>
+        <span>字数:3.2k</span>
         
         
         <span id="busuanzi_container_page_pv">
@@ -847,7 +847,7 @@
     
     <div class="toc-ref">
     
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF"><span class="toc-text">问题背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%92%E6%9F%A5"><span class="toc-text">排查</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E6%A0%B9%E5%9B%A0"><span class="toc-text">问题根因</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF"><span class="toc-text">问题背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-text">前置知识</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD"><span class="toc-text">中断</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="toc-text">中断虚拟化</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Intel%E7%9A%84%E7%A1%AC%E4%BB%B6%E6%96%B9%E6%A1%88%EF%BC%9AAPICv"><span class="toc-text">Intel的硬件方案：APICv</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#AMD%E7%9A%84%E7%A1%AC%E4%BB%B6%E6%96%B9%E6%A1%88%EF%BC%9AAVIC"><span class="toc-text">AMD的硬件方案：AVIC</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%81%E7%A8%8B"><span class="toc-text">流程</span></a></li></ol>
     
 <style>
     .left-col .switch-btn,
@@ -863,75 +863,235 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="问题背景"><a href="#问题背景" class="headerlink" title="问题背景"></a><center>问题背景</center></h3><p>有一台centos6的物理机宕机却没有生成kdump，需要排查一下kdump失败原因</p>
-<h3 id="排查"><a href="#排查" class="headerlink" title="排查"></a><center>排查</center></h3><ul>
-<li><strong>环境检查</strong></li>
-</ul>
-<p>首先检查一下问题机器的基础环境，centos6.3 os+5.10内核+nvme系统盘</p>
+        <h3 id="问题背景"><a href="#问题背景" class="headerlink" title="问题背景"></a><center>问题背景</center></h3><p>最近修改了一下调度器负载均衡的逻辑，目的是让普通的task不会运行在有虚拟机vcpu线程的cpu上。但是同事测试的时候发现某些条件下有些普通task会调度到虚机vcpu所在的cpu上，即使此时还有其他的cpu没有运行vcpu线程。</p>
+<p>这显然不符合我们最开始的预期，首先我们测试的虚机都是mwait透传的，理论上虚机所在的cpu利用率应该是100%，然后我们的负载均衡优化应该要把普通task迁移到空闲核（没有虚机vcpu线程的cpu）上去运行。</p>
+<p>最开始一直怀疑我写的代码逻辑有问题，再次梳理我的代码逻辑以及实际测试还是没发现问题。总之，经过一系列的排查，发现其实是测试机器上虚机的xml配置项有差异，我的机器上的pit的timer配置是<code>&lt;timer name=&#39;pit&#39; tickpolicy=&#39;discard&#39;/&gt;</code>，而测试有问题的机器上的该配置是<code>&lt;timer name=&#39;pit&#39; tickpolicy=&#39;delay&#39;/&gt;</code></p>
+<p>本文不详细展开排查过程，只看一下这两个配置项对系统的影响及其过程梳理。</p>
+<h3 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a><center>前置知识</center></h3><h4 id="中断"><a href="#中断" class="headerlink" title="中断"></a><center>中断</center></h4><p>与中断相关的一些寄存器：</p>
+<p>IRR：记录已到达 Local APIC 但尚未派发给 CPU 核心的中断。</p>
+<p>ISR：记录已派发给 CPU 核心、正在被服务的中断。</p>
+<p>EOI：通知 APIC 当前中断处理已完成。</p>
+<p>TMR：记录每个中断的触发模式（边沿触发或电平触发）。</p>
+<p>TPR：设置中断优先级阈值。APIC 不会投递向量号低于 TPR 值的未屏蔽中断。</p>
+<p>ICR：发送 IPI（处理器间中断）到其他 CPU 或自身。</p>
+<p>一个普通中断的处理过程简化如下：</p>
 <ul>
-<li><strong>对比正常机器</strong></li>
+<li>设置IRR中对应bit</li>
+<li>清除IRR对应bit，设置ISR对应bit</li>
+<li>执行中断处理程序</li>
+<li>写EOI，清理ISR中最高位的bit</li>
 </ul>
-<p>找一个正常机器进行kdump，对比正常机器与异常机器上的串口日志，发现异常机器fsck和mount失败。</p>
-<p><img src="/img/45.png"></p>
-<p>然后对比了正常机器和异常机器上的fsck和mount等binary的md5sum，发现是一模一样的，所以排除了binary的问题</p>
+<p>当然，实际处理过程不是这么简单的，更详细的寄存器和中断处理过程可以查看intel的manual。</p>
+<h4 id="中断虚拟化"><a href="#中断虚拟化" class="headerlink" title="中断虚拟化"></a><center>中断虚拟化</center></h4><p>（AI总结）</p>
+<p>在没有AVIC或APICv的早期x86虚拟化环境中，所有中断相关操作都必须由Hypervisor（如KVM）介入模拟，效率很低。</p>
 <ul>
-<li><strong>在os内进行mount测试</strong></li>
+<li>模拟设备与APIC：KVM需要在软件层面完整模拟PIC、IOAPIC和每个vCPU的Local APIC。客户机访问虚拟APIC寄存器会触发<code>VM-Exit</code>，由KVM模拟读写。</li>
+<li>中断注入的“等待窗口”：当有中断需注入，但客户机当前禁止中断（<code>RFLAGS.IF=0</code>）时，KVM无法强行注入。它会设置一个 “中断窗口” ，让CPU在客户机打开中断的瞬间触发<code>VM-Exit</code>，KVM再趁机注入。这个过程涉及频繁的<code>VM-Exit</code>和上下文切换，开销巨大。</li>
 </ul>
-<p>在kdump起小内核的时候mount失败，那么在大内核(也就是正常的OS环境)中能不能手动mount成功呢？</p>
-<p>系统内执行mount -t ext4 UUID&#x3D;c8ba2795-983c-4dfb-a359-xxxxxxxxxxx &#x2F;mnt是可以mount成功的</p>
-<p><img src="/img/46.png"></p>
-<p>那么此时就怀疑大概率就是因为nvme盘mount失败导致小内核启动有问题，从而导致kdump失败不能产生vmcore</p>
+<h5 id="Intel的硬件方案：APICv"><a href="#Intel的硬件方案：APICv" class="headerlink" title="Intel的硬件方案：APICv"></a>Intel的硬件方案：APICv</h5><p>Intel的APIC Virtualization (APICv) 是一系列硬件特性的集合，旨在将中断处理逻辑卸载到CPU硬件上。</p>
 <ul>
-<li><strong>进行fsck和mount等相关实验</strong></li>
+<li>虚拟APIC页：硬件直接模拟客户机对APIC的访问，无需<code>VM-Exit</code>。它通过Virtual-interrupt Delivery特性，让硬件自动评估并交付待处理的虚拟中断。</li>
+<li>Posted Interrupt (PI)：这是APICv的核心高效机制。Hypervisor只需将中断信息写入内存中的Posted Interrupt Descriptor (PID)，然后发送一个物理IPI通知目标CPU。目标CPU的硬件会自动将中断从PID同步到虚拟APIC页并注入客户机，全程无需VM-Exit。</li>
 </ul>
-<p>发现大内核中本来就是有&#x2F;mnt这个目录的，所以可以mount成功，如果一个目录本身不存在，就不能mount上</p>
-<p><img src="/img/47.png"></p>
-<p>那么是不是小内核中本来没有&#x2F;mnt这个目录，所以mount失败？看一下&#x2F;sbin&#x2F;mkdumprd制作initramfs的过程中mount的代码，怀疑是不是在制作小内核把mount命令的参数传丢了？</p>
-<p><img src="/img/48.png"></p>
-<p>像这样，如果$DUMPDEV没有值是不是就会出问题？那这个变量是在哪里赋值的?</p>
-<p><img src="/img/49.png"></p>
-<p>从log中我们可以知道DUMP_TARGET是UUID&#x3D;c8ba2795-983c-4dfb-a359-xxxxxxxxxx</p>
-<p>难道是findfs没找到 导致变量是空的？在&#x2F;sbin&#x2F;mkdumprd中加了点log打印$DUMPDEV等内容，果然，$DUMPDEV是空值</p>
-<p><img src="/img/50.png"></p>
+<h5 id="AMD的硬件方案：AVIC"><a href="#AMD的硬件方案：AVIC" class="headerlink" title="AMD的硬件方案：AVIC"></a>AMD的硬件方案：AVIC</h5><p>AMD的Advanced Virtual Interrupt Controller (AVIC) 在思路上与Intel APICv类似，但实现细节不同。</p>
 <ul>
-<li><strong>追踪findfs失败原因</strong></li>
+<li>虚拟APIC后备页：AVIC为每个vCPU提供一个vAPIC backing page，客户机可直接访问特定APIC寄存器，无需Hypervisor模拟。</li>
+<li>门铃机制：当Hypervisor需要注入中断时，它会设置vAPIC后备页中的IRR位，然后写入一个Doorbell MSR来通知目标物理CPU。目标CPU硬件收到门铃后，会检查vAPIC状态并自动注入中断，同样无需VM-Exit。</li>
 </ul>
-<p>这里就差不多实锤上面的怀疑点，基本就是因为findfs失败了。</p>
-<p>那么findfs失败在哪里，为什么失败？</p>
-<p>接下来我们重新制作initramfs并把把strace打包进initramfs中（可以查看&#x2F;etc&#x2F;kdump.conf中的extra_bins字段），然后修改&#x2F;sbin&#x2F;mkdumprd脚本在findfs命令前添加上strace命令。</p>
-<p>在大内核中执行&#x2F;usr&#x2F;bin&#x2F;strace findfs UUID&#x3D;c8ba2795-983c-4dfb-a359-xxxxxxxxxxx获取一下日志，然后手动宕机获取kdump串口日志，对比kdump小内核中的strace日志和正常的starce日志，可以发现kdump小内核中的设备号是有问题的！</p>
-<p><img src="/img/51.png"></p>
-<p>正常的nvme设备应该使用BLOCK_EXT_MAJOR设备号，是259，而这里是3？？</p>
-<p>查看include&#x2F;uapi&#x2F;linux&#x2F;major.h发现设备号3属于一种现代系统中几乎不再使用的block设备。</p>
-<ul>
-<li><strong>确认nvme盘使用的驱动驱动</strong></li>
-</ul>
-<p>那是不是小内核中驱动有问题？重新加log并重做initramfs然后触发宕机查看日志。</p>
-<p><img src="/img/52.png"></p>
-<p>发现驱动没有问题，是nvme驱动。</p>
-<ul>
-<li><strong>继续追查设备号不对的原因</strong></li>
-</ul>
-<p>查看正常机器和异常机器上的mknod –version，是同一个版本。</p>
-<p>在&#x2F;sbin&#x2F;mkdumprd中制作打包initramfs的添加set -x，然后触发宕机查看串口日志，发现主设备号是259啊？</p>
-<p><img src="/img/53.png"></p>
-<p>大模型助攻一波，提示到，3正好是259 % 256啊，难不成mknod溢出了？</p>
-<p>在添加掉日志查看mknod系统调用的时候传的是什么?</p>
-<p><img src="/img/54.png"></p>
-<p>在执行mknod的时候主设备号还是259，而系统调用的时候主设备号就变成3了。</p>
-<p>所以这里可以实锤是mknod的过程有问题，和内核无关。那么mknod的中间处理过程是怎么导致259溢出变成3的？是环境变量有问题还是mknod本身有问题？为什么大内核中测试mknod是支持259的？</p>
-<ul>
-<li><strong>最终追查到busybox上</strong></li>
-</ul>
-<p>再次对比大内核和小内核，大内核中which mknod返回的是&#x2F;bin&#x2F;mknod</p>
-<p>而小内核日志中显示用的是&#x2F;sbin&#x2F;mknod</p>
-<p>然后查看&#x2F;sbin&#x2F;mknod，发现它实际上是一个指向busybox的软链接。</p>
-<p><img src="/img/55.png"></p>
-<p>在&#x2F;sbin&#x2F;mkdumprd中我们可以看到，在制作initramfs的时候可能是为了尽可能减少initramfs的体积，所以使用busybox代替了很多命令，其中就包括mknod。</p>
-<p>修改&#x2F;sbin&#x2F;mkdumprd，不使用busybox代替mknod，而就是使用原本的&#x2F;bin&#x2F;mknod，重新制作intramfs打包，宕机测试没问题，可以产生vmcore。</p>
-<h3 id="问题根因"><a href="#问题根因" class="headerlink" title="问题根因"></a><center>问题根因</center></h3><p><font color='red'>centos6中kdump小内核在启动的时候，执行init的时候静态执行mknod来为设备创建设备文件。而当前centos6上机器使用的kexec-tools包，在制作kdump的initramfs的时候，其实是使用busybox来代替mknod这个binary的，但是当前的这个busybox的版本比较低，在mknod(也就是busybox)制作设备文件的时候，如果是为nvme（主设备号是259）制作设备文件，会产生溢出，259-&gt;3(256溢出)，所以最终调用mknod系统调用的时候就变成了制作major为3的设备文件，这时候实际上&#x2F;dev&#x2F;nvme0n1p1的主设备号是3，而不是259，而系统就需要依据主设备号去找对应的设备驱动，所以才在kdump小内核启动过程中出现了问题。</font></p>
-<p>雪好大，路好滑，大家小心，天天开心</p>
-<p>11st</p>
+<h3 id="流程"><a href="#流程" class="headerlink" title="流程"></a><center>流程</center></h3><p>首先我们看一下libvirt中对于tickpolicy的描述：</p>
+<pre><code class="language-c">tickpolicy
+The tickpolicy attribute determines what happens when QEMU misses a deadline for injecting a tick to the guest. This can happen, for example, because the guest was paused.
+
+delay
+Continue to deliver ticks at the normal rate. The guest OS will not notice anything is amiss, as from its point of view time will have continued to flow normally. The time in the guest should now be behind the time in the host by exactly the amount of time during which ticks have been missed.
+
+catchup
+Deliver ticks at a higher rate to catch up with the missed ticks. The guest OS will not notice anything is amiss, as from its point of view time will have continued to flow normally. Once the timer has managed to catch up with all the missing ticks, the time in the guest and in the host should match.
+
+merge
+Merge the missed tick(s) into one tick and inject. The guest time may be delayed, depending on how the OS reacts to the merging of ticks
+
+discard
+Throw away the missed ticks and continue with future injection normally. The guest OS will see the timer jump ahead by a potentially quite significant amount all at once, as if the intervening chunk of time had simply not existed; needless to say, such a sudden jump can easily confuse a guest OS which is not specifically prepared to deal with it. Assuming the guest OS can deal correctly with the time jump, the time in the guest and in the host should now match.
+</code></pre>
+<p>以上可知，当qemu错过了向虚机注入tick的deadline时，如果tickpolicy设置成dealy则还是按照正常速率去发送tick，而tickpolicy如果是设置成discard的话则直接丢掉当前的tick。</p>
+<p>我们看一下从libvirt-&gt;qemu-&gt;kvm是怎么执行这个pit的tickpolicy的，以及这些是怎么影响我们的代码的。</p>
+<p>在libvirt的virDomainTimerDefParseXML的函数中，解析timer的name、tickpolicy等属性，结果就是会给起虚机的qmeu命令行中加一条kvm-pit.lost_tick_policy&#x3D;{delay,discard}参数。</p>
+<p>在qemu中，通过do_pit_initialize函数来初始化pit，在这里向kvm发送KVM_CREATE_PIT2的ioctl请求，然后就根据xml中设置的pit的tickpolicy来走不同的分支。如果xml中设置的是<code>&lt;timer name=&#39;pit&#39; tickpolicy=&#39;delay&#39;/&gt;</code>，则直接break；如果xml中设置的是<code>&lt;timer name=&#39;pit&#39; tickpolicy=&#39;discard&#39;/&gt;</code>，则发送KVM_REINJECT_CONTROL的ioctl。我们看一下这两个不同的分支会导致系统行为上有什么区别。</p>
+<pre><code class="language-c">static void do_pit_initialize(KVMPITState *s, Error **errp)
+&#123;
+    struct kvm_pit_config config = &#123;
+        .flags = 0,
+    &#125;;
+    int ret;
+
+    ret = kvm_vm_ioctl(kvm_state, KVM_CREATE_PIT2, &amp;config);
+    if (ret &lt; 0) &#123;
+        error_setg(errp, &quot;Create kernel PIC irqchip failed: %s&quot;,
+                   strerror(-ret));
+        return;
+    &#125;
+    switch (s-&gt;lost_tick_policy) &#123;
+    case LOST_TICK_POLICY_DELAY:
+        break; /* enabled by default */
+    case LOST_TICK_POLICY_DISCARD:
+        if (kvm_check_extension(kvm_state, KVM_CAP_REINJECT_CONTROL)) &#123;
+            struct kvm_reinject_control control = &#123; .pit_reinject = 0 &#125;;
+
+            ret = kvm_vm_ioctl(kvm_state, KVM_REINJECT_CONTROL, &amp;control);
+            if (ret &lt; 0) &#123;
+                error_setg(errp,
+                           &quot;Can&#39;t disable in-kernel PIT reinjection: %s&quot;,
+                           strerror(-ret));
+                return;
+            &#125;
+        &#125;
+        break;
+    default:
+        error_setg(errp, &quot;Lost tick policy not supported.&quot;);
+        return;
+    &#125;
+
+    return;
+&#125;
+</code></pre>
+<p>我们先看一下KVM_CREATE_PIT2这个ioctl实际上请求kvm做了什么。这个主要是通过kvm_create_pit去创建一个kvm-pit内核线程，然后设置一个hrtimer，这个timer周期性地去让kvm-pit线程触发pit_do_work函数去实际注入中断。</p>
+<p>接下来我们看一下KVM_REINJECT_CONTROL这个ioctl在kvm中会做什么：</p>
+<pre><code class="language-c">int kvm_vm_ioctl_reinject(struct kvm *kvm, struct kvm_reinject_control *control)
+&#123;
+        struct kvm_pit *pit = kvm-&gt;arch.vpit;
+
+        mutex_lock(&amp;pit-&gt;pit_state.lock);
+        kvm_pit_set_reinject(pit, control-&gt;pit_reinject);
+        mutex_unlock(&amp;pit-&gt;pit_state.lock);
+
+        return 0;
+&#125;
+
+
+static void kvm_pit_set_reinject(struct kvm_pit *pit, bool reinject)
+&#123;
+        struct kvm_kpit_state *ps = &amp;pit-&gt;pit_state;
+        struct kvm *kvm = pit-&gt;kvm;
+
+        if (atomic_read(&amp;ps-&gt;reinject) == reinject)
+                return;
+
+        /*
+         * AMD SVM AVIC accelerates EOI write and does not trap.
+         * This cause in-kernel PIT re-inject mode to fail
+         * since it checks ps-&gt;irq_ack before kvm_set_irq()
+         * and relies on the ack notifier to timely queue
+         * the pt-&gt;worker work iterm and reinject the missed tick.
+         * So, deactivate APICv when PIT is in reinject mode.
+         */
+        if (reinject) &#123;
+                kvm_set_apicv_inhibit(kvm, APICV_INHIBIT_REASON_PIT_REINJ);
+                /* The initial state is preserved while ps-&gt;reinject == 0. */
+                kvm_pit_reset_reinject(pit);
+                kvm_register_irq_ack_notifier(kvm, &amp;ps-&gt;irq_ack_notifier);
+                kvm_register_irq_mask_notifier(kvm, 0, &amp;pit-&gt;mask_notifier);
+        &#125; else &#123;
+                kvm_clear_apicv_inhibit(kvm, APICV_INHIBIT_REASON_PIT_REINJ);
+                kvm_unregister_irq_ack_notifier(kvm, &amp;ps-&gt;irq_ack_notifier);
+                kvm_unregister_irq_mask_notifier(kvm, 0, &amp;pit-&gt;mask_notifier);
+        &#125;
+
+        atomic_set(&amp;ps-&gt;reinject, reinject);
+&#125;
+</code></pre>
+<p>在do_pit_initialize中我们就可以注意到，如果用户的xml中设置的是<code>&lt;timer name=&#39;pit&#39; tickpolicy=&#39;discard&#39;/&gt;</code>的话，struct kvm_reinject_control control &#x3D; { .pit_reinject &#x3D; 0 };将kvm_reinject_control结构体中的pit_reinject变量初始化为0了。所以在使用KVM_REINJECT_CONTROL ioctl到kvm_pit_set_reinject函数中的时候，传入的bool reinject参数应该是0，所以应该走else那个分支，这里清理掉了一些notifier回调并设置kvm-&gt;arch.apicv_inhibit_reasons为APICV_INHIBIT_REASON_PIT_REINJ。</p>
+<p>我们看一下 kvm_clear_apicv_inhibit(kvm, APICV_INHIBIT_REASON_PIT_REINJ);执行了什么:</p>
+<pre><code class="language-c">void __kvm_set_or_clear_apicv_inhibit(struct kvm *kvm,
+                                      enum kvm_apicv_inhibit reason, bool set)
+&#123;
+        unsigned long old, new;
+
+        lockdep_assert_held_write(&amp;kvm-&gt;arch.apicv_update_lock);
+
+        if (!(kvm_x86_ops.required_apicv_inhibits &amp; BIT(reason)))
+                return;
+
+        old = new = kvm-&gt;arch.apicv_inhibit_reasons;
+
+        if (reason != APICV_INHIBIT_REASON_IRQWIN)
+                set_or_clear_apicv_inhibit(&amp;new, reason, set);
+
+        set_or_clear_apicv_inhibit(&amp;new, APICV_INHIBIT_REASON_IRQWIN,
+                                   atomic_read(&amp;kvm-&gt;arch.apicv_nr_irq_window_req));
+
+        if (!!old != !!new) &#123;
+             /*
+                 * Kick all vCPUs before setting apicv_inhibit_reasons to avoid
+                 * false positives in the sanity check WARN in vcpu_enter_guest().
+                 * This task will wait for all vCPUs to ack the kick IRQ before
+                 * updating apicv_inhibit_reasons, and all other vCPUs will
+                 * block on acquiring apicv_update_lock so that vCPUs can&#39;t
+                 * redo vcpu_enter_guest() without seeing the new inhibit state.
+                 *
+                 * Note, holding apicv_update_lock and taking it in the read
+                 * side (handling the request) also prevents other vCPUs from
+                 * servicing the request with a stale apicv_inhibit_reasons.
+                 */
+                kvm_make_all_cpus_request(kvm, KVM_REQ_APICV_UPDATE);
+                kvm-&gt;arch.apicv_inhibit_reasons = new;
+                if (new) &#123;
+                        unsigned long gfn = gpa_to_gfn(APIC_DEFAULT_PHYS_BASE);
+                        int idx = srcu_read_lock(&amp;kvm-&gt;srcu);
+
+                        kvm_zap_gfn_range(kvm, gfn, gfn+1);
+                        srcu_read_unlock(&amp;kvm-&gt;srcu, idx);
+                &#125;
+        &#125; else &#123;
+                kvm-&gt;arch.apicv_inhibit_reasons = new;
+        &#125;
+&#125;
+</code></pre>
+<p>主要过程可以概括为：查看set&#x2F;clear的bit（在这里是APICV_INHIBIT_REASON_PIT_REINJ）前后resons是否发生了变化（这里的变化是指从无到有或者从有到无这种），如果发生了改变，那么就kick所有vcpu，在vcpu重新vcpu_enter_guest的时候会通过kvm_vcpu_update_apicv更新，根据是否开启avic设置kvm_lapic中的相关字段，并通过refresh_apicv_exec_ctrl从硬件层面开&#x2F;关apicv；且如果改变之后的reasons非0，那么就获取guest中APIC_DEFAULT_PHYS_BASE（这个就是apic相关的起始地址，一个页面大小）的gfn，然后通过把这一个页面给invalidate掉。</p>
+<blockquote>
+<p>#define IO_APIC_DEFAULT_PHYS_BASE       0xfec00000</p>
+<p>#define APIC_DEFAULT_PHYS_BASE          0xfee00000</p>
+<p>在x86系统上，这俩就分别是ioapic和lapic的默认的物理地址，可以通过cat &#x2F;proc&#x2F;iomem看到这些地址</p>
+<p>当然，如果acpi表中指定了比如ioapic的地址的话，可能并不是这两个默认地址，可能进行了重映射了</p>
+</blockquote>
+<p>所以到这里我们可以知道，如果设置的是<code>&lt;timer name=&#39;pit&#39; tickpolicy=&#39;delay&#39;/&gt;</code>，那么就是会set APICV_INHIBIT_REASON_PIT_REINJ，这里会关闭apicv，并解除guest中对于backing page的访问权限；如果设置的是<code>&lt;timer name=&#39;pit&#39; tickpolicy=&#39;discard&#39;/&gt;</code>，则开启avic（没有其他原因关闭的情况下）。也就是，pit的tickpolicy如果设置的是delay的话，amd平台上会把avic给关闭掉（因为只有amd平台的AVIC_REQUIRED_APICV_INHIBITS才包含APICV_INHIBIT_REASON_PIT_REINJ这个原因），采用软件模拟中断的方式。（这个在kvm_pit_set_reinject函数的注释中也可以看到）</p>
+<p>所以我们遇到的问题是怎么发生的呢？</p>
+<p>1.amd机器上配置的是<code>&lt;timer name=&#39;pit&#39; tickpolicy=&#39;delay&#39;/&gt;</code>，虚机启动没有使用avic，只能使用模拟中断的方式</p>
+<p>2.kvm准备注入中断，但是发现这时候guest中是关中断的，需要enable_irq_window创建一个中断窗口，等guest开中断时触发vm exit再注入中断（这个可以通过kvm_check_and_inject_events的代码逻辑看到）</p>
+<p>3.多个vcpu同时请求irq window的话，可能频繁set&#x2F;clear APICV_INHIBIT_REASON_IRQWIN这个inhibit reason，导致kvm-&gt;arch.apicv_update_lock锁竞争</p>
+<p>4.vcpu_enter_guest的时候等锁，vcpu线程睡眠，deactivate_task从rq中摘出，导致我的代码出现问题.</p>
+<p>上游应该是已经修了这个问题了，有兴趣可以看一下这个patch：6563ddadd169 (“KVM: SVM: Fix IRQ window inhibit handling across multiple vCPUs”)    <a target="_blank" rel="noopener" href="https://lore.kernel.org/all/20260123224514.2509129-3-seanjc@google.com/">https://lore.kernel.org/all/20260123224514.2509129-3-seanjc@google.com/</a></p>
+<p>其实到这里，我们还有个疑问：为什么pit的tickpolicy设置成delay就需要关闭avic呢？</p>
+<p>其实这个在kvm_pit_set_reinject函数的注释中就已经表达清楚了。AMD AVIC是可以加速写EOI的，也就是不用vm exit就可以写EOI。而这种in-kernel的pit重新注入需要在kvm_set_irq注入之前检查ps-&gt;irq_ack，并且依赖对ps-&gt;irq_ack的xchg检查。ps-&gt;irq_ack的作用是什么？它的值为1时代表上一个中断已经触发了EOI写，执行路径是kvm_ioapic_update_eoi-&gt;kvm_ioapic_update_eoi_one-&gt;kvm_notify_acked_irq，然后这里通知注册的notifier去执行kvm_pit_ack_irq更新。</p>
+<p>所以这里我们可以得出，pit的tickpolicy设置成delay会让中断reinject，中断的reinject依赖kvm感知写EOI，才能在kvm中触发相关的notifier，而AMD的AVIC会加速EOI写而不产生vm exit。因此，开启avic的时候kvm也就没法感知eoi写所以就不支持pit tickpolicy&#x3D;delay这种方式了。</p>
+<pre><code class="language-c">static void pit_do_work(struct kthread_work *work)
+&#123;
+        struct kvm_pit *pit = container_of(work, struct kvm_pit, expired);
+        struct kvm *kvm = pit-&gt;kvm;
+        struct kvm_vcpu *vcpu;
+        unsigned long i;
+        struct kvm_kpit_state *ps = &amp;pit-&gt;pit_state;
+
+        if (atomic_read(&amp;ps-&gt;reinject) &amp;&amp; !atomic_xchg(&amp;ps-&gt;irq_ack, 0))
+                return;
+
+        kvm_set_irq(kvm, KVM_PIT_IRQ_SOURCE_ID, 0, 1, false);
+        kvm_set_irq(kvm, KVM_PIT_IRQ_SOURCE_ID, 0, 0, false);
+
+        /*
+         * Provides NMI watchdog support via Virtual Wire mode.
+         * The route is: PIT -&gt; LVT0 in NMI mode.
+         *
+         * Note: Our Virtual Wire implementation does not follow
+         * the MP specification.  We propagate a PIT interrupt to all
+         * VCPUs and only when LVT0 is in NMI mode.  The interrupt can
+         * also be simultaneously delivered through PIC and IOAPIC.
+         */
+        if (atomic_read(&amp;kvm-&gt;arch.vapics_in_nmi_mode) &gt; 0)
+                kvm_for_each_vcpu(i, vcpu, kvm)
+                        kvm_apic_nmi_wd_deliver(vcpu);
+&#125;
+</code></pre>
 
       
        <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 857879363@qq.com </span>
